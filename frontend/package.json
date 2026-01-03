@@ -1,0 +1,44 @@
+{
+  "name": "frontend",
+  "version": "0.0.1",
+  "description": "A Quasar Project",
+  "productName": "frontend",
+  "author": "BRALE ENERGY GmbH",
+  "type": "module",
+  "private": true,
+  "license": "https://brale.de",
+  "scripts": {
+    "lint": "eslint -c ./eslint.config.js \"./src*/**/*.{js,cjs,mjs,vue}\"",
+    "format": "prettier --write \"**/*.{js,vue,scss,html,md,json}\" --ignore-path .gitignore",
+    "test": "echo \"No test specified\" && exit 0",
+    "dev": "quasar dev",
+    "build": "quasar build",
+    "license:check": "license-checker --production --onlyAllow 'MIT;ISC;BSD-2-Clause;BSD-3-Clause;UNLICENSED;0BSD;https://www.npmjs.com/package/vue3-image-editor'"
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.16.4",
+    "axios": "^1.2.1",
+    "pdf-vue3": "^1.0.12",
+    "quasar": "^2.9.0",
+    "vue": "^3.4.18",
+    "vue-loading-overlay": "^6.0.4",
+    "vue-router": "^4.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "@quasar/app-vite": "^2.1.0",
+    "@vue/eslint-config-prettier": "^10.1.0",
+    "autoprefixer": "^10.4.2",
+    "eslint": "^9.14.0",
+    "eslint-plugin-vue": "^9.30.0",
+    "globals": "^15.12.0",
+    "postcss": "^8.4.14",
+    "prettier": "^3.3.3",
+    "vite-plugin-checker": "^0.8.0"
+  },
+  "engines": {
+    "node": "^28 || ^26 || ^24 || ^22 || ^20 || ^18",
+    "npm": ">= 6.13.4",
+    "yarn": ">= 1.21.1"
+  }
+}

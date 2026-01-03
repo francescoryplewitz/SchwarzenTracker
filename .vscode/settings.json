@@ -1,0 +1,63 @@
+{
+  // ───────────────────────────────────────────────
+  // 1) Alle anderen Validatoren/Formatter ausschalten / re-enable
+  // ───────────────────────────────────────────────
+  "eslint.enable": true,
+  "javascript.validate.enable": true,
+  "typescript.validate.enable": true,
+  // ───────────────────────────────────────────────
+  // 2) Formatting wie im Dev-Container
+  // ───────────────────────────────────────────────
+  "editor.defaultFormatter": "numso.prettier-standard-vscode",
+  "editor.formatOnSave": true,
+  "files.autoSave": "afterDelay",
+  "editor.formatOnSaveMode": "modifications",
+  "editor.formatOnPaste": true,
+  "standard.enableGlobally": true,
+  "standard.autoFixOnSave": true,
+  "editor.tabSize": 2,
+  // ───────────────────────────────────────────────
+  // 3) Sprach-spezifische Formatter
+  // ───────────────────────────────────────────────
+  "[javascript]": {
+    "editor.defaultFormatter": "numso.prettier-standard-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "numso.prettier-standard-vscode"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "vue.volar"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[less]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  // ───────────────────────────────────────────────
+  // 4) Sonstige Einstellungen (GitLens, Copilot etc.)
+  // ───────────────────────────────────────────────
+  // Unused code ausgrauen
+  "editor.showUnused": true,
+  // ESLint als Linter aktivieren und Fixes on Save
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "vue"
+  ],
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  }
+}

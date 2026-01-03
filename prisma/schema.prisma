@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int           @id @default(autoincrement())
+  lastName       String?
+  firstName      String?
+  email          String?
+  mobile         String?
+  roles          String[]
+  externalId     String?       @unique
+  createdAt      DateTime      @default(now())
+  modifiedAt     DateTime      @updatedAt
+  isActive       Boolean       @default(true)
+  filterSettings Json          @default("{}")
+  LegalEntity    LegalEntity[]
+  Person         Person[]
+}
+
+model LegalEntity {
+  id                                 String                   @id() @default(uuid())
+  createdAt                          DateTime                 @default(now())
+  modifiedAt                         DateTime                 @updatedAt
+  userId                             Int
+  createdBy                          User                     @relation(fields: [userId], references: [id])
+  type                               LegalType
+  name                               String?
+  street                             String?
+  zip                                String?
+  city                               String?
+  federalState                       String?
+  email                              String?
+  mobile                             String?
+  emailSecondary                     String?
+  mobileSecondary                    String?
+  fax                                String?
+  web                                String?
+  notes                              String?
+  maxOrdersPerYear                   Int?
+  housesInReserve                    Int?
+  teamsCount                         Int?
+  virtualTeamsCount                  Int?
+  catchmentAreaRadius                Int?
+  nameOfBank                         String?
+  iban                               String?
+  bic                                String?
+  cashDiscount                       Int?
+  paymentPersiodDiscount             Int?
+  paymentPeriod                      Int?
+  trades                             String[]
+  isActive                           Boolean                  @default(true)
+  businessRelation                   BusinessRelation
+  allowsNewsletter                   Boolean                  @default(true)
+  contactPersons                     PersonsOnLegalEntities[]
+  documents                          Document[]
+  exemptionCertificate13bDocsValidTo DateTime?
+  exemptionCertificate48bDocsValidTo DateTime?
+  clearanceCertificateDocsValidTo    DateTime?
+  businessRegistrationDocsValidTo    DateTime?
+  guaranteeDocsValidTo               DateTime?
+  priceAgreementDocsValidTo          DateTime?
+  isSvenjaInSync                     Boolean                  @default(false)
+  isSageInSync                       Boolean                  @default(false)
+  sageAddressId                      String?
+  hasCustomerAccount           Boolean                        @default(false)
+}
+
+model Person {
+  id                    String                   @id() @default(uuid())
+  createdAt             DateTime                 @default(now())
+  modifiedAt            DateTime                 @updatedAt
+  userId                Int
+  createdBy             User                     @relation(fields: [userId], references: [id])
+  type                  PersonType
+  title                 String?
+  namePrefix            String?
+  firstName             String
+  lastName              String
+  email                 String?
+  mobile                String?
+  position              String?
+  description           String?
+  assignedLegalEntities PersonsOnLegalEntities[]
+  isSvenjaInSync        Boolean                  @default(false)
+  isSageInSync                       Boolean                  @default(false)
+  sageAddressId                      String?
+  sageContactPersonIds String[]
+}
+
+model PersonsOnLegalEntities {
+  personId       String
+  person         Person      @relation(fields: [personId], references: [id])
+  legalEntityId  String
+  legalEntity    LegalEntity @relation(fields: [legalEntityId], references: [id])
+  isMainContact  Boolean     @default(false)
+  isSvenjaInSync Boolean     @default(false)
+  isSageInSync Boolean @default(false)
+  sageContactId     String?
+  @@id([personId, legalEntityId])
+}
+
+model Document {
+  id             String        @id @default(uuid())
+  createdAt      DateTime      @default(now())
+  modifiedAt     DateTime      @updatedAt
+  fileName       String?
+  description    String?
+  type           DocumentType? @relation(fields: [documentTypeId], references: [id])
+  content        Boolean       @default(false)
+  uploadStatus   String?
+  documentTypeId String?
+  legalEntityId  String?
+  legalEntity    LegalEntity?  @relation(fields: [legalEntityId], references: [id])
+}
+
+model DocumentType {
+  id                    String     @id
+  convertToPdf          Boolean    @default(false)
+  usesSharepointHandler Boolean    @default(false)
+  sharepointPath        String?
+  altRoot               String?
+  Document              Document[]
+}
+
+enum BusinessRelation {
+  subcontractor
+}
+
+enum LegalType {
+  publicOrganization
+  company
+  ev
+}
+
+enum PersonType {
+  customer
+  internal
+  external
+}

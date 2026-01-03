@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "numso.prettier-standard-vscode",
+    "chenxsan.vscode-standard-format",
+    "dbaeumer.vscode-eslint",
+    "Vue.volar",
+    "eamodio.gitlens",
+    "nuxt.mdc",
+    "ms-azuretools.vscode-docker",
+    "waderyan.gitblame",
+    "prisma.prisma",
+    "redhat.vscode-yaml",
+    "esbenp.prettier-vscode"
+  ]
+}
