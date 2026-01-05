@@ -1,9 +1,11 @@
 const axios = require('axios')
 const Lib = require('./lib')
+const env = require('../srv/server/enviroment')
+global.env = env
 
 module.exports = new (class {
   constructor () {
-    ;(this.url = env.test.url),
+    ;(this.url = env.url),
       (this.service = ''),
       (this.headers = { 'Content-Type': 'application/JSON' })
     this.auth = { username: '', password: '' }
@@ -137,4 +139,11 @@ module.exports = new (class {
   setHeaders (headers) {
     this.headers = headers
   }
+  async shutdownServer() {
+        const params = {
+            method: 'GET',
+            url: `${this.url}/shutdown`
+        }
+        return axios(params).catch(_ => { return null })
+    }
 })()

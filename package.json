@@ -32,15 +32,17 @@
     "set:schema": "node ./scripts/set-schema.js",
     "start:frontend": "cd ./frontend && npx quasar dev",
     "app:build": "cd ./frontend && npx quasar build",
-    "test:run": "npx mocha --checkLeaks=false",
-    "test": "export NODE_ENV=test-local && npm run set:schema && npm run db:start-local && npm run db:migrate && start-server-and-test start http://localhost:4004 test:run && npm run db:stop ",
+    "test:unit": "npx mocha test/unit/**/*.js --checkLeaks=false",
+    "test:integration": "npx mocha test/integration/**/*.js --file test/setup --checkLeaks=false",
+    "test:run": "npm run test:unit && npm run test:integration",
+    "test:all": "npm run test:unit && start-server-and-test start http://localhost:4004 test:integration",
+    "test": "export NODE_ENV=test && npm run set:schema && npm run db:start-local && npm run db:migrate && start-server-and-test start http://localhost:4004 test:integration && npm run db:stop ",
     "test:local": "export NODE_ENV=ui-tests && npm run set:schema && npm run db:start-local && npm run db:migrate && start-server-and-test start:ui-tests http://localhost:4004 test:ui && npm run db:stop ",
-    "test:ci": "export NODE_ENV=test-local && npm run set:schema && npm run db:start-local && npm run db:migrate && start-server-and-test start:coverage http://localhost:4004 test:run && npm run db:stop && npm run report:coverage",
-    "wdio:login": "export NODE_ENV=ui-tests && wdio run ./test/frontend/wdio.conf.js --suite login",
-    "test:ui:login": "export NODE_ENV=ui-tests && npm run set:schema && npm run db:start-local && npm run db:migrate && start-server-and-test start:ui-tests http://localhost:4004  wdio:login"
+    "test:ci": "export NODE_ENV=test NODE_V8_COVERAGE=coverage/tmp && npm run set:schema && npm run db:start-local && npm run db:migrate && (rm -rf coverage .nyc_output 2>/dev/null || true) && npm run test:all && sleep 1 && FORCE_COLOR=1 c8 report --exclude-after-remap | sed 's|base-expressjs-vue/||g; s| base-expressjs-vue| .|g' && npm run db:stop",
+    "claude": "claude --dangerously-skip-permissions"
   },
   "c8": {
-    "all": false,
+    "all": true,
     "check-coverage": true,
     "lines": 80,
     "exclude": [
@@ -52,14 +54,23 @@
       "srv/modules/file-handler/*",
       "srv/server/Logger.js",
       "srv/server/logger.js",
-      "srv/server/input-validation.js",
-      "mockserver/**"
+      "mockserver/**",
+      "test/**",
+      "**/*.spec.js",
+      "**/*.test.js",
+      "**/node_modules/**",
+      "coverage/**",
+      ".mocharc.js",
+      "scripts/**",
+      "frontend/**"
     ],
     "reporter": [
       "text",
       "lcov",
       "cobertura"
-    ]
+    ],
+    "excludeAfterRemap": true,
+    "src": "./srv"
   },
   "standard": {
     "ignore": [

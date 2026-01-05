@@ -5,7 +5,7 @@ const ENV = process.env.NODE_ENV ?? 'development'
 const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../.secrets.json').toString()))
 
 const parsePrivateSecrets = (config) => {
-  if (['test-local'].includes(ENV)) return
+  if (['test'].includes(ENV)) return
   if (!fs.existsSync(path.resolve(__dirname, '../../.secrets-private.json'))) return
   const privateConfig = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../.secrets-private.json').toString()))
   for (const [key, value] of Object.entries(privateConfig)) {

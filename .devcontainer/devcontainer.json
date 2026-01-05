@@ -1,8 +1,8 @@
 {
   "name": "dev-with-claude",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20-bookworm",
   "features": {
-    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0.5": {}
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
   },
   "customizations": {
     "vscode": {
@@ -10,5 +10,6 @@
         "ms-vscode-remote.remote-containers"
       ]
     }
-  }
+  },
+  "postCreateCommand": "curl -fsSL https://claude.ai/install.sh | bash"
 }

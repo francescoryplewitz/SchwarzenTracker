@@ -9,6 +9,7 @@ scripts/migrated.json
 scripts/production-data.json
 scripts/anonymized-data/**
 coverage
+.nyc_output
 local-db/**
 local-db.js
 backup-migrations

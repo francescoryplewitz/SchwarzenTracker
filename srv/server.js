@@ -64,13 +64,13 @@ const server = app.listen(PORT, async () => {
   })
 })
 
-if (process.env.NODE_ENV === 'test-local') {
+if (process.env.NODE_ENV === 'test') {
   app.get('/shutdown', () => {
     server.close()
     process.exit(0)
   })
   app.get('/admin/reset', async (_req, res) => {
-    await dataGenerator.resetMockdata()
+    //await dataGenerator.resetMockdata()
     return res.status(204).send()
   })
 }
