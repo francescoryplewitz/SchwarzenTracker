@@ -14,7 +14,9 @@ const registerSession = function (app) {
       sameSite: 'lax',
       domain: process.env.domain,
       path: '/',
-      maxAge: 24 * 60 * 60 * 1000
+      maxAge: 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true
     }
   }
   app.use(session(params))

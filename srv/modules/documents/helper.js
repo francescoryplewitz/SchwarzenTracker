@@ -14,7 +14,12 @@ const self = (module.exports = {
     if (typeof text !== 'string') {
       return false
     }
-    if (text.includes('/')) {
+    // Block path traversal characters and sequences
+    if (text.includes('/') || text.includes('\\') || text.includes('..')) {
+      return false
+    }
+    // Block null bytes
+    if (text.includes('\0')) {
       return false
     }
     if (/(?:^\s|\s$)/.test(text)) {
@@ -129,7 +134,7 @@ const self = (module.exports = {
   transformFileName: (fileName) => {
     const splitted = fileName.split('.')
     splitted[splitted.length - 1] = splitted[splitted.length - 1].toLowerCase()
-    return splitted.join('.').replace(/\//g, '_')
+    return splitted.join('.').replace(/[/\\]/g, '_')
   },
   setDocumentContentById: async (id, buffer, fileName) => {
     const result = await fileHandler.save(id, buffer)

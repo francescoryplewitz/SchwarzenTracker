@@ -6,10 +6,8 @@ const typeValidators = {
     if (value === undefined || value === null) return true
     if (typeof value !== 'string') return false
     if (constraints.length && value.length !== constraints.length) return false
-    if (constraints.minLength && value.length < constraints.minLength)
-      return false
-    if (constraints.maxLength && value.length > constraints.maxLength)
-      return false
+    if (constraints.minLength && value.length < constraints.minLength) { return false }
+    if (constraints.maxLength && value.length > constraints.maxLength) { return false }
     return true
   },
   CLEANSTRING: (value, constraints = {}) => {
@@ -19,10 +17,8 @@ const typeValidators = {
     const regex = /^[a-zA-Z0-9.,-_äöüßÄÖÜ\s]*$/
     if (!regex.test(value)) return false
     if (constraints.length && value.length !== constraints.length) return false
-    if (constraints.minLength && value.length < constraints.minLength)
-      return false
-    if (constraints.maxLength && value.length > constraints.maxLength)
-      return false
+    if (constraints.minLength && value.length < constraints.minLength) { return false }
+    if (constraints.maxLength && value.length > constraints.maxLength) { return false }
     return true
   },
   EMAIL: (value, constraints = {}) => {
@@ -30,10 +26,8 @@ const typeValidators = {
     if (typeof value !== 'string') return false
     if (!validator.isEmail(value)) return false
     if (constraints.length && value.length !== constraints.length) return false
-    if (constraints.minLength && value.length < constraints.minLength)
-      return false
-    if (constraints.maxLength && value.length > constraints.maxLength)
-      return false
+    if (constraints.minLength && value.length < constraints.minLength) { return false }
+    if (constraints.maxLength && value.length > constraints.maxLength) { return false }
     return true
   },
   BOOLEAN: value => {

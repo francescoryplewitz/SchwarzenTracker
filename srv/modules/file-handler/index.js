@@ -1,7 +1,7 @@
 class FileService {
   constructor () {
     // Choose implementation based on environment
-    if (['production', 'production-test'].includes(process.env.NODE_ENV)) {
+    if (process.env.NODE_ENV === 'production') {
       const s3 = require('./s3')
       this.handler = s3
     } else {

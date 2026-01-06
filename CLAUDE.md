@@ -34,6 +34,9 @@
 - if you have to cretae CRUD operation endpoints, use the instructions in .ai/detail-instructions/crud-operations.md
 - tests database models by using guidance at .ai/detail-instructions/db-model-guidance.md
 
+## environment variables
+- if you add new environment variables, you must update `ENV.md` with the new variable
+- document the variable name, description, and whether it's required for development or production
 
 ## automated tests
 - tests frontend components by using guidance at .ai/detail-instructions/frontend-tests-guidance.md

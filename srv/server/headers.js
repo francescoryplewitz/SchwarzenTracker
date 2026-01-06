@@ -3,6 +3,8 @@ const cors = require('cors')
 const crypto = require('crypto')
 const LOG = new Logger('SERVER')
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 // 1️⃣ Helmet Security Headers
 const registerHelmet = (app) => {
   LOG.info('Register Helmet')
@@ -24,18 +26,20 @@ const registerHelmet = (app) => {
         'https://cdn.jsdelivr.net'
       ],
       styleSrc: ["'self'", 'https://cdn.jsdelivr.net'],
-      imgSrc: ["'self'", 'http://localhost:4004'],
+      imgSrc: ["'self'", 'data:'],
       connectSrc: ["'self'"],
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
       baseUri: ["'self'"],
-      formAction: ["'self'"]
+      formAction: ["'self'"],
+      frameAncestors: ["'none'"],
+      ...(isProduction ? { upgradeInsecureRequests: [] } : {})
     }
   }))
 
   // Cross-Origin Resource Policy
   app.use(helmet.crossOriginResourcePolicy({
-    policy: ['production', 'production-test', 'ui-tests'].includes(process.env.NODE_ENV)
+    policy: process.env.NODE_ENV === 'production'
       ? 'same-origin'
       : 'cross-origin'
   }))
@@ -75,8 +79,13 @@ const registerCors = (app) => {
     origin: (origin, callback) => {
       // In case of non-browser requests (e.g., Postman) origin can be undefined
       if (!origin) return callback(null, false)
-      const valid = whitelist.some(url => origin.includes(url))
-      callback(null, valid)
+      try {
+        const originHost = new URL(origin).host
+        const valid = whitelist.some(url => originHost === url || originHost.endsWith('.' + url))
+        callback(null, valid)
+      } catch {
+        callback(null, false)
+      }
     },
     credentials: true,
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'],

@@ -11,6 +11,7 @@ const registerAuthentication = async function (app) {
     done(null, user)
   })
   app.use(passport.initialize())
+  app.use(passport.session())
 
   if (['production'].includes(process.env.NODE_ENV)) {
     registerOAuth(app)

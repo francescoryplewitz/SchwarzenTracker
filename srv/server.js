@@ -13,11 +13,14 @@ const app = express()
 const PORT = env.port ?? 4004
 const version = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../package.json')).toString())?.version
 
+const cookieParser = require('cookie-parser')
 const registerRoutes = require('./routes/index')
 const registerHeaders = require('./server/headers')
 const registerAuthentication = require('./server/authentication/index')
 const registerSession = require('./server/authentication/session')
 const registerProduction = require('./server/production')
+const { apiLimiter } = require('./server/rate-limit')
+const { doubleCsrfProtection, csrfTokenEndpoint, csrfErrorHandler } = require('./server/csrf')
 const prisma = require('./data/prisma')
 
 require('./jobs/jobs')
@@ -31,8 +34,17 @@ app.use((req, _res, next) => {
 
 registerProduction(app)
 registerHeaders(app)
+app.use(apiLimiter)
+app.use(cookieParser())
 registerSession(app)
 registerAuthentication(app)
+
+// CSRF protection for state-changing requests (skip in test/development)
+if (!['test', 'development'].includes(process.env.NODE_ENV)) {
+  app.use(doubleCsrfProtection)
+  app.use(csrfErrorHandler)
+}
+app.get('/csrf-token', csrfTokenEndpoint)
 
 const server = app.listen(PORT, async () => {
   LOG.info(`App listening on port ${PORT}`)
@@ -74,7 +86,7 @@ if (process.env.NODE_ENV === 'test') {
     process.exit(0)
   })
   app.get('/admin/reset', async (_req, res) => {
-    //await dataGenerator.resetMockdata()
+    // await dataGenerator.resetMockdata()
     return res.status(204).send()
   })
 }

@@ -9,7 +9,7 @@ import axios from 'axios'
 // for each client)
 
 let api
-if (!['production', 'production-test'].includes(process.env.NODE_ENV)) {
+if (process.env.NODE_ENV !== 'production') {
   api = axios.create({ baseURL: 'http://localhost:4004' })
   api.interceptors.response.use(
     (response) => response,
@@ -18,7 +18,7 @@ if (!['production', 'production-test'].includes(process.env.NODE_ENV)) {
     }
   )
 }
-if (['production', 'production-test', 'ui-tests'].includes(process.env.NODE_ENV)) {
+if (process.env.NODE_ENV === 'production') {
   api = axios.create()
   api.interceptors.response.use(
     (response) => response,
