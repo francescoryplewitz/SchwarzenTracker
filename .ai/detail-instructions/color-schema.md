@@ -6,3 +6,7 @@
 - Subtitles, captions, descriptive text (Subtle Text): **grey-8**
 - Standard, regular text (Default Text): **black**
 - General background colors (Background): **grey-1**
+
+##brand colors
+- base #040d16
+- accent #00ffc2

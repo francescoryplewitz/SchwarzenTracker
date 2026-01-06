@@ -3,8 +3,8 @@
     <div class="row items-center text-black">
       <!-- Logo + Badge -->
       <div class="col-auto self-center flex column items-center text-center">
-        <img @click="router.push('/')" alt="BRALE Energy Toolbox" src="~assets/logo.png"
-          class="logo pointer q-pr-md q-ml-md" style="width: 100px; max-width: 100%; max-height: 100%;" />
+        <img @click="router.push('/')" alt="BRALE Energy Toolbox" class="logo pointer q-pr-md q-ml-md"
+          style="width: 100px; max-width: 100%; max-height: 100%;" />
         <q-badge v-if="stage === 'production'" text-color="black" color="white" :label="environment" />
       </div>
 

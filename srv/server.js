@@ -32,6 +32,7 @@ app.use((req, _res, next) => {
 registerProduction(app)
 registerHeaders(app)
 registerSession(app)
+registerAuthentication(app)
 
 const server = app.listen(PORT, async () => {
   LOG.info(`App listening on port ${PORT}`)
@@ -54,12 +55,15 @@ const server = app.listen(PORT, async () => {
   })
 
   app.get('/user/current', async (req, res) => {
+    if (!req.user?.id) {
+      return res.status(401).send({ error: 'Not authenticated' })
+    }
     const user = await prisma.User.findUnique({
       where: {
         id: req.user.id
       }
     })
-    if (!user) return res.status(404)
+    if (!user) return res.status(404).send({ error: 'User not found' })
     return res.status(200).send(user)
   })
 })
