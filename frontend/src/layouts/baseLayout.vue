@@ -52,7 +52,7 @@ export default defineComponent({
 
       Platform.is.mobile = response.data.isMobile
 
-      if (!hasRole('USER')) {
+      if (!hasRole('user')) {
         router.push('/')
         return
       }

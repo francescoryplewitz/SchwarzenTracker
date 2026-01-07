@@ -22,7 +22,7 @@ const registerProduction = require('./server/production')
 const { apiLimiter } = require('./server/rate-limit')
 const { doubleCsrfProtection, csrfTokenEndpoint, csrfErrorHandler } = require('./server/csrf')
 const prisma = require('./data/prisma')
-
+const dg = require('./data/data-generator')
 require('./jobs/jobs')
 
 app.use(useragent.express())
@@ -50,6 +50,7 @@ const server = app.listen(PORT, async () => {
   LOG.info(`App listening on port ${PORT}`)
   LOG.alert('Server has started')
   registerRoutes(app)
+  await dg.init()
 
   app.get('/', async (_req, res) => {
     return res.status(200).send()

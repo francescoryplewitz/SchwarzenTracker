@@ -19,7 +19,8 @@ const secrets = {
     }
   },
   roleMapping: {
-    [process.env.ROLEMAPPING_USER]: 'USER'
+    [process.env.ROLEMAPPING_USER]: 'user',
+    [process.env.ROLEMAPPING_ADMIN]: 'admin'
   },
   db: {
     schema: process.env.DB_SCHEMA,

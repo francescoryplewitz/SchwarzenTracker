@@ -8,7 +8,8 @@ const getUsersFromDb = async () => {
         id: true,
         firstName: true,
         lastName: true,
-        email: true
+        email: true,
+        roles: true
       },
       orderBy: { id: 'asc' }
     })

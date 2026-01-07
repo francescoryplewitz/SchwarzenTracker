@@ -80,8 +80,8 @@ const registerCors = (app) => {
       // In case of non-browser requests (e.g., Postman) origin can be undefined
       if (!origin) return callback(null, false)
       try {
-        const originHost = new URL(origin).host
-        const valid = whitelist.some(url => originHost === url || originHost.endsWith('.' + url))
+        const originHostname = new URL(origin).hostname
+        const valid = whitelist.some(url => originHostname === url || originHostname.endsWith('.' + url))
         callback(null, valid)
       } catch {
         callback(null, false)

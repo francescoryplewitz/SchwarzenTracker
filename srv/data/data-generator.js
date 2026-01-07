@@ -26,10 +26,6 @@ const mapFiles = (dir) => {
 // Datenbank-Operationen
 const resetEntities = () => {
   return prisma.$transaction([
-    prisma.personsOnLegalEntities.deleteMany({}),
-    prisma.person.deleteMany({}),
-    prisma.legalEntity.deleteMany({}),
-    prisma.User.deleteMany({})
   ])
 }
 

@@ -133,20 +133,14 @@ export default defineComponent({
       {
         id: 'admin',
         name: 'Admin',
-        description: 'Full system access',
+        description: 'Vollzugriff auf das System',
         icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'
       },
       {
-        id: 'editor',
-        name: 'Editor',
-        description: 'Create and modify content',
-        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'
-      },
-      {
-        id: 'viewer',
-        name: 'Viewer',
-        description: 'Read-only access',
-        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+        id: 'user',
+        name: 'User',
+        description: 'Standard Benutzerzugang',
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
       }
     ]
 
@@ -218,12 +212,21 @@ export default defineComponent({
       onConfigChange()
     }
 
+    const setRolesFromUser = () => {
+      const user = users.value.find(u => u.id === selectedUser.value)
+      if (user?.roles) {
+        selectedRoles.value = [...user.roles]
+      }
+    }
+
     const onConfigChange = () => {
+      setRolesFromUser()
       saveConfig()
     }
 
     onMounted(async () => {
       await Promise.all([loadUsers(), loadConfig()])
+      setRolesFromUser()
     })
 
     return {
