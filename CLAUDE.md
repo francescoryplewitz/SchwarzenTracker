@@ -4,8 +4,18 @@
 
 - never try to resolve issues regarding to prisma migrations. ask me to do it.
 
-**Comment Language**  
+**Comment Language**
   - All comments in your test code should be written in **English**.
+
+
+## CRITICAL RULES (Non-negotiable)
+
+- NO defensive checks in internal code
+- NO nested try-catch blocks
+- NO cloning objects - mutate directly (client side)
+- NO semicolons
+- Debounced v-model watching (500ms) for autosave, NOT blur events (client side)
+- Push/mutate arrays directly after API calls, NEVER reload full list (client side)
 
 
 ## code style
@@ -25,22 +35,25 @@
 
 ## frontend code style
 - note eslint rules of vue components: should always have multi-word  names. vue/multi-word-component-names
-- if you have to create a new page, use the instructions in .ai/detail-instructions/new-pages-guidance.md
-- if you have to create a new component, use the instructions in .ai/detail-instructions/component-guidance.md
-- if you need icons, try to find standard icons definitions for your case in .ai/detail-instructions/icon-map.md
-- if you need colors, try to find standard colors definitions for your case in .ai/detail-instructions/color-schema.md
 
 ## backend code style
-- if you have to cretae CRUD operation endpoints, use the instructions in .ai/detail-instructions/crud-operations.md
 - tests database models by using guidance at .ai/detail-instructions/db-model-guidance.md
 
 ## environment variables
 - if you add new environment variables, you must update `ENV.md` with the new variable
 - document the variable name, description, and whether it's required for development or production
 
-## automated tests
-- tests frontend components by using guidance at .ai/detail-instructions/frontend-tests-guidance.md
-- tests backend components by using guidance at .ai/detail-instructions/srv-tests-guidance.md
+## Pre-flight Checklist (MANDATORY)
+
+BEFORE writing any code, you MUST read the appropriate guidance file:
+
+- Creating a page? → MUST read .ai/detail-instructions/new-pages-guidance.md
+- Creating a component? → MUST read .ai/detail-instructions/component-guidance.md
+- Creating CRUD endpoints? → MUST read .ai/detail-instructions/crud-operations.md
+- Writing frontend tests? → MUST read .ai/detail-instructions/frontend-tests-guidance.md
+- Writing backend tests? → MUST read .ai/detail-instructions/srv-tests-guidance.md
+- Using icons? → MUST check .ai/detail-instructions/icon-map.md
+- Using colors? → MUST check .ai/detail-instructions/color-schema.md
 
 ## PR instructions
 - write a short title which describes the changes you made. title should be 3 words at max 

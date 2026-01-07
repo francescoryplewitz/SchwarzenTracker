@@ -11,7 +11,7 @@ Filter: mdi-filter-outline
 2. status
 Alert / Warning: mdi-alert-circle-outline
 Success / Check: mdi-check-circle-outline
-Info: mdi-
+Info: mdi-information-outline
 3. persons & roles
 Natürliche Person: mdi-account-outline
 Juristische Person: mdi-account-group-outline
