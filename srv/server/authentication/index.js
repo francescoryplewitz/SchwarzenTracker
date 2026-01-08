@@ -17,7 +17,7 @@ const registerAuthentication = async function (app) {
     registerOAuth(app)
   }
 
-  if (process.env.NODE_ENV === 'development') {
+  if (['development', 'test'].includes(process.env.NODE_ENV)) {
     registerDevAuth(app)
   }
 }

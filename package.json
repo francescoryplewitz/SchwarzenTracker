@@ -33,10 +33,10 @@
     "start:frontend": "cd ./frontend && npx quasar dev",
     "app:build": "cd ./frontend && npx quasar build",
     "test:unit": "npx mocha test/unit/**/*.js --checkLeaks=false",
-    "test:integration": "npx mocha test/integration/**/*.js --file test/setup --checkLeaks=false",
+    "test:integration": "npx mocha test/integration/**/*.js --file test/setup.js --checkLeaks=false",
     "test:run": "npm run test:unit && npm run test:integration",
-    "test:all": "npm run test:unit && start-server-and-test start http://localhost:4004 test:integration",
-    "test": "export NODE_ENV=test && npm run set:schema && npm run db:start-local && npm run db:migrate && start-server-and-test start http://localhost:4004 test:integration && npm run db:stop ",
+    "test:all": "npm run test:unit && start-server-and-test start http://localhost:5005 test:integration",
+    "test": "export NODE_ENV=test && npm run set:schema && npm run db:start-local && npm run db:migrate && start-server-and-test start http://localhost:5005 test:integration && npm run db:stop ",
     "test:local": "export NODE_ENV=ui-tests && npm run set:schema && npm run db:start-local && npm run db:migrate && start-server-and-test start:ui-tests http://localhost:4004 test:ui && npm run db:stop ",
     "test:ci": "export NODE_ENV=test NODE_V8_COVERAGE=coverage/tmp && npm run set:schema && npm run db:start-local && npm run db:migrate && (rm -rf coverage .nyc_output 2>/dev/null || true) && npm run test:all && sleep 1 && FORCE_COLOR=1 c8 report --exclude-after-remap | sed 's|base-expressjs-vue/||g; s| base-expressjs-vue| .|g' && npm run db:stop",
     "claude": "claude --dangerously-skip-permissions"
@@ -130,6 +130,7 @@
     "@wdio/local-runner": "^9.13.0",
     "@wdio/mocha-framework": "^9.13.0",
     "@wdio/spec-reporter": "^8.29.3",
+    "axios-cookiejar-support": "^4.0.7",
     "chai": "^4.3.8",
     "chai-as-promised": "^7.1.1",
     "chai-http": "^4.4.0",
@@ -140,6 +141,7 @@
     "prisma": "^6.7.0",
     "standard": "^17.1.0",
     "standard-version": "^9.5.0",
-    "start-server-and-test": "^2.0.4"
+    "start-server-and-test": "^2.0.4",
+    "tough-cookie": "^6.0.0"
   }
 }

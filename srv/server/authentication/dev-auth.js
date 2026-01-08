@@ -5,8 +5,8 @@ const registerDevAuth = (app) => {
   LOG.info('Registering dev auth middleware')
 
   app.use(async (req, res, next) => {
-    // Skip dev auth for the dev config endpoints themselves
-    if (req.path.startsWith('/dev/')) {
+    // Skip dev auth only for the dev config endpoints, not test endpoints
+    if (req.path === '/dev/users' || req.path === '/dev/config') {
       return next()
     }
 

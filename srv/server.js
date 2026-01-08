@@ -86,8 +86,4 @@ if (process.env.NODE_ENV === 'test') {
     server.close()
     process.exit(0)
   })
-  app.get('/admin/reset', async (_req, res) => {
-    // await dataGenerator.resetMockdata()
-    return res.status(204).send()
-  })
 }

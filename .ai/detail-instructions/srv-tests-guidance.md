@@ -58,7 +58,7 @@ describe('resource related tests', () => {
     await server.checkConnection()
     await server.reset()
     server.setService('/api')
-    server.setAuth({ username: 'testuser', password: 'password' })
+    await server.setAuth('admin')
   })
   it('should create new resource', async () => {
     const result = await POST('/resource', {
@@ -124,8 +124,34 @@ Only the following technologies may be used:
 - Offers helper methods to create commonly used data entities for your domain models
 - These methods automate repetitive data setup tasks.
 - Allows test authors to focus on the actual test logic rather than setup procedures.
-- The `server` object is automatically available in all tests.  
+- The `server` object is automatically available in all tests.
 - Implementation is located at: `test/server.js`
+
+### Authentication in Tests
+
+Use `server.setAuth(preset)` to authenticate as a test user. Presets are loaded from `srv/data/structuredata/user.json` using the user's `firstName` (lowercase) as the key.
+
+**Available presets:**
+| Preset | Roles | Description |
+|--------|-------|-------------|
+| `'standard'` | `['user']` | Regular user |
+| `'admin'` | `['admin', 'user']` | Admin with both roles |
+
+**Usage:**
+```js
+// Authenticate as admin
+await server.setAuth('admin')
+
+// Authenticate as regular user
+await server.setAuth('standard')
+```
+
+**Custom roles:** For testing specific role combinations not in presets, POST directly:
+```js
+await POST('/dev/config', { userId: 1, roles: ['admin'] })
+```
+
+**Adding new test users:** Add entries to `srv/data/structuredata/user.json`. The preset key will be the `firstName` in lowercase.
 
 ### Important Notes on ExpressJS and JavaScript Behavior
 

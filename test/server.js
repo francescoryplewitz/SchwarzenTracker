@@ -1,98 +1,63 @@
-const axios = require('axios')
-const Lib = require('./lib')
+const axios = require('axios').default
+const { wrapper } = require('axios-cookiejar-support')
+const { CookieJar } = require('tough-cookie')
 const env = require('../srv/server/enviroment')
+const dataGenerator = require('../srv/data/data-generator')
+const users = require('../srv/data/structuredata/user.json')
+
 global.env = env
+
+const authPresets = {}
+for (const user of users) {
+  const key = user.firstName.toLowerCase()
+  authPresets[key] = { userId: user.id, roles: user.roles }
+}
 
 module.exports = new (class {
   constructor () {
-    ;(this.url = env.url),
-      (this.service = ''),
-      (this.headers = { 'Content-Type': 'application/JSON' })
-    this.auth = { username: '', password: '' }
+    this.url = env.url || env.domain
+    this.service = ''
+    this.headers = { 'Content-Type': 'application/json' }
+    this.jar = new CookieJar()
+    this.client = wrapper(axios.create({ jar: this.jar, withCredentials: true }))
   }
+
   httpOperations () {
     return {
-      GET: async (path, service = this.service, auth = this.auth) => {
+      GET: async (path, service = this.service) => {
         const url = `${this.url}${service ? service : ''}${path}`
-        return await axios({ url, method: 'GET', auth }).catch(e => {
-          if (e.response) {
-            return e.response
-          }
+        return await this.client({ url, method: 'GET' }).catch(e => {
+          if (e.response) return e.response
           return { status: 500, data: { error: e.message } }
         })
       },
-      PATCH: async (
-        path,
-        data,
-        service = this.service,
-        headers = this.headers,
-        auth = this.auth
-      ) => {
+      POST: async (path, data, service = this.service, headers = this.headers) => {
         const url = `${this.url}${service ? service : ''}${path}`
-        return await axios({ url, method: 'PATCH', data, headers, auth }).catch(
-          e => {
-            if (e.response) {
-              return e.response
-            }
-            return { status: 500, data: { error: e.message } }
-          }
-        )
-      },
-      POST: async (
-        path,
-        data,
-        headers = this.headers,
-        service = this.service,
-        auth = this.auth
-      ) => {
-        const url = `${this.url}${service ? service : ''}${path}`
-        return await axios({ url, method: 'POST', data, headers, auth }).catch(
-          e => {
-            if (e.response) {
-              return e.response
-            }
-            return { status: 500, data: { error: e.message } }
-          }
-        )
-      },
-      PUT: async (
-        path,
-        data,
-        service = this.service,
-        headers = this.headers,
-        auth = this.auth
-      ) => {
-        const url = `${this.url}${service ? service : ''}${path}`
-        return await axios({ url, method: 'PUT', data, headers, auth }).catch(
-          e => {
-            if (e.response) {
-              return e.response
-            }
-            return { status: 500, data: { error: e.message } }
-          }
-        )
-      },
-      DELETE: async (
-        path,
-        service = this.service,
-        headers = this.headers,
-        auth = this.auth,
-        data = {}
-      ) => {
-        const url = `${this.url}${service ? service : ''}${path}`
-        const res = await axios({
-          url,
-          method: 'DELETE',
-          headers,
-          auth,
-          data
-        }).catch(e => {
-          if (e.response) {
-            return e.response
-          }
+        return await this.client({ url, method: 'POST', data, headers }).catch(e => {
+          if (e.response) return e.response
           return { status: 500, data: { error: e.message } }
         })
-        return res
+      },
+      PATCH: async (path, data, service = this.service, headers = this.headers) => {
+        const url = `${this.url}${service ? service : ''}${path}`
+        return await this.client({ url, method: 'PATCH', data, headers }).catch(e => {
+          if (e.response) return e.response
+          return { status: 500, data: { error: e.message } }
+        })
+      },
+      PUT: async (path, data, service = this.service, headers = this.headers) => {
+        const url = `${this.url}${service ? service : ''}${path}`
+        return await this.client({ url, method: 'PUT', data, headers }).catch(e => {
+          if (e.response) return e.response
+          return { status: 500, data: { error: e.message } }
+        })
+      },
+      DELETE: async (path, data = {}, service = this.service, headers = this.headers) => {
+        const url = `${this.url}${service ? service : ''}${path}`
+        return await this.client({ url, method: 'DELETE', data, headers }).catch(e => {
+          if (e.response) return e.response
+          return { status: 500, data: { error: e.message } }
+        })
       }
     }
   }
@@ -105,45 +70,43 @@ module.exports = new (class {
       throw new Error('Could not find running server')
     }
   }
-  reset () {
-    const params = {
-      url: `${this.url}/admin/reset`,
-      method: 'GET',
-      auth: {
-        username: 'admin',
-        password: 'brale'
-      }
-    }
-    return axios(params)
+
+  async reset () {
+    await dataGenerator.resetMockdata()
   }
-  clearFileStorage () {
-    const params = {
-      url: `${this.url}/admin/clear`,
-      method: 'GET',
-      auth: {
-        username: 'admin',
-        password: 'brale'
-      }
-    }
-    return axios(params)
+
+  resetSession () {
+    this.jar = new CookieJar()
+    this.client = wrapper(axios.create({ jar: this.jar, withCredentials: true }))
   }
+
+  async setAuth (preset) {
+    const config = authPresets[preset]
+    if (!config) {
+      throw new Error(`Unknown auth preset: ${preset}. Available: ${Object.keys(authPresets).join(', ')}`)
+    }
+    const url = `${this.url}/dev/config`
+    return await this.client({
+      url,
+      method: 'POST',
+      data: config,
+      headers: this.headers
+    })
+  }
+
   setService (service) {
     this.service = service
   }
-  setAuth (auth) {
-    this.auth = auth
-  }
+
   addHeader (header) {
     Object.assign(this.headers, header)
   }
+
   setHeaders (headers) {
     this.headers = headers
   }
-  async shutdownServer() {
-        const params = {
-            method: 'GET',
-            url: `${this.url}/shutdown`
-        }
-        return axios(params).catch(_ => { return null })
-    }
+
+  async shutdownServer () {
+    return axios({ method: 'GET', url: `${this.url}/shutdown` }).catch(_ => null)
+  }
 })()

@@ -65,7 +65,9 @@ class DataGenerator {
   async resetMockdata () {
     await resetEntities()
     await upsertData(this.structuredata)
-    await insertMockData(this.mockdata)
+    if (Object.keys(this.mockdata).length > 0) {
+      await insertMockData(this.mockdata)
+    }
   }
 
   async reset () {
