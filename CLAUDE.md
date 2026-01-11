@@ -47,8 +47,7 @@
 
 BEFORE writing any code, you MUST read the appropriate guidance file:
 
-- Creating a page? → MUST read .ai/detail-instructions/new-pages-guidance.md
-- Creating a component? → MUST read .ai/detail-instructions/component-guidance.md
+- Creating a page or component? → MUST read .ai/detail-instructions/vue-guidance.md
 - Creating CRUD endpoints? → MUST read .ai/detail-instructions/crud-operations.md
 - Writing frontend tests? → MUST read .ai/detail-instructions/frontend-tests-guidance.md
 - Writing backend tests? → MUST read .ai/detail-instructions/srv-tests-guidance.md
