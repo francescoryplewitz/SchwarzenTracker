@@ -1,0 +1,2 @@
+- this app follows a mobile first approach, the will be used mainly on smartphones. Layouts should be responsive and adapt to the screen size.
+- Follow the design approach of frontend/src/components/start-welcome.vue for all new pages and components you will create

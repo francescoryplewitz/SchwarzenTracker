@@ -46,7 +46,7 @@
 ## Pre-flight Checklist (MANDATORY)
 
 BEFORE writing any code, you MUST read the appropriate guidance file:
-
+- Follow the project specific instructions in PROJECT-SPECIFIC.md
 - Creating a page or component? → MUST read .ai/detail-instructions/vue-guidance.md
 - Creating CRUD endpoints? → MUST read .ai/detail-instructions/crud-operations.md
 - Writing frontend tests? → MUST read .ai/detail-instructions/frontend-tests-guidance.md

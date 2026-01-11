@@ -28,6 +28,34 @@ validate({
 
 ---
 
+## Query Parameter Validation
+
+- **CRITICAL**: Always validate query parameters using `validateQuery` middleware to prevent server crashes
+- Unvalidated query parameters can cause runtime errors when passed to database queries
+- Use `srv/server/input-validation.js` for query validation
+
+### Example query validation
+
+```js
+const { validate, validateQuery } = require('../server/input-validation')
+
+app.get('/items', validateQuery({
+  search: { type: 'STRING' },
+  status: { type: 'STRING' },
+  skip: { type: 'NUMBER' },
+  limit: { type: 'NUMBER' }
+}), service.getItems)
+```
+
+### Available types for query parameters
+- `STRING` - Text values
+- `NUMBER` - Numeric values (will be parsed from string)
+- `BOOLEAN` - true/false (parsed from string "true"/"false")
+- `CLEANSTRING` - Alphanumeric only
+- `TIMESTAMP` - ISO date strings
+
+---
+
 ## Create (POST)
 
 - Always use **`POST`** to create new entries.
