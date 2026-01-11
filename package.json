@@ -6,8 +6,8 @@
   "scripts": {
     "docker:build": "docker build . --build-arg NODE_ENV=production -t $version",
     "docker:create": "npm run docker:build && npm run docker:tag && npm run docker:push",
-    "docker:tag": "docker tag $version 669860431552.dkr.ecr.eu-central-1.amazonaws.com/joerg:$version",
-    "docker:push": "npm run ecr:login && docker push 669860431552.dkr.ecr.eu-central-1.amazonaws.com/joerg:$version",
+    "docker:tag": "docker tag $version 669860431552.dkr.ecr.eu-central-1.amazonaws.com/base:$version",
+    "docker:push": "npm run ecr:login && docker push 669860431552.dkr.ecr.eu-central-1.amazonaws.com/base:$version",
     "ecr:login": "aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 669860431552.dkr.ecr.eu-central-1.amazonaws.com",
     "start:container": "npm run set:private-secrets && npm run start",
     "set:private-secrets": "node ./scripts/set-private-secrets.js",

@@ -20,7 +20,6 @@ RUN npm ci \
 # Quellcode kopieren und das Frontend bauen
 COPY . .
 RUN npm run app:build
-# Ergebnis: /joerg/frontend/dist
 
 # ───────────────────────────────────────────────────────────────────────────────
 # 2) Runtime-Stage: genau dein Original-Image, aber ohne den Build-Step
@@ -64,7 +63,7 @@ RUN apt-get update && apt-get install -y \
 RUN npm run install:all
 
 # Jetzt das fertige Build-Output aus dem Builder ins finale Image kopieren
-COPY --from=builder /joerg/frontend/dist ./frontend/dist
+COPY --from=builder /base/frontend/dist ./frontend/dist
 
 # Expose und Start-Command wie gehabt
 EXPOSE 80:80
