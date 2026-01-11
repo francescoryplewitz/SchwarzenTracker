@@ -33,9 +33,7 @@ export default defineComponent({
     const q = useQuasar()
     const isMobile = computed(() => q.platform.is.mobile)
 
-    const menuItems = [
-      { name: 'subcontractor', label: 'Subunternehmer', icon: 'people', route: '/subcontractor' }
-    ]
+    const menuItems = []
 
     const isActive = item => {
       return route.path.includes(item.route)

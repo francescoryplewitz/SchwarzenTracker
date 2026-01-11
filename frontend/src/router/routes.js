@@ -1,10 +1,8 @@
 const routes = [
+  // Start page - standalone without layout
   {
     path: '/',
-    component: () => import('layouts/baseLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/IndexPage.vue') },
-    ]
+    component: () => import('pages/IndexPage.vue')
   },
 
   // Dev config page - standalone without layout

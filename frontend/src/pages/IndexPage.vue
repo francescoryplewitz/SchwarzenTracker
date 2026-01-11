@@ -1,15 +1,15 @@
 <template>
-  <intro></intro>
+  <start-welcome />
 </template>
 
 <script>
-import { defineComponent } from 'vue';
-import intro from 'components/intro.vue';
+import { defineComponent } from 'vue'
+import StartWelcome from 'components/start-welcome.vue'
 
 export default defineComponent({
   name: 'IndexPage',
   components: {
-    intro
-  },
-});
+    StartWelcome
+  }
+})
 </script>

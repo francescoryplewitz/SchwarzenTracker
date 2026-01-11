@@ -118,3 +118,28 @@ such as:\
 - *never* use outlined or filled input fields
 - buttons should always have a tooltip an be dense and flat
 - prevent using custom css if its not absolutely necessary. Use Quasar utilities instead.
+
+# Asset Imports (Images, Fonts, etc.)
+
+When importing static assets (images, fonts, etc.) in Vue components:
+
+- **DO NOT** use `@/` alias for asset paths in `src` attributes (e.g., `<img src="@/static/logo.png" />`)
+- **DO** import assets as ES modules using relative paths, then bind them dynamically:
+
+```vue
+<template>
+  <img :src="logoUrl" alt="Logo" />
+</template>
+
+<script>
+import logoUrl from '../static/logo.png'
+
+export default {
+  setup() {
+    return { logoUrl }
+  }
+}
+</script>
+```
+
+This ensures Vite correctly resolves and bundles the asset with proper cache-busting hashes.

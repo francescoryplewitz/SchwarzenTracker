@@ -36,6 +36,7 @@
     "test:integration": "npx mocha test/integration/**/*.js --file test/setup.js --checkLeaks=false",
     "test:run": "npm run test:unit && npm run test:integration",
     "test:all": "npm run test:unit && start-server-and-test start http://localhost:5005 test:integration",
+    "test:frontend": "cd ./frontend && npm run test",
     "test": "export NODE_ENV=test && npm run set:schema && npm run db:start-local && npm run db:migrate && start-server-and-test start http://localhost:5005 test:integration && npm run db:stop ",
     "test:local": "export NODE_ENV=ui-tests && npm run set:schema && npm run db:start-local && npm run db:migrate && start-server-and-test start:ui-tests http://localhost:4004 test:ui && npm run db:stop ",
     "test:ci": "export NODE_ENV=test NODE_V8_COVERAGE=coverage/tmp && npm run set:schema && npm run db:start-local && npm run db:migrate && (rm -rf coverage .nyc_output 2>/dev/null || true) && npm run test:all && sleep 1 && FORCE_COLOR=1 c8 report --exclude-after-remap | sed 's|base-expressjs-vue/||g; s| base-expressjs-vue| .|g' && npm run db:stop",
