@@ -1,50 +1,76 @@
 <template>
-  <q-card flat class="q-pa-xs">
-    <div class="row items-center text-black">
-      <!-- Logo + Badge -->
-      <div class="col-auto self-center flex column items-center text-center">
-        <img @click="router.push('/')" alt="BRALE Energy Toolbox" class="logo pointer q-pr-md q-ml-md"
-          style="width: 100px; max-width: 100%; max-height: 100%;" />
-        <q-badge v-if="stage === 'production'" text-color="black" color="white" :label="environment" />
+  <div class="app-header-content">
+    <div class="header-left">
+      <div class="logo-container" @click="router.push('/')">
+        <img v-if="logoUrl" :src="logoUrl" alt="Logo" class="header-logo" />
+        <span v-else class="logo-text">ST</span>
       </div>
 
-      <!-- Environment-Chip (dev/stage) -->
-      <div class="col-auto self-center">
-        <q-chip v-if="stage !== 'production'" outline square color="red" :label="environment" />
-      </div>
-
-      <!-- Logout-Button ganz rechts -->
-      <div class="col flex justify-end">
-        <q-btn flat dense icon="fa-solid fa-right-from-bracket" @click="logout()">
-          <q-tooltip>Hier können Sie sich ausloggen!</q-tooltip>
-        </q-btn>
-      </div>
+      <nav v-if="!isMobile" class="desktop-nav">
+        <button
+          v-for="item in menuItems"
+          :key="item.name"
+          class="nav-btn"
+          :class="{ active: isActive(item) }"
+          @click="navigate(item.route)"
+        >
+          {{ item.label }}
+        </button>
+      </nav>
     </div>
-  </q-card>
+
+    <div class="header-right">
+      <div v-if="stage !== 'production' && environment" class="env-badge">
+        {{ environment }}
+      </div>
+      <button class="logout-btn" @click="logout">
+        <q-icon name="mdi-logout" size="18px" />
+        <q-tooltip>Ausloggen</q-tooltip>
+      </button>
+    </div>
+  </div>
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, } from 'vue'
-import { useRouter } from "vue-router"
+import { defineComponent, ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { api } from 'boot/axios'
 import { LocalStorage } from 'quasar'
 
-
 export default defineComponent({
-  name: 'headerComponent',
+  name: 'HeaderComponent',
 
-  components: {
+  props: {
+    isMobile: { type: Boolean, default: false }
   },
 
   setup() {
     const environment = ref('')
     const stage = ref('')
     const router = useRouter()
+    const route = useRoute()
+    const logoUrl = ref(null)
+
+    const menuItems = [
+      { name: 'dashboard', label: 'Dashboard', route: '/dashboard' },
+      { name: 'exercises', label: 'Übungen', route: '/exercises' },
+      { name: 'plans', label: 'Pläne', route: '/plans' }
+    ]
+
+    const isActive = (item) => {
+      return route.path.includes(item.route)
+    }
+
+    const navigate = (path) => {
+      if (route.path !== path) {
+        router.push(path)
+      }
+    }
 
     async function fetchEnvironment() {
       const result = await api({
-        url: "/version",
-        method: "GET",
+        url: '/version',
+        method: 'GET',
         withCredentials: true
       })
       if (result.data.stage !== 'production') {
@@ -56,18 +82,137 @@ export default defineComponent({
 
     async function logout() {
       LocalStorage.remove('user')
-      window.open('/logout', "_self")
+      window.open('/logout', '_self')
     }
 
     onMounted(() => {
       fetchEnvironment()
     })
+
     return {
       logout,
       environment,
       stage,
-      router
+      router,
+      logoUrl,
+      menuItems,
+      isActive,
+      navigate
     }
   }
 })
 </script>
+
+<style scoped>
+.app-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.logo-container:hover {
+  opacity: 0.8;
+}
+
+.header-logo {
+  height: 32px;
+  width: auto;
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #00ffc2;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-btn {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.nav-btn.active {
+  background: rgba(0, 255, 194, 0.1);
+  border-color: rgba(0, 255, 194, 0.2);
+  color: #00ffc2;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.env-badge {
+  padding: 4px 10px;
+  background: rgba(240, 101, 117, 0.15);
+  border: 1px solid rgba(240, 101, 117, 0.3);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #f06575;
+  text-transform: uppercase;
+}
+
+.logout-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+@media (max-width: 640px) {
+  .app-header-content {
+    padding: 0 12px;
+  }
+}
+</style>

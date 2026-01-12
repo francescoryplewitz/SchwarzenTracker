@@ -3,6 +3,7 @@ const { GET } = server.httpOperations()
 describe('Health endpoint', () => {
   before(async function () {
     await server.checkConnection()
+    server.setService('')
   })
 
   it('should return status 200 with ok status', async () => {

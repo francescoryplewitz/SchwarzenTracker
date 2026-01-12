@@ -1,53 +1,47 @@
 <template>
-  <!-- Desktop Card -->
-  <q-card v-if="!isMobile" class="bg-white q-ma-md">
-    <div class="row items-center no-wrap q-px-sm q-my-md">
-      <q-btn v-for="item in menuItems" :key="item.name" flat dense :label="item.label" @click="navigate(item)"
-        :color="isActive(item) ? 'primary' : 'black'" :class="isActive(item) ? 'tab-active' : ''"
-        class="no-uppercase q-mx-xs" />
-    </div>
-  </q-card>
-
-  <!-- Mobile Card -->
-  <q-card v-else class="bg-white q-my-md q-mx-md q-pa-sm">
-    <div class="row items-stretch">
-      <q-btn v-for="item in menuItems" :key="item.name" flat no-caps class="col tab-btn" @click="navigate(item.route)"
-        :class="isActive(item) ? 'text-primary tab-active' : 'text-grey-7'">
-        <q-icon :name="item.icon" size="sm" class="q-mr-sm" />
-        <span>{{ item.label }}</span>
-      </q-btn>
-    </div>
-  </q-card>
+  <nav class="bottom-nav">
+    <button
+      v-for="item in menuItems"
+      :key="item.name"
+      class="nav-item"
+      :class="{ active: isActive(item) }"
+      @click="navigate(item.route)"
+    >
+      <q-icon :name="item.icon" size="22px" />
+      <span class="nav-label">{{ item.label }}</span>
+    </button>
+  </nav>
 </template>
 
 <script>
-import { defineComponent, computed } from 'vue'
+import { defineComponent } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useQuasar } from 'quasar'
 
 export default defineComponent({
+  name: 'NavbarBottom',
 
   setup() {
     const router = useRouter()
     const route = useRoute()
-    const q = useQuasar()
-    const isMobile = computed(() => q.platform.is.mobile)
 
-    const menuItems = []
+    const menuItems = [
+      { name: 'dashboard', label: 'Dashboard', route: '/dashboard', icon: 'mdi-view-dashboard-outline' },
+      { name: 'exercises', label: 'Übungen', route: '/exercises', icon: 'mdi-dumbbell' },
+      { name: 'plans', label: 'Pläne', route: '/plans', icon: 'mdi-clipboard-text-outline' }
+    ]
 
-    const isActive = item => {
+    const isActive = (item) => {
       return route.path.includes(item.route)
     }
-    
-    function navigate(path) {
-      if (route.path !== path && path) {
-        router.push(typeof path === 'string' ? path : path.route)
+
+    const navigate = (path) => {
+      if (route.path !== path) {
+        router.push(path)
       }
     }
 
     return {
       menuItems,
-      isMobile,
       isActive,
       navigate
     }
@@ -56,10 +50,45 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.no-uppercase {
-  text-transform: none
+.bottom-nav {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  height: 64px;
+  padding: 8px 16px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
 }
-.tab-active {
-  border-bottom: 2px solid #23a0df;
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.nav-item.active {
+  color: #00ffc2;
+}
+
+.nav-item.active:hover {
+  background: rgba(0, 255, 194, 0.05);
+}
+
+.nav-label {
+  font-size: 11px;
+  font-weight: 500;
 }
 </style>

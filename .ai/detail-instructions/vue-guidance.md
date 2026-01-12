@@ -155,7 +155,9 @@ Keep in page when:
 
 If not specified, ask the developer at which path the new page should be placed.
 
-A page must begin with a header. Always use a `q-card` for the header containing a fitting icon and title:
+### 2.1 Light Theme Pages (Quasar Standard)
+
+For admin/desktop pages using the standard Quasar light theme:
 
 ```vue
 <q-card class="bg-grey-1 q-mb-md">
@@ -177,6 +179,118 @@ A page must begin with a header. Always use a `q-card` for the header containing
 ```
 
 The rest of the content should be placed in another `q-card`.
+
+### 2.2 Dark Theme Pages (Mobile App)
+
+For mobile app pages with glassmorphism design, use this pattern. **Copy the complete template and CSS exactly** - do not improvise spacing values.
+
+#### Global Theme Classes (from `theme-dark.scss`)
+
+- `.dark-page` - Dark background with gradient
+- `.glass-card` - Glassmorphism card with blur effect
+- `.accent-box` - Turquoise icon box with border (14px border-radius)
+
+#### Template Structure
+
+```vue
+<template>
+  <div class="PAGENAME-page dark-page">
+    <div class="content-container">
+      <header class="page-header">
+        <div class="header-icon accent-box">
+          <q-icon name="$ICON" size="24px" />
+        </div>
+        <div class="header-text">
+          <h1 class="page-title">$TITLE</h1>
+          <p class="page-subtitle">$SUBTITLE</p>
+        </div>
+        <!-- Optional: Action button -->
+        <button class="header-action-btn" @click="doAction">
+          <q-icon name="mdi-plus" size="20px" />
+          <q-tooltip>Tooltip text</q-tooltip>
+        </button>
+      </header>
+
+      <!-- Page content with .glass-card -->
+      <div class="content-card glass-card">
+        ...
+      </div>
+    </div>
+  </div>
+</template>
+```
+
+#### Required CSS (copy exactly!)
+
+```scss
+<style scoped>
+.content-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px 24px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.header-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-text {
+  flex: 1;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  margin-top: 16px;
+  line-height: 1.1;
+}
+
+.page-subtitle {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 2px 0 0 0;
+}
+
+.header-action-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(0, 255, 194, 0.1);
+  border: 1px solid rgba(0, 255, 194, 0.2);
+  color: #00ffc2;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-action-btn:hover {
+  background: rgba(0, 255, 194, 0.2);
+}
+</style>
+```
+
+#### Important Notes
+
+- **Do not change spacing values** - they are carefully calibrated
+- **Always use `.dark-page`** as the root class
+- **Use `.glass-card`** for content sections (not `q-card`)
+- **Subtitle is optional** - remove `.header-text` wrapper if no subtitle needed
 
 
 ## 3. Creating Components

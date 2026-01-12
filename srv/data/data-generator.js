@@ -1,6 +1,7 @@
 const prisma = require('./prisma')
 const fs = require('fs')
 const path = require('path')
+const { seedExercises } = require('./seed/exercises')
 
 // Hilfsfunktionen zum Laden der JSON-Dateien
 const loadDirectory = (dir) => {
@@ -24,9 +25,17 @@ const mapFiles = (dir) => {
 }
 
 // Datenbank-Operationen
-const resetEntities = () => {
-  return prisma.$transaction([
-  ])
+const resetEntities = async () => {
+  try {
+    await prisma.$transaction([
+      prisma.userExerciseFavorite.deleteMany(),
+      prisma.exerciseImage.deleteMany(),
+      prisma.exerciseVariant.deleteMany(),
+      prisma.exercise.deleteMany()
+    ])
+  } catch (e) {
+    console.log('Exercise tables not yet migrated, skipping reset')
+  }
 }
 
 const insertMockData = (files) => {
@@ -60,6 +69,7 @@ class DataGenerator {
 
   async init () {
     await upsertData(this.structuredata)
+    await seedExercises()
   }
 
   async resetMockdata () {
@@ -68,6 +78,7 @@ class DataGenerator {
     if (Object.keys(this.mockdata).length > 0) {
       await insertMockData(this.mockdata)
     }
+    await seedExercises()
   }
 
   async reset () {

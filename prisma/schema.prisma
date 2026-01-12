@@ -20,4 +20,113 @@ model User {
   modifiedAt     DateTime      @updatedAt
   isActive       Boolean       @default(true)
   filterSettings Json          @default("{}")
+
+  // Exercise relations
+  createdExercises  Exercise[]
+  exerciseFavorites UserExerciseFavorite[]
+}
+
+// ============================================
+// UEBUNGEN MODULE
+// ============================================
+
+model Exercise {
+  id            String   @id @default(cuid())
+  name          String
+  description   String   @db.Text
+
+  // Kategorisierung
+  muscleGroups  MuscleGroup[]
+  category      ExerciseCategory
+  equipment     Equipment?
+
+  // Medien
+  images        ExerciseImage[]
+  videoUrl      String?
+
+  // Varianten
+  variants      ExerciseVariant[]
+
+  // Herkunft
+  isSystem      Boolean  @default(false)
+  forkedFromId  String?
+  forkedFrom    Exercise? @relation("ExerciseForks", fields: [forkedFromId], references: [id])
+  forks         Exercise[] @relation("ExerciseForks")
+  createdById   Int?
+  createdBy     User?     @relation(fields: [createdById], references: [id])
+
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  userFavorites UserExerciseFavorite[]
+}
+
+model ExerciseVariant {
+  id          String    @id @default(cuid())
+  title       String
+  description String?   @db.Text
+  equipment   Equipment?
+
+  exerciseId  String
+  exercise    Exercise  @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ExerciseImage {
+  id         String   @id @default(cuid())
+  exerciseId String
+  url        String
+  sortOrder  Int      @default(0)
+  altText    String?
+
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+}
+
+model UserExerciseFavorite {
+  userId      Int
+  exerciseId  String
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@id([userId, exerciseId])
+}
+
+// Enums
+enum MuscleGroup {
+  CHEST
+  BACK
+  SHOULDERS
+  BICEPS
+  TRICEPS
+  FOREARMS
+  ABS
+  OBLIQUES
+  QUADS
+  HAMSTRINGS
+  GLUTES
+  CALVES
+}
+
+enum ExerciseCategory {
+  COMPOUND
+  ISOLATION
+  CARDIO
+  STRETCHING
+}
+
+enum Equipment {
+  BARBELL
+  DUMBBELL
+  MACHINE
+  CABLE
+  BODYWEIGHT
+  KETTLEBELL
+  BAND
+  OTHER
 }

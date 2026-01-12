@@ -35,6 +35,8 @@ export default defineConfig({
     css: true,
     coverage: {
       provider: 'v8',
+      all: true,
+      reportOnFailure: true,
       reporter: ['text', 'lcov'],
       include: ['src/**/*.{js,vue}'],
       exclude: ['src/**/__tests__/**', 'tests/**'],

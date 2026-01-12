@@ -1,0 +1,187 @@
+// Dark Glassmorphism Theme
+// Shared styles for the dark theme design system
+
+// Glass Card Mixin
+@mixin glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+
+@mixin glass-card-hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(0, 255, 194, 0.15);
+}
+
+@mixin glass-card-clickable {
+  cursor: pointer;
+  &:hover {
+    @include glass-card-hover;
+    transform: translateY(-2px);
+    border-color: rgba(0, 255, 194, 0.25);
+  }
+}
+
+// Dark Page Background
+@mixin dark-page-bg {
+  background:
+    radial-gradient(ellipse at top left, rgba(0, 255, 194, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(0, 255, 194, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at center, rgba(0, 255, 194, 0.03) 0%, transparent 70%),
+    linear-gradient(135deg, #040d16 0%, #061219 50%, #040d16 100%);
+  min-height: 100vh;
+}
+
+// Accent Icon Box
+@mixin accent-icon-box {
+  background: rgba(0, 255, 194, 0.1);
+  border: 1px solid rgba(0, 255, 194, 0.2);
+  color: #00ffc2;
+  backdrop-filter: blur(10px);
+}
+
+// Glass Chip
+@mixin glass-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+@mixin glass-chip-active {
+  background: rgba(0, 255, 194, 0.15);
+  border-color: rgba(0, 255, 194, 0.3);
+  color: #00ffc2;
+}
+
+// Glass Input
+@mixin glass-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  transition: border-color 0.2s ease;
+
+  &:focus,
+  &:focus-within {
+    border-color: rgba(0, 255, 194, 0.4);
+    outline: none;
+  }
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+// Glass Button
+@mixin glass-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 255, 194, 0.2);
+    color: white;
+  }
+}
+
+@mixin glass-btn-primary {
+  background: rgba(0, 255, 194, 0.1);
+  border: 1px solid rgba(0, 255, 194, 0.2);
+  color: #00ffc2;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(0, 255, 194, 0.2);
+    border-color: rgba(0, 255, 194, 0.4);
+  }
+}
+
+// Text Colors
+.text-light-primary {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.text-light-secondary {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.text-light-muted {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.text-light-hint {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.text-accent {
+  color: #00ffc2;
+}
+
+// Reusable Classes
+.glass-card {
+  @include glass-card;
+}
+
+.glass-card-hover:hover {
+  @include glass-card-hover;
+}
+
+.glass-card-clickable {
+  @include glass-card;
+  @include glass-card-clickable;
+}
+
+.dark-page {
+  @include dark-page-bg;
+  position: relative;
+}
+
+.accent-box {
+  @include accent-icon-box;
+  border-radius: 14px;
+}
+
+// Glass Dialog styling
+.glass-dialog {
+  .q-card {
+    @include glass-card;
+    background: rgba(4, 13, 22, 0.95);
+  }
+}
+
+// Override Quasar dark mode input styling
+.dark-input {
+  .q-field__control {
+    @include glass-input;
+  }
+
+  .q-field__label {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .q-field__native,
+  .q-field__prefix,
+  .q-field__suffix {
+    color: white;
+  }
+
+  .q-field--focused .q-field__label {
+    color: #00ffc2;
+  }
+}
+
+// Separator
+.glass-separator {
+  background: rgba(255, 255, 255, 0.08);
+  height: 1px;
+}
