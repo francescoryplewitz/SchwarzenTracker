@@ -46,21 +46,7 @@
 <script>
 import { defineComponent, computed } from 'vue'
 import { api } from 'boot/axios'
-
-const muscleGroupLabels = {
-  CHEST: 'Brust',
-  BACK: 'Rücken',
-  SHOULDERS: 'Schultern',
-  BICEPS: 'Bizeps',
-  TRICEPS: 'Trizeps',
-  FOREARMS: 'Unterarme',
-  ABS: 'Bauch',
-  OBLIQUES: 'Seitliche Bauchmuskeln',
-  QUADS: 'Oberschenkel',
-  HAMSTRINGS: 'Beinbeuger',
-  GLUTES: 'Gesäß',
-  CALVES: 'Waden'
-}
+import { muscleGroupLabels } from 'src/constants/muscleGroups'
 
 const equipmentLabels = {
   BARBELL: 'Langhantel',

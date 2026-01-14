@@ -35,9 +35,15 @@
 
 ## frontend code style
 - note eslint rules of vue components: should always have multi-word  names. vue/multi-word-component-names
+- NEVER add `// eslint-disable` or `// eslint-disable-next-line` comments. If ESLint reports an error, fix the code pattern - do not suppress the warning. The agent must never disable ESLint rules.
 
 ## backend code style
 - tests database models by using guidance at .ai/detail-instructions/db-model-guidance.md
+
+## Globals (Backend)
+The following globals are available in backend code without requiring imports:
+- `Logger` - Logging utility. Usage: `const LOG = new Logger('MODULE_NAME')`
+- `env` - Environment configuration from `.secrets.json`
 
 ## environment variables
 - if you add new environment variables, you must update `ENV.md` with the new variable

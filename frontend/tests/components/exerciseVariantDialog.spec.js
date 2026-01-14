@@ -136,7 +136,7 @@ describe('ExerciseVariantDialog', () => {
       let postCalled = false
       let postUrl = ''
       server.use(
-        rest.post('http://localhost:4004/api/exercises/:id/variants', async (req, res, ctx) => {
+        rest.post('http://localhost:5001/api/exercises/:id/variants', async (req, res, ctx) => {
           postCalled = true
           postUrl = req.url.pathname
           return res(ctx.status(201), ctx.json(createdVariant))
@@ -164,7 +164,7 @@ describe('ExerciseVariantDialog', () => {
     it('sends correct data on create', async () => {
       let receivedBody = null
       server.use(
-        rest.post('http://localhost:4004/api/exercises/:id/variants', async (req, res, ctx) => {
+        rest.post('http://localhost:5001/api/exercises/:id/variants', async (req, res, ctx) => {
           receivedBody = await req.json()
           return res(ctx.status(201), ctx.json(createdVariant))
         })

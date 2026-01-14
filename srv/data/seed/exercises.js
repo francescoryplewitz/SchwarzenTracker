@@ -8,6 +8,7 @@ const systemExercises = [
     muscleGroups: ['CHEST', 'TRICEPS', 'SHOULDERS'],
     category: 'COMPOUND',
     equipment: 'BARBELL',
+    recommendedRestSeconds: 120,
     isSystem: true
   },
   {
@@ -16,6 +17,7 @@ const systemExercises = [
     muscleGroups: ['CHEST'],
     category: 'ISOLATION',
     equipment: 'DUMBBELL',
+    recommendedRestSeconds: 60,
     isSystem: true
   },
   {
@@ -24,6 +26,7 @@ const systemExercises = [
     muscleGroups: ['CHEST', 'TRICEPS', 'SHOULDERS'],
     category: 'COMPOUND',
     equipment: 'BODYWEIGHT',
+    recommendedRestSeconds: 90,
     isSystem: true
   },
 
@@ -34,6 +37,7 @@ const systemExercises = [
     muscleGroups: ['BACK', 'HAMSTRINGS', 'GLUTES'],
     category: 'COMPOUND',
     equipment: 'BARBELL',
+    recommendedRestSeconds: 150,
     isSystem: true
   },
   {
@@ -42,6 +46,7 @@ const systemExercises = [
     muscleGroups: ['BACK', 'BICEPS'],
     category: 'COMPOUND',
     equipment: 'BODYWEIGHT',
+    recommendedRestSeconds: 120,
     isSystem: true
   },
   {
@@ -50,6 +55,7 @@ const systemExercises = [
     muscleGroups: ['BACK', 'BICEPS'],
     category: 'COMPOUND',
     equipment: 'CABLE',
+    recommendedRestSeconds: 90,
     isSystem: true
   },
 
@@ -60,6 +66,7 @@ const systemExercises = [
     muscleGroups: ['SHOULDERS', 'TRICEPS'],
     category: 'COMPOUND',
     equipment: 'DUMBBELL',
+    recommendedRestSeconds: 120,
     isSystem: true
   },
   {
@@ -68,6 +75,7 @@ const systemExercises = [
     muscleGroups: ['SHOULDERS'],
     category: 'ISOLATION',
     equipment: 'DUMBBELL',
+    recommendedRestSeconds: 60,
     isSystem: true
   },
 
@@ -78,6 +86,7 @@ const systemExercises = [
     muscleGroups: ['BICEPS'],
     category: 'ISOLATION',
     equipment: 'DUMBBELL',
+    recommendedRestSeconds: 60,
     isSystem: true
   },
   {
@@ -86,6 +95,7 @@ const systemExercises = [
     muscleGroups: ['TRICEPS', 'CHEST'],
     category: 'COMPOUND',
     equipment: 'BODYWEIGHT',
+    recommendedRestSeconds: 90,
     isSystem: true
   },
 
@@ -96,6 +106,7 @@ const systemExercises = [
     muscleGroups: ['QUADS', 'HAMSTRINGS', 'GLUTES'],
     category: 'COMPOUND',
     equipment: 'BARBELL',
+    recommendedRestSeconds: 150,
     isSystem: true
   },
   {
@@ -104,6 +115,7 @@ const systemExercises = [
     muscleGroups: ['QUADS', 'GLUTES', 'HAMSTRINGS'],
     category: 'COMPOUND',
     equipment: 'DUMBBELL',
+    recommendedRestSeconds: 90,
     isSystem: true
   },
   {
@@ -112,6 +124,7 @@ const systemExercises = [
     muscleGroups: ['QUADS', 'GLUTES'],
     category: 'COMPOUND',
     equipment: 'MACHINE',
+    recommendedRestSeconds: 120,
     isSystem: true
   },
   {
@@ -120,6 +133,7 @@ const systemExercises = [
     muscleGroups: ['CALVES'],
     category: 'ISOLATION',
     equipment: 'BODYWEIGHT',
+    recommendedRestSeconds: 45,
     isSystem: true
   },
 
@@ -130,6 +144,7 @@ const systemExercises = [
     muscleGroups: ['ABS', 'OBLIQUES'],
     category: 'ISOLATION',
     equipment: 'BODYWEIGHT',
+    recommendedRestSeconds: 60,
     isSystem: true
   }
 ]
@@ -147,7 +162,11 @@ async function seedExercises() {
         await prisma.exercise.create({ data: exercise })
         console.log(`Created: ${exercise.name}`)
       } else {
-        console.log(`Skipped (exists): ${exercise.name}`)
+        await prisma.exercise.update({
+          where: { id: existing.id },
+          data: { recommendedRestSeconds: exercise.recommendedRestSeconds }
+        })
+        console.log(`Updated: ${exercise.name}`)
       }
     }
 

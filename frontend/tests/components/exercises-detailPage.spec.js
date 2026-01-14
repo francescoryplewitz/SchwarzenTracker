@@ -48,7 +48,7 @@ describe('ExerciseDetailPage', () => {
   describe('Loading State', () => {
     it('displays loading state during fetch', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.delay(100), ctx.status(200), ctx.json(singleExercise))
         })
       )
@@ -60,7 +60,7 @@ describe('ExerciseDetailPage', () => {
 
     it('hides loading state after fetch completes', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(singleExercise))
         })
       )
@@ -76,7 +76,7 @@ describe('ExerciseDetailPage', () => {
     it('fetches exercise by ID on mount', async () => {
       let fetchedId = null
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           fetchedId = req.params.id
           return res(ctx.status(200), ctx.json(singleExercise))
         })
@@ -90,7 +90,7 @@ describe('ExerciseDetailPage', () => {
 
     it('displays exercise details correctly', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(singleExercise))
         })
       )
@@ -105,7 +105,7 @@ describe('ExerciseDetailPage', () => {
 
     it('displays empty state when exercise not found', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json({}))
         })
       )
@@ -121,10 +121,10 @@ describe('ExerciseDetailPage', () => {
     it('toggles favorite status on button click', async () => {
       let favoriteToggled = false
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json({ ...singleExercise, isFavorite: false }))
         }),
-        rest.post('http://localhost:4004/api/exercises/:id/favorite', (req, res, ctx) => {
+        rest.post('http://localhost:5001/api/exercises/:id/favorite', (req, res, ctx) => {
           favoriteToggled = true
           return res(ctx.status(201), ctx.json({ success: true }))
         })
@@ -144,7 +144,7 @@ describe('ExerciseDetailPage', () => {
   describe('Edit/Delete for Non-System Exercises', () => {
     it('shows edit button for non-system exercises', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(singleExercise))
         })
       )
@@ -157,7 +157,7 @@ describe('ExerciseDetailPage', () => {
 
     it('shows delete button for non-system exercises', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(singleExercise))
         })
       )
@@ -170,7 +170,7 @@ describe('ExerciseDetailPage', () => {
 
     it('hides edit button for system exercises', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(systemExercise))
         })
       )
@@ -183,7 +183,7 @@ describe('ExerciseDetailPage', () => {
 
     it('hides delete button for system exercises', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(systemExercise))
         })
       )
@@ -196,7 +196,7 @@ describe('ExerciseDetailPage', () => {
 
     it('opens edit dialog for non-system exercises', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(singleExercise))
         })
       )
@@ -213,7 +213,7 @@ describe('ExerciseDetailPage', () => {
 
     it('delete button triggers confirmDelete on click', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(singleExercise))
         })
       )
@@ -236,7 +236,7 @@ describe('ExerciseDetailPage', () => {
   describe('Navigation', () => {
     it('navigates back to exercises list', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(singleExercise))
         })
       )
@@ -255,7 +255,7 @@ describe('ExerciseDetailPage', () => {
   describe('Variant Tabs', () => {
     it('displays variant tabs when variants exist', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(singleExercise))
         })
       )
@@ -269,7 +269,7 @@ describe('ExerciseDetailPage', () => {
 
     it('does not display variant tabs when no variants', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json({ ...singleExercise, variants: [] }))
         })
       )
@@ -284,7 +284,7 @@ describe('ExerciseDetailPage', () => {
   describe('Video Button', () => {
     it('shows video button when videoUrl exists', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(singleExercise))
         })
       )
@@ -297,7 +297,7 @@ describe('ExerciseDetailPage', () => {
 
     it('hides video button when no videoUrl', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json({ ...singleExercise, videoUrl: null }))
         })
       )
@@ -312,7 +312,7 @@ describe('ExerciseDetailPage', () => {
   describe('FAB Actions', () => {
     it('shows FAB when exercise is loaded', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(singleExercise))
         })
       )
@@ -325,7 +325,7 @@ describe('ExerciseDetailPage', () => {
 
     it('shows fork button for system exercises', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(systemExercise))
         })
       )
@@ -338,7 +338,7 @@ describe('ExerciseDetailPage', () => {
 
     it('hides fork button for non-system exercises', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(singleExercise))
         })
       )

@@ -379,6 +379,38 @@ watch(() => props.item, debouncedPatch, { deep: true })
 
 ## 5. Client State Management
 
+### Autosave Pattern (Standard)
+
+- The parent holds a reference to the original object (no cloning).
+- The child receives this reference via props.
+- The child creates a local ref using `toRef()` or `ref()` and mutates that.
+- No clones, no draft objects, and no merge logic.
+
+### Working with Props Correctly
+
+**NEVER mutate `props.X` directly.** Vue props are read-only by design.
+
+Instead, create a reactive reference in the child component:
+
+```js
+// Option 1: toRef (keeps reactivity link to parent)
+const item = toRef(props, 'item')
+
+// Option 2: ref (for objects passed by reference)
+const items = ref(props.items)
+
+// Now you can mutate:
+item.value.name = 'New Name'        // Parent sees this change
+items.value.push(newEntry)          // Parent sees this change
+```
+
+**Why this works:** JavaScript objects are passed by reference. When you do `ref(props.items)`, you're not cloning - you're creating a reactive wrapper around the same object. Mutations to properties inside that object propagate to the parent.
+
+### Event Emits Only When Explicitly Requested
+
+- Emit changes only when explicitly triggered (e.g., save/cancel flows).
+- Do **not** emit default `update:` events in autosave scenarios.
+
 ### Object References Across Boundaries
 
 When opening dialogs or child components for creating or editing entries, always pass object references instead of cloning.
@@ -418,6 +450,24 @@ Remove the item from the array by index or filter - never reload the full list.
 
 
 ## 6. Prohibitions
+
+### ESLint Rules Are Never Disabled
+
+**NEVER use `// eslint-disable` comments.** If ESLint complains, the code pattern is wrong.
+
+Common mistake:
+```js
+// BAD - never do this
+// eslint-disable-next-line vue/no-mutating-props
+props.items.push(newItem)
+```
+
+Correct approach:
+```js
+// GOOD
+const items = ref(props.items)
+items.value.push(newItem)
+```
 
 ### Internal Functions
 

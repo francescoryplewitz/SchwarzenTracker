@@ -8,7 +8,7 @@ import {
   forkedExercise
 } from '../../fixtures/exercises.js'
 
-const BASE_URL = 'http://localhost:4004'
+const BASE_URL = 'http://localhost:5001'
 
 // Store to track state changes during tests
 let exerciseStore = [...exerciseList]

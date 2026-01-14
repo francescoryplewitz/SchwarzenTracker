@@ -110,7 +110,7 @@ describe('ExerciseCard', () => {
     it('calls POST API when adding favorite', async () => {
       let apiCalled = false
       server.use(
-        rest.post('http://localhost:4004/api/exercises/:id/favorite', (req, res, ctx) => {
+        rest.post('http://localhost:5001/api/exercises/:id/favorite', (req, res, ctx) => {
           apiCalled = true
           return res(ctx.status(201), ctx.json({ success: true }))
         })
@@ -129,7 +129,7 @@ describe('ExerciseCard', () => {
     it('calls DELETE API when removing favorite', async () => {
       let apiCalled = false
       server.use(
-        rest.delete('http://localhost:4004/api/exercises/:id/favorite', (req, res, ctx) => {
+        rest.delete('http://localhost:5001/api/exercises/:id/favorite', (req, res, ctx) => {
           apiCalled = true
           return res(ctx.status(204))
         })
@@ -159,7 +159,7 @@ describe('ExerciseCard', () => {
 
     it('does not navigate when clicking favorite button', async () => {
       server.use(
-        rest.post('http://localhost:4004/api/exercises/:id/favorite', (req, res, ctx) => {
+        rest.post('http://localhost:5001/api/exercises/:id/favorite', (req, res, ctx) => {
           return res(ctx.status(201), ctx.json({ success: true }))
         })
       )

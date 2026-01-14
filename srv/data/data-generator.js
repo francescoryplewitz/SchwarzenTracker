@@ -2,6 +2,7 @@ const prisma = require('./prisma')
 const fs = require('fs')
 const path = require('path')
 const { seedExercises } = require('./seed/exercises')
+const { seedPlans } = require('./seed/plans')
 
 // Hilfsfunktionen zum Laden der JSON-Dateien
 const loadDirectory = (dir) => {
@@ -70,6 +71,7 @@ class DataGenerator {
   async init () {
     await upsertData(this.structuredata)
     await seedExercises()
+    await seedPlans()
   }
 
   async resetMockdata () {
@@ -79,6 +81,7 @@ class DataGenerator {
       await insertMockData(this.mockdata)
     }
     await seedExercises()
+    await seedPlans()
   }
 
   async reset () {

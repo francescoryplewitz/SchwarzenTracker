@@ -62,7 +62,7 @@ In `.secrets.json` under `db.*`:
 | Variable | Description |
 |----------|-------------|
 | `domain` | Application domain (e.g. `https://app.example.com`) |
-| `port` | Server port (default: `4004`) |
+| `port` | Server port (default: `5001`) |
 | `stage` | Environment label |
 
 ### CSRF

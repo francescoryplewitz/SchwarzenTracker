@@ -205,6 +205,7 @@ const forkExercise = async (req, res) => {
         category: original.category,
         equipment: original.equipment,
         videoUrl: original.videoUrl,
+        recommendedRestSeconds: original.recommendedRestSeconds,
         isSystem: false,
         forkedFromId: id,
         createdById: userId

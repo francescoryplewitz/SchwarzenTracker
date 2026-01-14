@@ -24,6 +24,10 @@ model User {
   // Exercise relations
   createdExercises  Exercise[]
   exerciseFavorites UserExerciseFavorite[]
+
+  // Plan relations
+  createdPlans   TrainingPlan[]
+  planFavorites  UserPlanFavorite[]
 }
 
 // ============================================
@@ -44,6 +48,9 @@ model Exercise {
   images        ExerciseImage[]
   videoUrl      String?
 
+  // Empfohlene Pausenzeit zwischen Sätzen (in Sekunden)
+  recommendedRestSeconds  Int?
+
   // Varianten
   variants      ExerciseVariant[]
 
@@ -61,6 +68,7 @@ model Exercise {
 
   // Relations
   userFavorites UserExerciseFavorite[]
+  planExercises PlanExercise[]
 }
 
 model ExerciseVariant {
@@ -129,4 +137,57 @@ enum Equipment {
   KETTLEBELL
   BAND
   OTHER
+}
+
+// ============================================
+// TRAININGSPLAN MODULE
+// ============================================
+
+model TrainingPlan {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+
+  isSystem    Boolean  @default(false)
+  createdById Int?
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+
+  exercises   PlanExercise[]
+  favorites   UserPlanFavorite[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PlanExercise {
+  id           String   @id @default(cuid())
+  planId       String
+  plan         TrainingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  exerciseId   String
+  exercise     Exercise @relation(fields: [exerciseId], references: [id])
+
+  sortOrder    Int      @default(0)
+  sets         Int      @default(3)
+  minReps      Int      @default(8)
+  maxReps      Int      @default(12)
+  targetWeight Float?
+  restSeconds  Int?
+  restAfterSeconds Int?   // Pause nach dieser Übung, vor der nächsten
+  notes        String?  @db.Text
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([planId, exerciseId])
+}
+
+model UserPlanFavorite {
+  userId    Int
+  planId    String
+  createdAt DateTime @default(now())
+
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan      TrainingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@id([userId, planId])
 }

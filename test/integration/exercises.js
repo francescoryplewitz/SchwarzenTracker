@@ -17,7 +17,10 @@ describe('Exercise endpoints', () => {
       expect(result.status).to.equal(200)
       expect(result.data).to.be.an('array')
       expect(result.data.length).to.be.greaterThan(0)
-      systemExerciseId = result.data[0].id
+      // Find a system exercise explicitly
+      const systemExercise = result.data.find(ex => ex.isSystem === true)
+      expect(systemExercise).to.exist
+      systemExerciseId = systemExercise.id
     })
 
     it('should filter by muscleGroup', async () => {
@@ -161,13 +164,23 @@ describe('Exercise endpoints', () => {
 
   describe('POST /exercises/:id/variants', () => {
     it('should create variant for existing exercise', async () => {
+      // Create own exercise first
+      const exerciseResult = await POST('/exercises', {
+        name: 'Test Exercise for Variant',
+        description: 'Test',
+        category: 'COMPOUND',
+        muscleGroups: ['CHEST']
+      })
+      expect(exerciseResult.status).to.equal(201)
+      const ownExerciseId = exerciseResult.data.id
+
       const variant = {
         title: 'Schrägbank Variante',
         description: 'Schrägbank Version'
       }
-      const result = await POST(`/exercises/${systemExerciseId}/variants`, variant)
+      const result = await POST(`/exercises/${ownExerciseId}/variants`, variant)
       expect(result.status).to.equal(201)
-      expect(result.data.exerciseId).to.equal(systemExerciseId)
+      expect(result.data.exerciseId).to.equal(ownExerciseId)
     })
 
     it('should return 404 for non-existent parent exercise', async () => {

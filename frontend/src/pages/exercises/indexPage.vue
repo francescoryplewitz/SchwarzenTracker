@@ -90,21 +90,7 @@ import { api } from 'boot/axios'
 import ExerciseCard from 'components/exercises/exerciseCard.vue'
 import ExerciseFilter from 'components/exercises/exerciseFilter.vue'
 import ExerciseForm from 'components/exercises/exerciseForm.vue'
-
-const muscleGroupLabels = {
-  CHEST: 'Brust',
-  BACK: 'Rücken',
-  SHOULDERS: 'Schultern',
-  BICEPS: 'Bizeps',
-  TRICEPS: 'Trizeps',
-  FOREARMS: 'Unterarme',
-  ABS: 'Bauch',
-  OBLIQUES: 'Seitliche Bauchmuskeln',
-  QUADS: 'Oberschenkel',
-  HAMSTRINGS: 'Beinbeuger',
-  GLUTES: 'Gesäß',
-  CALVES: 'Waden'
-}
+import { muscleGroupLabels } from 'src/constants/muscleGroups'
 
 const equipmentLabels = {
   BARBELL: 'Langhantel',

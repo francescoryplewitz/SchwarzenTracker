@@ -1,7 +1,16 @@
 const rateLimit = require('express-rate-limit')
 const LOG = new Logger('RATE-LIMIT')
 
+const isProduction = process.env.NODE_ENV === 'production'
+
+// No-op middleware for non-production environments
+const noOpLimiter = (req, res, next) => next()
+
 const createLimiter = (windowMs, max, message) => {
+  if (!isProduction) {
+    return noOpLimiter
+  }
+  
   return rateLimit({
     windowMs,
     max,

@@ -94,6 +94,18 @@
               placeholder="https://..."
             >
           </div>
+
+          <div class="field-group">
+            <label class="field-label">Empfohlene Pausenzeit (Sekunden)</label>
+            <input
+              v-model.number="form.recommendedRestSeconds"
+              type="number"
+              min="0"
+              class="text-input"
+              data-test="rest-input"
+              placeholder="z.B. 90"
+            >
+          </div>
         </q-form>
       </div>
 
@@ -165,7 +177,8 @@ export default defineComponent({
       muscleGroups: [],
       category: null,
       equipment: null,
-      videoUrl: ''
+      videoUrl: '',
+      recommendedRestSeconds: null
     })
 
     const resetForm = () => {
@@ -175,6 +188,7 @@ export default defineComponent({
       form.category = null
       form.equipment = null
       form.videoUrl = ''
+      form.recommendedRestSeconds = null
     }
 
     const open = (exercise = null) => {
@@ -187,6 +201,7 @@ export default defineComponent({
         form.category = exercise.category
         form.equipment = exercise.equipment
         form.videoUrl = exercise.videoUrl || ''
+        form.recommendedRestSeconds = exercise.recommendedRestSeconds || null
       } else {
         isEdit.value = false
         editingExercise.value = null
@@ -218,7 +233,8 @@ export default defineComponent({
         muscleGroups: form.muscleGroups,
         category: form.category,
         equipment: form.equipment,
-        videoUrl: form.videoUrl || null
+        videoUrl: form.videoUrl || null,
+        recommendedRestSeconds: form.recommendedRestSeconds || null
       }
 
       if (isEdit.value) {

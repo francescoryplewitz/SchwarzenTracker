@@ -95,6 +95,10 @@
               <q-icon name="mdi-tag" size="14px" />
               {{ categoryLabels[exercise.category] }}
             </span>
+            <span v-if="exercise.recommendedRestSeconds" class="tag-item" data-test="rest-tag">
+              <q-icon name="mdi-timer-outline" size="14px" />
+              {{ formatRestTime(exercise.recommendedRestSeconds) }} Pause
+            </span>
           </div>
 
           <div class="exercise-separator"></div>
@@ -113,6 +117,17 @@
             <q-icon name="mdi-play-circle" size="20px" />
             Video ansehen
           </button>
+        </div>
+
+        <div v-if="exercise.muscleGroups?.length > 0" class="muscle-section glass-card" data-test="muscle-section">
+          <div class="section-header-inline">
+            <span class="section-label-small">Trainierte Muskelgruppen</span>
+          </div>
+          <muscle-body-diagram
+            :sets="muscleGroupSets"
+            :max-sets="maxMuscleSets"
+            :show-sets="false"
+          />
         </div>
 
       </template>
@@ -152,31 +167,19 @@
 
     <exercise-form ref="formRef" :exercises="[]" />
     <exercise-variant-dialog ref="variantRef" :exercise-id="exercise.id" @created="onVariantCreated" />
+    <confirm-dialog ref="confirmDialogRef" />
   </div>
 </template>
 
 <script>
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
 import { api } from 'boot/axios'
 import ExerciseForm from 'components/exercises/exerciseForm.vue'
 import ExerciseVariantDialog from 'components/exercises/exerciseVariantDialog.vue'
-
-const muscleGroupLabels = {
-  CHEST: 'Brust',
-  BACK: 'Rücken',
-  SHOULDERS: 'Schultern',
-  BICEPS: 'Bizeps',
-  TRICEPS: 'Trizeps',
-  FOREARMS: 'Unterarme',
-  ABS: 'Bauch',
-  OBLIQUES: 'Seitliche Bauchmuskeln',
-  QUADS: 'Oberschenkel',
-  HAMSTRINGS: 'Beinbeuger',
-  GLUTES: 'Gesäß',
-  CALVES: 'Waden'
-}
+import MuscleBodyDiagram from 'components/plans/muscleBodyDiagram.vue'
+import ConfirmDialog from 'components/common/confirmDialog.vue'
+import { muscleGroupLabels } from 'src/constants/muscleGroups'
 
 const equipmentLabels = {
   BARBELL: 'Langhantel',
@@ -201,24 +204,38 @@ export default defineComponent({
 
   components: {
     ExerciseForm,
-    ExerciseVariantDialog
+    ExerciseVariantDialog,
+    MuscleBodyDiagram,
+    ConfirmDialog
   },
 
   setup() {
     const route = useRoute()
     const router = useRouter()
-    const $q = useQuasar()
 
     const exercise = ref({})
     const loading = ref(true)
     const activeTab = ref('main')
     const formRef = ref(null)
     const variantRef = ref(null)
+    const confirmDialogRef = ref(null)
     const fabOpen = ref(false)
 
     const hasVariants = computed(() => exercise.value.variants?.length > 0)
     const canEdit = computed(() => !exercise.value.isSystem)
     const canDelete = computed(() => !exercise.value.isSystem)
+
+    const muscleGroupSets = computed(() => {
+      const sets = {}
+      exercise.value.muscleGroups?.forEach(mg => {
+        sets[mg] = 1
+      })
+      return sets
+    })
+
+    const maxMuscleSets = computed(() => {
+      return exercise.value.muscleGroups?.length ? 1 : 0
+    })
 
     const currentVariantData = computed(() => {
       if (activeTab.value === 'main') {
@@ -255,16 +272,18 @@ export default defineComponent({
       formRef.value.open(exercise.value)
     }
 
-    const confirmDelete = () => {
-      $q.dialog({
-        title: 'Übung löschen',
-        message: `Möchtest du "${exercise.value.name}" wirklich löschen?`,
-        cancel: true,
-        persistent: true
-      }).onOk(async () => {
+    const confirmDelete = async () => {
+      try {
+        await confirmDialogRef.value.open({
+          title: 'Übung löschen',
+          message: `Möchtest du "${exercise.value.name}" wirklich löschen?`,
+          type: 'confirm'
+        })
         await api.delete(`/api/exercises/${exercise.value.id}`)
         router.push('/exercises')
-      })
+      } catch {
+        // User cancelled
+      }
     }
 
     const forkExercise = async () => {
@@ -284,6 +303,15 @@ export default defineComponent({
       window.open(exercise.value.videoUrl, '_blank')
     }
 
+    const formatRestTime = (seconds) => {
+      if (seconds >= 60) {
+        const mins = Math.floor(seconds / 60)
+        const secs = seconds % 60
+        return secs > 0 ? `${mins}:${secs.toString().padStart(2, '0')} Min` : `${mins} Min`
+      }
+      return `${seconds} Sek`
+    }
+
     onMounted(() => {
       loadExercise()
     })
@@ -294,10 +322,13 @@ export default defineComponent({
       activeTab,
       formRef,
       variantRef,
+      confirmDialogRef,
       fabOpen,
       hasVariants,
       canEdit,
       canDelete,
+      muscleGroupSets,
+      maxMuscleSets,
       currentVariantData,
       muscleGroupLabels,
       equipmentLabels,
@@ -308,7 +339,8 @@ export default defineComponent({
       forkExercise,
       openVariantDialog,
       onVariantCreated,
-      openVideo
+      openVideo,
+      formatRestTime
     }
   }
 })
@@ -544,6 +576,23 @@ export default defineComponent({
 
 .video-btn:hover {
   background: rgba(0, 255, 194, 0.2);
+}
+
+.muscle-section {
+  padding: 20px;
+  margin-top: 16px;
+}
+
+.section-header-inline {
+  margin-bottom: 8px;
+}
+
+.section-label-small {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .fab-actions {

@@ -27,7 +27,7 @@ const getUsers = async (req, res) => {
 }
 
 const getConfig = (req, res) => {
-  const devConfig = req.session?.devUser || { userId: 1, roles: [] }
+  const devConfig = req.session?.devUser || { userId: 1, roles: ['user'] }
   return res.status(200).json(devConfig)
 }
 

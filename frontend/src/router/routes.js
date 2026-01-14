@@ -51,6 +51,11 @@ const routes = [
         path: '',
         name: 'plans',
         component: () => import('pages/plans/indexPage.vue')
+      },
+      {
+        path: ':id',
+        name: 'plan-detail',
+        component: () => import('pages/plans/detailPage.vue')
       }
     ]
   },

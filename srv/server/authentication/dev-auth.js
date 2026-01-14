@@ -11,12 +11,12 @@ const registerDevAuth = (app) => {
     }
 
     // Get dev user config from session, default to user 1
-    const devConfig = req.session?.devUser || { userId: 1, roles: [] }
+    const devConfig = req.session?.devUser || { userId: 1, roles: ['user'] }
 
     // If no user configured and no session user, use default
     if (!devConfig.userId) {
       devConfig.userId = 1
-      devConfig.roles = []
+      devConfig.roles = ['user']
     }
 
     try {

@@ -202,7 +202,7 @@ describe('ExerciseForm', () => {
     it('does not submit when name is empty', async () => {
       let apiCalled = false
       server.use(
-        rest.post('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.post('http://localhost:5001/api/exercises', (req, res, ctx) => {
           apiCalled = true
           return res(ctx.status(201), ctx.json(createdExercise))
         })
@@ -227,7 +227,7 @@ describe('ExerciseForm', () => {
     it('does not submit when category is not selected', async () => {
       let apiCalled = false
       server.use(
-        rest.post('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.post('http://localhost:5001/api/exercises', (req, res, ctx) => {
           apiCalled = true
           return res(ctx.status(201), ctx.json(createdExercise))
         })
@@ -255,7 +255,7 @@ describe('ExerciseForm', () => {
     it('calls POST API when creating new exercise', async () => {
       let postCalled = false
       server.use(
-        rest.post('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.post('http://localhost:5001/api/exercises', (req, res, ctx) => {
           postCalled = true
           return res(ctx.status(201), ctx.json(createdExercise))
         })
@@ -286,7 +286,7 @@ describe('ExerciseForm', () => {
     it('sends correct payload on create', async () => {
       let receivedBody = null
       server.use(
-        rest.post('http://localhost:4004/api/exercises', async (req, res, ctx) => {
+        rest.post('http://localhost:5001/api/exercises', async (req, res, ctx) => {
           receivedBody = await req.json()
           return res(ctx.status(201), ctx.json(createdExercise))
         })
@@ -334,7 +334,7 @@ describe('ExerciseForm', () => {
 
     it('adds created exercise to exercises array', async () => {
       server.use(
-        rest.post('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.post('http://localhost:5001/api/exercises', (req, res, ctx) => {
           return res(ctx.status(201), ctx.json(createdExercise))
         })
       )
@@ -398,7 +398,7 @@ describe('ExerciseForm', () => {
       let patchCalled = false
       let patchUrl = ''
       server.use(
-        rest.patch('http://localhost:4004/api/exercises/:id', (req, res, ctx) => {
+        rest.patch('http://localhost:5001/api/exercises/:id', (req, res, ctx) => {
           patchCalled = true
           patchUrl = req.url.pathname
           return res(ctx.status(200), ctx.json({ ...singleExercise, name: 'Updated Name' }))

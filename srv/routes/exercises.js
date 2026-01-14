@@ -22,7 +22,8 @@ module.exports = (app) => {
     muscleGroups: { type: 'ARRAY' },
     category: { type: 'STRING', required: true },
     equipment: { type: 'STRING' },
-    videoUrl: { type: 'STRING' }
+    videoUrl: { type: 'STRING' },
+    recommendedRestSeconds: { type: 'NUMBER' }
   }), service.createExercise)
 
   app.patch('/api/exercises/:id', authorize(['user']), validate({
@@ -31,7 +32,8 @@ module.exports = (app) => {
     muscleGroups: { type: 'ARRAY' },
     category: { type: 'STRING' },
     equipment: { type: 'STRING' },
-    videoUrl: { type: 'STRING' }
+    videoUrl: { type: 'STRING' },
+    recommendedRestSeconds: { type: 'NUMBER' }
   }), service.updateExercise)
 
   app.delete('/api/exercises/:id', authorize(['user']), service.deleteExercise)

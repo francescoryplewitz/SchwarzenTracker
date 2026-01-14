@@ -38,7 +38,7 @@ describe('ExercisesIndexPage', () => {
   describe('Loading State', () => {
     it('displays loading state during fetch', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           return res(ctx.delay(100), ctx.status(200), ctx.json(exerciseList))
         })
       )
@@ -50,7 +50,7 @@ describe('ExercisesIndexPage', () => {
 
     it('hides loading state after fetch completes', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(exerciseList))
         })
       )
@@ -66,7 +66,7 @@ describe('ExercisesIndexPage', () => {
     it('loads exercises on mount', async () => {
       let apiCalled = false
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           apiCalled = true
           return res(ctx.status(200), ctx.json(exerciseList))
         })
@@ -80,7 +80,7 @@ describe('ExercisesIndexPage', () => {
 
     it('displays exercises via ExerciseCard components', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(exerciseList))
         })
       )
@@ -94,7 +94,7 @@ describe('ExercisesIndexPage', () => {
 
     it('displays empty state when no exercises', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(emptyExerciseList))
         })
       )
@@ -110,7 +110,7 @@ describe('ExercisesIndexPage', () => {
     it('debounces search input (500ms)', async () => {
       let searchQuery = ''
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           searchQuery = req.url.searchParams.get('search') || ''
           return res(ctx.status(200), ctx.json(exerciseList))
         })
@@ -135,7 +135,7 @@ describe('ExercisesIndexPage', () => {
     it('clears search and reloads list', async () => {
       let callCount = 0
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           callCount++
           return res(ctx.status(200), ctx.json(exerciseList))
         })
@@ -162,7 +162,7 @@ describe('ExercisesIndexPage', () => {
   describe('Filters', () => {
     it('opens filter dialog on filter button click', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(exerciseList))
         })
       )
@@ -179,7 +179,7 @@ describe('ExercisesIndexPage', () => {
 
     it('has filter button', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(exerciseList))
         })
       )
@@ -192,7 +192,7 @@ describe('ExercisesIndexPage', () => {
 
     it('renders filter options in dialog', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(exerciseList))
         })
       )
@@ -213,7 +213,7 @@ describe('ExercisesIndexPage', () => {
 
     it('toggles filter selection in dialog', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(exerciseList))
         })
       )
@@ -241,7 +241,7 @@ describe('ExercisesIndexPage', () => {
   describe('Pagination', () => {
     it('shows load more button when more items available', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(exerciseList)) // 30 items
         })
       )
@@ -254,7 +254,7 @@ describe('ExercisesIndexPage', () => {
 
     it('hides load more button when no more items', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(exerciseListSmall)) // < 30 items
         })
       )
@@ -268,7 +268,7 @@ describe('ExercisesIndexPage', () => {
     it('loads more exercises on load more button click', async () => {
       let skipValue = null
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           skipValue = req.url.searchParams.get('skip')
           if (skipValue === '30') {
             return res(ctx.status(200), ctx.json(exerciseListSmall))
@@ -291,7 +291,7 @@ describe('ExercisesIndexPage', () => {
   describe('Create Exercise', () => {
     it('opens create form on add button click', async () => {
       server.use(
-        rest.get('http://localhost:4004/api/exercises', (req, res, ctx) => {
+        rest.get('http://localhost:5001/api/exercises', (req, res, ctx) => {
           return res(ctx.status(200), ctx.json(exerciseList))
         })
       )
