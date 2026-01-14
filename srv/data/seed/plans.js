@@ -70,7 +70,7 @@ const systemPlans = [
   }
 ]
 
-async function seedPlans() {
+async function seedPlans () {
   try {
     console.log('Seeding training plans...')
 

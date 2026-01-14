@@ -3,6 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const { seedExercises } = require('./seed/exercises')
 const { seedPlans } = require('./seed/plans')
+const { seedWorkouts } = require('./seed/workouts')
 
 // Hilfsfunktionen zum Laden der JSON-Dateien
 const loadDirectory = (dir) => {
@@ -29,13 +30,21 @@ const mapFiles = (dir) => {
 const resetEntities = async () => {
   try {
     await prisma.$transaction([
+      // Workouts first (references PlanExercise)
+      prisma.workoutSet.deleteMany(),
+      prisma.workout.deleteMany(),
+      // Plans (PlanExercise references Exercise and TrainingPlan)
+      prisma.planExercise.deleteMany(),
+      prisma.userPlanFavorite.deleteMany(),
+      prisma.trainingPlan.deleteMany(),
+      // Exercises
       prisma.userExerciseFavorite.deleteMany(),
       prisma.exerciseImage.deleteMany(),
       prisma.exerciseVariant.deleteMany(),
       prisma.exercise.deleteMany()
     ])
   } catch (e) {
-    console.log('Exercise tables not yet migrated, skipping reset')
+    console.log('Tables not yet migrated, skipping reset')
   }
 }
 
@@ -64,7 +73,7 @@ const upsertData = (data) => {
 // Definition der Klasse
 class DataGenerator {
   constructor () {
-    this.mockdata = mapFiles('mockdata')
+    // this.mockdata = mapFiles('mockdata')
     this.structuredata = mapFiles('structuredata')
   }
 
@@ -72,16 +81,18 @@ class DataGenerator {
     await upsertData(this.structuredata)
     await seedExercises()
     await seedPlans()
+    await seedWorkouts()
   }
 
   async resetMockdata () {
     await resetEntities()
     await upsertData(this.structuredata)
-    if (Object.keys(this.mockdata).length > 0) {
+    if (this.mockdata && Object.keys(this.mockdata).length > 0) {
       await insertMockData(this.mockdata)
     }
     await seedExercises()
     await seedPlans()
+    await seedWorkouts()
   }
 
   async reset () {

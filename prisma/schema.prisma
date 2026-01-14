@@ -28,6 +28,9 @@ model User {
   // Plan relations
   createdPlans   TrainingPlan[]
   planFavorites  UserPlanFavorite[]
+
+  // Workout relations
+  workouts       Workout[]
 }
 
 // ============================================
@@ -154,6 +157,7 @@ model TrainingPlan {
 
   exercises   PlanExercise[]
   favorites   UserPlanFavorite[]
+  workouts    Workout[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -175,6 +179,8 @@ model PlanExercise {
   restAfterSeconds Int?   // Pause nach dieser Übung, vor der nächsten
   notes        String?  @db.Text
 
+  workoutSets  WorkoutSet[]
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -190,4 +196,62 @@ model UserPlanFavorite {
   plan      TrainingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@id([userId, planId])
+}
+
+// ============================================
+// WORKOUTS MODULE
+// ============================================
+
+model Workout {
+  id            String        @id @default(cuid())
+  planId        String
+  plan          TrainingPlan  @relation(fields: [planId], references: [id])
+  userId        Int
+  user          User          @relation(fields: [userId], references: [id])
+
+  planName      String        // Snapshot des Plannamens
+  status        WorkoutStatus @default(IN_PROGRESS)
+  startedAt     DateTime      @default(now())
+  completedAt   DateTime?
+  pausedAt      DateTime?     // Wann pausiert (null wenn läuft)
+  totalPausedMs Int           @default(0) // Akkumulierte Pausenzeit
+
+  sets          WorkoutSet[]
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model WorkoutSet {
+  id              String       @id @default(cuid())
+  workoutId       String
+  workout         Workout      @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  planExerciseId  String
+  planExercise    PlanExercise @relation(fields: [planExerciseId], references: [id])
+
+  setNumber       Int          // 1, 2, 3...
+
+  // Vom Nutzer eingetragen
+  weight          Float?
+  reps            Int?
+
+  // Zielwerte (Snapshot aus Plan)
+  targetWeight    Float?
+  targetMinReps   Int
+  targetMaxReps   Int
+  restSeconds     Int?
+
+  completedAt     DateTime?
+  sortOrder       Int          @default(0)
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+enum WorkoutStatus {
+  IN_PROGRESS
+  PAUSED
+  COMPLETED
+  ABANDONED
 }

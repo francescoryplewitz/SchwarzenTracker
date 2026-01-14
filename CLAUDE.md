@@ -91,3 +91,5 @@ Apply this strictly after completion:
 -   Direct mutation paths are standard when they are functionally
     appropriate and technically stable.
 
+## Lint
+- when your done run npm run lint to fix any linting errors

@@ -149,7 +149,7 @@ const systemExercises = [
   }
 ]
 
-async function seedExercises() {
+async function seedExercises () {
   try {
     console.log('Seeding exercises...')
 

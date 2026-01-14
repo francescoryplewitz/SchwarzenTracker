@@ -10,7 +10,7 @@ const createLimiter = (windowMs, max, message) => {
   if (!isProduction) {
     return noOpLimiter
   }
-  
+
   return rateLimit({
     windowMs,
     max,
