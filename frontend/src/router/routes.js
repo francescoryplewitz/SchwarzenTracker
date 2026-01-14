@@ -60,6 +60,24 @@ const routes = [
     ]
   },
 
+  // Workouts
+  {
+    path: '/workouts',
+    component: () => import('layouts/baseLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'workouts',
+        component: () => import('pages/workouts/indexPage.vue')
+      },
+      {
+        path: ':id',
+        name: 'workout-active',
+        component: () => import('pages/workouts/activePage.vue')
+      }
+    ]
+  },
+
   // Always leave this as last one,
   // but you can also remove it
   {

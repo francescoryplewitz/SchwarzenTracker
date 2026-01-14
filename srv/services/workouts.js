@@ -202,7 +202,7 @@ const createWorkout = async (req, res) => {
           targetWeight: planExercise.targetWeight,
           targetMinReps: planExercise.minReps,
           targetMaxReps: planExercise.maxReps,
-          restSeconds: planExercise.restSeconds,
+          restSeconds: planExercise.restSeconds || planExercise.exercise.recommendedRestSeconds || 90,
           sortOrder: sortOrder++
         })
       }
@@ -437,7 +437,7 @@ const completeSet = async (req, res) => {
     LOG.info(`Completed set ${setId} in workout ${id}`)
     return res.status(200).send({
       set: updated,
-      restSeconds: updated.restSeconds,
+      restSeconds: updated.restSeconds || updated.planExercise?.exercise?.recommendedRestSeconds || 90,
       nextSetId: nextSet?.id || null
     })
   } catch (e) {

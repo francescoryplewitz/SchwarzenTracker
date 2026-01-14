@@ -4,9 +4,9 @@ async function seedWorkouts () {
   try {
     console.log('Seeding workouts...')
 
-    // Get admin user (userId 2)
+    // Get admin user (userId 1)
     const adminUser = await prisma.user.findFirst({
-      where: { id: 2 }
+      where: { id: 1 }
     })
 
     if (!adminUser) {

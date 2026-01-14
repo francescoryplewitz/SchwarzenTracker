@@ -27,7 +27,8 @@ export default defineComponent({
     const menuItems = [
       { name: 'dashboard', label: 'Dashboard', route: '/dashboard', icon: 'mdi-view-dashboard-outline' },
       { name: 'exercises', label: 'Übungen', route: '/exercises', icon: 'mdi-dumbbell' },
-      { name: 'plans', label: 'Pläne', route: '/plans', icon: 'mdi-clipboard-text-outline' }
+      { name: 'plans', label: 'Pläne', route: '/plans', icon: 'mdi-clipboard-text-outline' },
+      { name: 'workouts', label: 'Workouts', route: '/workouts', icon: 'mdi-play-circle-outline' }
     ]
 
     const isActive = (item) => {
