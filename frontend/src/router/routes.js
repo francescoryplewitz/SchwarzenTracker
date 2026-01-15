@@ -1,14 +1,21 @@
 const routes = [
-  // Start page - standalone without layout
-  {
-    path: '/',
-    component: () => import('pages/IndexPage.vue')
-  },
-
   // Dev config page - standalone without layout
   {
     path: '/dev',
     component: () => import('pages/DevConfigPage.vue')
+  },
+
+  // Dashboard (Home)
+  {
+    path: '/',
+    component: () => import('layouts/baseLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'dashboard',
+        component: () => import('pages/dashboard/indexPage.vue')
+      }
+    ]
   },
 
   // Exercises module
@@ -25,19 +32,6 @@ const routes = [
         path: ':id',
         name: 'exercise-detail',
         component: () => import('pages/exercises/detailPage.vue')
-      }
-    ]
-  },
-
-  // Dashboard
-  {
-    path: '/dashboard',
-    component: () => import('layouts/baseLayout.vue'),
-    children: [
-      {
-        path: '',
-        name: 'dashboard',
-        component: () => import('pages/dashboard/indexPage.vue')
       }
     ]
   },

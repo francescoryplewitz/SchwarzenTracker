@@ -1,19 +1,55 @@
 <template>
   <div class="dashboard-page dark-page" data-test="dashboard-page">
     <div class="content-container">
-      <header class="page-header">
-        <div class="header-icon accent-box">
-          <q-icon name="mdi-view-dashboard-outline" size="32px" />
+      <header class="welcome-section">
+        <div class="logo-wrapper">
+          <div class="logo-glow"></div>
+          <div class="logo-container">
+            <img :src="logoUrl" alt="SchwarzenTracker" class="app-logo" />
+          </div>
         </div>
-        <div class="header-text">
-          <h1 class="page-title" data-test="page-title">Dashboard</h1>
-          <p class="page-subtitle">Deine Trainingsübersicht</p>
-        </div>
+        <h1 class="app-name">SchwarzenTracker</h1>
+        <p class="welcome-text">Dein persönlicher Fitness-Tracker</p>
       </header>
 
-      <div class="placeholder-card glass-card" data-test="placeholder-card">
-        <span class="placeholder-label" data-test="coming-soon-label">Coming Soon</span>
-        <p class="placeholder-text">Das Dashboard wird später implementiert.</p>
+      <div class="quick-actions">
+        <button class="action-card glass-card" data-test="start-workout-btn" @click="$router.push('/workouts')">
+          <div class="action-icon workout-icon">
+            <q-icon name="mdi-play-circle" size="28px" />
+          </div>
+          <div class="action-content">
+            <span class="action-title">Workout starten</span>
+            <span class="action-desc">Beginne dein Training</span>
+          </div>
+          <q-icon name="mdi-chevron-right" size="20px" class="action-arrow" />
+        </button>
+
+        <button class="action-card glass-card" data-test="plans-btn" @click="$router.push('/plans')">
+          <div class="action-icon plans-icon">
+            <q-icon name="mdi-clipboard-text-outline" size="28px" />
+          </div>
+          <div class="action-content">
+            <span class="action-title">Trainingspläne</span>
+            <span class="action-desc">Pläne verwalten</span>
+          </div>
+          <q-icon name="mdi-chevron-right" size="20px" class="action-arrow" />
+        </button>
+
+        <button class="action-card glass-card" data-test="exercises-btn" @click="$router.push('/exercises')">
+          <div class="action-icon exercises-icon">
+            <q-icon name="mdi-dumbbell" size="28px" />
+          </div>
+          <div class="action-content">
+            <span class="action-title">Übungen</span>
+            <span class="action-desc">Übungskatalog durchsuchen</span>
+          </div>
+          <q-icon name="mdi-chevron-right" size="20px" class="action-arrow" />
+        </button>
+      </div>
+
+      <div class="stats-preview glass-card">
+        <span class="stats-label">Coming Soon</span>
+        <p class="stats-text">Hier erscheinen bald deine Trainingsstatistiken</p>
       </div>
     </div>
   </div>
@@ -21,9 +57,14 @@
 
 <script>
 import { defineComponent } from 'vue'
+import logoUrl from '../../static/app-logo.png'
 
 export default defineComponent({
-  name: 'DashboardIndexPage'
+  name: 'DashboardIndexPage',
+
+  setup() {
+    return { logoUrl }
+  }
 })
 </script>
 
@@ -39,81 +80,202 @@ export default defineComponent({
   padding: 24px 16px;
 }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
+.welcome-section {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-top: 16px;
 }
 
-.header-icon {
-  width: 56px;
-  height: 56px;
+.logo-wrapper {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 20px;
+}
+
+.logo-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(0, 255, 194, 0.4) 0%, rgba(0, 255, 194, 0.1) 40%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(30px);
+}
+
+.logo-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  overflow: hidden;
+  z-index: 1;
 }
 
-.header-text {
-  flex: 1;
+.app-logo {
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
 }
 
-.page-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: white;
-  margin: 0 0 4px;
+.app-name {
+  font-size: 36px;
+  font-weight: 800;
   letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #00ffc2 0%, #00e6af 50%, #00ffc2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 8px;
+  text-shadow: 0 0 40px rgba(0, 255, 194, 0.5);
 }
 
-.page-subtitle {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.5);
+.welcome-text {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.6);
   margin: 0;
+  letter-spacing: 0.02em;
 }
-
-.placeholder-card {
-  padding: 32px;
-  text-align: center;
-}
-
-.placeholder-label {
-  display: inline-block;
-  padding: 6px 12px;
-  background: rgba(0, 255, 194, 0.1);
-  border: 1px solid rgba(0, 255, 194, 0.2);
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #00ffc2;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 16px;
-}
-
-.placeholder-text {
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.5);
-  margin: 0;
-}
-
-@media (max-width: 480px) {
+  
+  .quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  
+  .action-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    cursor: pointer;
+    border: none;
+    text-align: left;
+    width: 100%;
+    transition: all 0.2s ease;
+  }
+  
+  .action-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0, 255, 194, 0.25);
+  }
+  
+  .action-card:hover .action-arrow {
+    color: #00ffc2;
+    transform: translateX(4px);
+  }
+  
+  .action-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .workout-icon {
+    background: rgba(0, 255, 194, 0.12);
+    color: #00ffc2;
+  }
+  
+  .plans-icon {
+    background: rgba(33, 150, 243, 0.12);
+    color: #2196f3;
+  }
+  
+  .exercises-icon {
+    background: rgba(255, 193, 7, 0.12);
+    color: #ffc107;
+  }
+  
+  .action-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .action-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+  }
+  
+  .action-desc {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+  }
+  
+  .action-arrow {
+    color: rgba(255, 255, 255, 0.25);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  
+  .stats-preview {
+    padding: 24px;
+    text-align: center;
+  }
+  
+  .stats-label {
+    display: inline-block;
+    padding: 6px 12px;
+    background: rgba(0, 255, 194, 0.1);
+    border: 1px solid rgba(0, 255, 194, 0.2);
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #00ffc2;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+  
+  .stats-text {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.4);
+    margin: 0;
+  }
+  
+  @media (max-width: 480px) {
   .content-container {
     padding: 16px 12px;
   }
 
-  .page-header {
-    gap: 12px;
+  .logo-wrapper {
+    width: 180px;
+    height: 180px;
   }
 
-  .header-icon {
-    width: 48px;
-    height: 48px;
+  .logo-glow {
+    width: 140px;
+    height: 140px;
   }
 
-  .page-title {
-    font-size: 20px;
+  .logo-container {
+    width: 180px;
+    height: 180px;
+  }
+
+  .app-logo {
+    width: 180px;
+    height: 180px;
+  }
+
+  .app-name {
+    font-size: 28px;
+  }
+
+  .action-icon {
+    width: 46px;
+    height: 46px;
   }
 }
 </style>
