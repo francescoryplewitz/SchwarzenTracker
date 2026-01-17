@@ -1,70 +1,59 @@
 # ───────────────────────────────────────────────────────────────────────────────
-# 1) Builder-Stage: installiert alles (inkl. Dev-Dependencies) und baut dein Frontend
+# 1) Builder: install deps, build frontend, generate prisma client, prune dev deps
 # ───────────────────────────────────────────────────────────────────────────────
-FROM node:20-slim AS builder
-
-# Für den Build brauchen wir Dev-Deps, also setzen wir hier explizit "development"
-ENV NODE_ENV=development
+FROM node:20-bookworm-slim AS builder
 
 WORKDIR /base
 
-# Nur package-Files kopieren, damit Docker-Cache greift, wenn sich Quellcode ändert
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  python3 \
+  make \
+  g++ \
+  pkg-config \
+  libcairo2-dev \
+  libpango1.0-dev \
+  libjpeg-dev \
+  libgif-dev \
+  librsvg2-dev \
+  libvips-dev \
+  && rm -rf /var/lib/apt/lists/*
+
 COPY package.json package-lock.json ./
 COPY frontend/package.json frontend/package-lock.json ./frontend/
 
-# Installiere root + frontend (inkl. Dev-Deps) und baue dann
 RUN npm ci \
-    && cd frontend \
-    && npm ci
+  && cd frontend \
+  && npm ci
 
-# Quellcode kopieren und das Frontend bauen
 COPY . .
 RUN npm run app:build
+RUN npx prisma generate
+RUN npm prune --omit=dev
 
 # ───────────────────────────────────────────────────────────────────────────────
-# 2) Runtime-Stage: genau dein Original-Image, aber ohne den Build-Step
+# 2) Runtime: minimal deps + built assets only
 # ───────────────────────────────────────────────────────────────────────────────
-FROM node:20-slim
+FROM node:20-bookworm-slim AS runtime
 
-# Hier kannst du per --build-arg NODE_ENV=production reinreichen
-ARG NODE_ENV
-ENV NODE_ENV=${NODE_ENV}
+ENV NODE_ENV=production
 
 WORKDIR /base
 
-# Gesamtes Projekt rein (ohne dist aus dem Host, das kommt gleich aus dem Builder)
-COPY . .
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  libcairo2 \
+  libpango-1.0-0 \
+  libjpeg62-turbo \
+  libgif7 \
+  librsvg2-2 \
+  libvips \
+  && rm -rf /var/lib/apt/lists/*
 
-# Deine Original-System-Dependencies
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    fonts-liberation \
-    libappindicator3-1 \
-    libasound2 \
-    libatk1.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    xdg-utils \
-    wget \
-    --no-install-recommends \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Installiere nur die Produktions-Dependencies (so wie zuvor)
-RUN npm run install:all
-
-# Jetzt das fertige Build-Output aus dem Builder ins finale Image kopieren
+COPY --from=builder /base/node_modules ./node_modules
+COPY --from=builder /base/package.json ./package.json
+COPY --from=builder /base/srv ./srv
+COPY --from=builder /base/scripts ./scripts
+COPY --from=builder /base/.secrets.json ./.secrets.json
 COPY --from=builder /base/frontend/dist ./frontend/dist
 
-# Expose und Start-Command wie gehabt
-EXPOSE 80:80
+EXPOSE 5001
 CMD ["npm", "run", "start:container"]
