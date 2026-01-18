@@ -14,7 +14,7 @@ const registerAuthentication = async function (app) {
   app.use(passport.session())
 
   if (['production'].includes(process.env.NODE_ENV)) {
-   // registerOAuth(app)
+    // registerOAuth(app)
     registerDevAuth(app)
   }
 

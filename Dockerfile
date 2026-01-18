@@ -54,6 +54,7 @@ COPY --from=builder /base/srv ./srv
 COPY --from=builder /base/scripts ./scripts
 COPY --from=builder /base/.secrets.json ./.secrets.json
 COPY --from=builder /base/frontend/dist ./frontend/dist
+COPY schwarzentracker.env ./.env
 
 EXPOSE 5001
 CMD ["npm", "run", "start:container"]

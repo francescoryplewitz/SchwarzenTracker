@@ -2,8 +2,8 @@ class FileService {
   constructor () {
     // Choose implementation based on environment
     if (process.env.NODE_ENV === 'production') {
-      const s3 = require('./s3')
-      this.handler = s3
+      const local = require('./local')
+      this.handler = local
     } else {
       const local = require('./local')
       this.handler = local
