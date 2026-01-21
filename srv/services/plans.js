@@ -6,17 +6,11 @@ const calculatePlanDuration = (exercises) => {
 
   let totalDuration = 0
 
-  exercises.forEach((exercise, index) => {
+  exercises.forEach((exercise) => {
     // Pausen zwischen Sätzen (n-1 Pausen für n Sätze)
     if (exercise.sets > 1) {
       const restSeconds = exercise.restSeconds || 90
       totalDuration += (exercise.sets - 1) * restSeconds
-    }
-
-    // Pause nach der Übung (außer bei der letzten)
-    if (index < exercises.length - 1) {
-      const restAfterSeconds = exercise.restAfterSeconds || 90
-      totalDuration += restAfterSeconds
     }
   })
 
@@ -69,8 +63,7 @@ const buildPlanQuery = (req) => {
         select: {
           id: true,
           sets: true,
-          restSeconds: true,
-          restAfterSeconds: true
+          restSeconds: true
         },
         orderBy: { sortOrder: 'asc' }
       },
@@ -263,7 +256,6 @@ const copyPlan = async (req, res) => {
             maxReps: e.maxReps,
             targetWeight: e.targetWeight,
             restSeconds: e.restSeconds,
-            restAfterSeconds: e.restAfterSeconds,
             notes: e.notes
           }))
         }
@@ -287,7 +279,7 @@ const copyPlan = async (req, res) => {
 const addExercise = async (req, res) => {
   const { id } = req.params
   const userId = req.session.user.id
-  const { exerciseId, sets, minReps, maxReps, targetWeight, restSeconds, restAfterSeconds, notes } = req.body
+  const { exerciseId, sets, minReps, maxReps, targetWeight, restSeconds, notes } = req.body
 
   try {
     const plan = await prisma.trainingPlan.findUnique({ where: { id } })
@@ -322,7 +314,6 @@ const addExercise = async (req, res) => {
         maxReps: maxReps || 12,
         targetWeight,
         restSeconds,
-        restAfterSeconds,
         notes
       },
       include: { exercise: true }
@@ -339,7 +330,7 @@ const addExercise = async (req, res) => {
 const updatePlanExercise = async (req, res) => {
   const { id, exerciseId } = req.params
   const userId = req.session.user.id
-  const { sets, minReps, maxReps, targetWeight, restSeconds, restAfterSeconds, notes } = req.body
+  const { sets, minReps, maxReps, targetWeight, restSeconds, notes } = req.body
 
   try {
     const plan = await prisma.trainingPlan.findUnique({ where: { id } })
@@ -370,7 +361,7 @@ const updatePlanExercise = async (req, res) => {
 
     const updated = await prisma.planExercise.update({
       where: { id: planExercise.id },
-      data: { sets, minReps, maxReps, targetWeight, restSeconds, restAfterSeconds, notes },
+      data: { sets, minReps, maxReps, targetWeight, restSeconds, notes },
       include: { exercise: true }
     })
 

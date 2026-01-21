@@ -95,16 +95,6 @@
                 @contextmenu.prevent
               />
 
-              <div v-if="index < plan.exercises.length - 1 && !isDragMode" class="rest-between-exercises">
-                <div class="rest-line" />
-                <button class="rest-badge" :class="{ editable: canEdit }"
-                  @click="canEdit && editRestAfter(planExercise)">
-                  <q-icon name="mdi-timer-sand" size="14px" />
-                  <span>{{ formatRestTime(planExercise.restAfterSeconds || 90) }}</span>
-                  <q-icon v-if="canEdit" name="mdi-pencil" size="12px" class="edit-icon" />
-                </button>
-                <div class="rest-line" />
-              </div>
             </template>
             <div
               v-if="isDragMode && dropTargetIndex === plan.exercises.length"
@@ -221,17 +211,11 @@ export default defineComponent({
 
       let totalDuration = 0
 
-      plan.value.exercises.forEach((exercise, index) => {
+      plan.value.exercises.forEach((exercise) => {
         // Pausen zwischen Sätzen (n-1 Pausen für n Sätze)
         if (exercise.sets > 1) {
           const restSeconds = exercise.restSeconds || 90
           totalDuration += (exercise.sets - 1) * restSeconds
-        }
-
-        // Pause nach der Übung (außer bei der letzten)
-        if (index < plan.value.exercises.length - 1) {
-          const restAfterSeconds = exercise.restAfterSeconds || 90
-          totalDuration += restAfterSeconds
         }
       })
 
@@ -310,29 +294,6 @@ export default defineComponent({
       return `${seconds} Sek`
     }
 
-    const editRestAfter = async (planExercise) => {
-      try {
-        const value = await confirmDialogRef.value.open({
-          title: 'Pause zur nächsten Übung',
-          message: 'Wie lange soll die Pause nach dieser Übung sein?',
-          type: 'prompt',
-          promptConfig: {
-            model: String(planExercise.restAfterSeconds || 90),
-            type: 'number',
-            suffix: 'Sekunden'
-          }
-        })
-        const restAfterSeconds = parseInt(value) || 90
-        const { data } = await api.patch(
-          `/api/plans/${plan.value.id}/exercises/${planExercise.exerciseId}`,
-          { restAfterSeconds }
-        )
-        Object.assign(planExercise, data)
-      } catch {
-        // User cancelled
-      }
-    }
-
     const getItemRects = () => {
       if (!exerciseListRef.value) return []
       const items = exerciseListRef.value.querySelectorAll('[data-test="exercise-item"]')
@@ -377,7 +338,6 @@ export default defineComponent({
       onExerciseAdded,
       removeExercise,
       formatRestTime,
-      editRestAfter,
       handleDragStart,
       onTouchEnd
     }
@@ -587,52 +547,6 @@ export default defineComponent({
 
 .exercises-list--drag-mode {
   gap: 6px;
-}
-
-.rest-between-exercises {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 4px 0;
-}
-
-.rest-line {
-  flex: 1;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.rest-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px dashed rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.4);
-  transition: all 0.2s ease;
-}
-
-.rest-badge.editable {
-  cursor: pointer;
-}
-
-.rest-badge.editable:hover {
-  border-color: rgba(0, 255, 194, 0.3);
-  color: rgba(255, 255, 255, 0.6);
-  background: rgba(0, 255, 194, 0.05);
-}
-
-.rest-badge .edit-icon {
-  opacity: 0;
-  margin-left: 2px;
-  transition: opacity 0.2s ease;
-}
-
-.rest-badge.editable:hover .edit-icon {
-  opacity: 1;
 }
 
 .add-exercise-btn {

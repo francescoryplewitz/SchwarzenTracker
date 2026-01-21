@@ -176,7 +176,6 @@ model PlanExercise {
   maxReps      Int      @default(12)
   targetWeight Float?
   restSeconds  Int?
-  restAfterSeconds Int?   // Pause nach dieser Übung, vor der nächsten
   notes        String?  @db.Text
 
   workoutSets  WorkoutSet[]

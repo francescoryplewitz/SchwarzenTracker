@@ -27,17 +27,11 @@ describe('Plans Service Helper Functions', () => {
 
       let totalDuration = 0
 
-      exercises.forEach((exercise, index) => {
+      exercises.forEach((exercise) => {
         // Pausen zwischen Sätzen (n-1 Pausen für n Sätze)
         if (exercise.sets > 1) {
           const restSeconds = exercise.restSeconds || 90
           totalDuration += (exercise.sets - 1) * restSeconds
-        }
-
-        // Pause nach der Übung (außer bei der letzten)
-        if (index < exercises.length - 1) {
-          const restAfterSeconds = exercise.restAfterSeconds || 90
-          totalDuration += restAfterSeconds
         }
       })
 
@@ -68,7 +62,6 @@ describe('Plans Service Helper Functions', () => {
     it('should calculate duration for single exercise with sets', () => {
       const exercises = [{ sets: 3, restSeconds: 60 }]
       // 3 sets = 2 pauses between sets = 2 * 60 = 120
-      // No restAfterSeconds since it's the last exercise
       const result = calculatePlanDuration(exercises)
       expect(result).to.equal(120)
     })
@@ -82,52 +75,52 @@ describe('Plans Service Helper Functions', () => {
 
     it('should calculate duration for two exercises', () => {
       const exercises = [
-        { sets: 3, restSeconds: 60, restAfterSeconds: 90 },
+        { sets: 3, restSeconds: 60 },
         { sets: 2, restSeconds: 45 }
       ]
-      // Exercise 1: 2 pauses * 60 = 120, restAfter = 90, total = 210
-      // Exercise 2: 1 pause * 45 = 45, no restAfter (last), total = 45
-      // Total = 210 + 45 = 255
+      // Exercise 1: 2 pauses * 60 = 120
+      // Exercise 2: 1 pause * 45 = 45
+      // Total = 120 + 45 = 165
       const result = calculatePlanDuration(exercises)
-      expect(result).to.equal(255)
+      expect(result).to.equal(165)
     })
 
-    it('should use default restAfterSeconds (90) when not provided', () => {
+    it('should handle exercises with only set pauses', () => {
       const exercises = [
         { sets: 2, restSeconds: 60 },
         { sets: 1 }
       ]
-      // Exercise 1: 1 pause * 60 = 60, restAfter = 90 (default), total = 150
-      // Exercise 2: 0 pauses, no restAfter, total = 0
-      // Total = 150
+      // Exercise 1: 1 pause * 60 = 60
+      // Exercise 2: 0 pauses (sets = 1)
+      // Total = 60
       const result = calculatePlanDuration(exercises)
-      expect(result).to.equal(150)
+      expect(result).to.equal(60)
     })
 
     it('should calculate duration for multiple exercises with different rest times', () => {
       const exercises = [
-        { sets: 4, restSeconds: 120, restAfterSeconds: 180 },
-        { sets: 3, restSeconds: 90, restAfterSeconds: 60 },
+        { sets: 4, restSeconds: 120 },
+        { sets: 3, restSeconds: 90 },
         { sets: 2, restSeconds: 60 }
       ]
-      // Exercise 1: 3 pauses * 120 = 360, restAfter = 180, total = 540
-      // Exercise 2: 2 pauses * 90 = 180, restAfter = 60, total = 240
-      // Exercise 3: 1 pause * 60 = 60, no restAfter, total = 60
-      // Total = 540 + 240 + 60 = 840
+      // Exercise 1: 3 pauses * 120 = 360
+      // Exercise 2: 2 pauses * 90 = 180
+      // Exercise 3: 1 pause * 60 = 60
+      // Total = 360 + 180 + 60 = 600
       const result = calculatePlanDuration(exercises)
-      expect(result).to.equal(840)
+      expect(result).to.equal(600)
     })
 
     it('should handle exercises with sets = 1 correctly', () => {
       const exercises = [
-        { sets: 1, restAfterSeconds: 90 },
+        { sets: 1 },
         { sets: 1 }
       ]
-      // Exercise 1: 0 pauses (sets = 1), restAfter = 90, total = 90
-      // Exercise 2: 0 pauses, no restAfter, total = 0
-      // Total = 90
+      // Exercise 1: 0 pauses (sets = 1)
+      // Exercise 2: 0 pauses (sets = 1)
+      // Total = 0
       const result = calculatePlanDuration(exercises)
-      expect(result).to.equal(90)
+      expect(result).to.equal(0)
     })
   })
 })

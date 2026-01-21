@@ -119,8 +119,7 @@ export default defineComponent({
       minReps: 8,
       maxReps: 12,
       targetWeight: null,
-      restSeconds: null,
-      restAfterSeconds: null
+      restSeconds: null
     })
 
     const resetConfig = () => {
@@ -129,7 +128,6 @@ export default defineComponent({
       config.maxReps = 12
       config.targetWeight = null
       config.restSeconds = null
-      config.restAfterSeconds = null
     }
 
     const loadExercises = async () => {
@@ -160,10 +158,8 @@ export default defineComponent({
     const selectExercise = (exercise) => {
       if (selectedExercise.value?.id === exercise.id) {
         selectedExercise.value = null
-        config.restAfterSeconds = null
       } else {
         selectedExercise.value = exercise
-        config.restAfterSeconds = exercise.recommendedRestSeconds || 90
       }
     }
 
@@ -174,8 +170,7 @@ export default defineComponent({
         minReps: config.minReps,
         maxReps: config.maxReps,
         targetWeight: config.targetWeight || null,
-        restSeconds: config.restSeconds || null,
-        restAfterSeconds: config.restAfterSeconds || null
+        restSeconds: config.restSeconds || null
       })
       emit('added', data)
       close()

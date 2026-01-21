@@ -50,8 +50,7 @@ describe('Plan endpoints', () => {
         sets: 3,
         minReps: 8,
         maxReps: 12,
-        restSeconds: 60,
-        restAfterSeconds: 90
+        restSeconds: 60
       })
 
       // Fetch the plan
@@ -61,8 +60,6 @@ describe('Plan endpoints', () => {
       
       // Calculate expected duration:
       // 3 sets = 2 pauses between sets = 2 * 60 = 120
-      // No restAfterSeconds since it's the only exercise
-      // Total = 120
       const expectedDuration = 120
       expect(getPlanResult.data.exercises[0].sets).to.equal(3)
       expect(getPlanResult.data.exercises[0].restSeconds).to.equal(60)
@@ -82,14 +79,10 @@ describe('Plan endpoints', () => {
         expect(directPlanResult.status).to.equal(200)
         const exercises = directPlanResult.data.exercises
         let calculatedDuration = 0
-        exercises.forEach((exercise, index) => {
+        exercises.forEach((exercise) => {
           if (exercise.sets > 1) {
             const restSeconds = exercise.restSeconds || 90
             calculatedDuration += (exercise.sets - 1) * restSeconds
-          }
-          if (index < exercises.length - 1) {
-            const restAfterSeconds = exercise.restAfterSeconds || 90
-            calculatedDuration += restAfterSeconds
           }
         })
         expect(calculatedDuration).to.equal(expectedDuration)
@@ -117,14 +110,13 @@ describe('Plan endpoints', () => {
       expect(planResult.status).to.equal(201)
       const planId = planResult.data.id
 
-      // Add first exercise: 4 sets, 120s rest, 180s after
+      // Add first exercise: 4 sets, 120s rest
       await POST(`/plans/${planId}/exercises`, {
         exerciseId: createdExerciseId,
         sets: 4,
         minReps: 6,
         maxReps: 8,
-        restSeconds: 120,
-        restAfterSeconds: 180
+        restSeconds: 120
       })
 
       // Add second exercise: 2 sets, 60s rest
@@ -153,28 +145,24 @@ describe('Plan endpoints', () => {
         // Calculate expected duration from the plan's exercises
         const exercises = directPlanResult.data.exercises
         let expectedDuration = 0
-        exercises.forEach((exercise, index) => {
+        exercises.forEach((exercise) => {
           if (exercise.sets > 1) {
             const restSeconds = exercise.restSeconds || 90
             expectedDuration += (exercise.sets - 1) * restSeconds
           }
-          if (index < exercises.length - 1) {
-            const restAfterSeconds = exercise.restAfterSeconds || 90
-            expectedDuration += restAfterSeconds
-          }
         })
-        
+
         // Verify the calculation matches our expected value
-        // Exercise 1: 3 pauses * 120 = 360, restAfter = 180, total = 540
-        // Exercise 2: 1 pause * 60 = 60, no restAfter (last), total = 60
-        // Total = 540 + 60 = 600
-        expect(expectedDuration).to.equal(600)
+        // Exercise 1: 3 pauses * 120 = 360
+        // Exercise 2: 1 pause * 60 = 60
+        // Total = 360 + 60 = 420
+        expect(expectedDuration).to.equal(420)
       } else {
         // Calculate expected duration:
-        // Exercise 1: 3 pauses * 120 = 360, restAfter = 180, total = 540
-        // Exercise 2: 1 pause * 60 = 60, no restAfter (last), total = 60
-        // Total = 540 + 60 = 600
-        const expectedDuration = 600
+        // Exercise 1: 3 pauses * 120 = 360
+        // Exercise 2: 1 pause * 60 = 60
+        // Total = 360 + 60 = 420
+        const expectedDuration = 420
         expect(testPlan.estimatedDuration).to.equal(expectedDuration)
       }
     })
@@ -188,7 +176,7 @@ describe('Plan endpoints', () => {
       expect(planResult.status).to.equal(201)
       const planId = planResult.data.id
 
-      // Add exercise without restSeconds and restAfterSeconds
+      // Add exercise without restSeconds
       await POST(`/plans/${planId}/exercises`, {
         exerciseId: createdExerciseId,
         sets: 2,
@@ -199,31 +187,26 @@ describe('Plan endpoints', () => {
       // Fetch plans list and check estimatedDuration
       const plansResult = await GET('/plans')
       let testPlan = plansResult.data.find(p => p.id === planId)
-      
+
       // If not found by ID, try by name
       if (!testPlan) {
         testPlan = plansResult.data.find(p => p.name === 'Test Plan Default Rest')
       }
-      
+
       // Calculate expected duration with defaults:
       // 2 sets = 1 pause, default restSeconds = 90, total = 90
-      // No restAfterSeconds since it's the only exercise
       const expectedDuration = 90
-      
+
       // If still not found, fetch directly and verify calculation
       if (!testPlan) {
         const directPlanResult = await GET(`/plans/${planId}`)
         expect(directPlanResult.status).to.equal(200)
         const exercises = directPlanResult.data.exercises
         let calculatedDuration = 0
-        exercises.forEach((exercise, index) => {
+        exercises.forEach((exercise) => {
           if (exercise.sets > 1) {
             const restSeconds = exercise.restSeconds || 90
             calculatedDuration += (exercise.sets - 1) * restSeconds
-          }
-          if (index < exercises.length - 1) {
-            const restAfterSeconds = exercise.restAfterSeconds || 90
-            calculatedDuration += restAfterSeconds
           }
         })
         expect(calculatedDuration).to.equal(expectedDuration)
@@ -266,10 +249,10 @@ describe('Plan endpoints', () => {
       }
     })
 
-    it('should include sets, restSeconds, and restAfterSeconds in exercises query', async () => {
+    it('should include sets and restSeconds in exercises query', async () => {
       const result = await GET('/plans')
       expect(result.status).to.equal(200)
-      
+
       // Find a plan with exercises
       const planWithExercises = result.data.find(p => p.exerciseCount > 0)
       if (planWithExercises) {
@@ -281,7 +264,6 @@ describe('Plan endpoints', () => {
           // Verify that exercises have the required fields for duration calculation
           expect(exercise).to.have.property('sets')
           expect(exercise).to.have.property('restSeconds')
-          expect(exercise).to.have.property('restAfterSeconds')
         }
       }
     })
@@ -588,7 +570,6 @@ describe('Plan endpoints', () => {
         minReps: 6,
         maxReps: 8,
         restSeconds: 90,
-        restAfterSeconds: 120,
         notes: 'Test notes'
       })
       expect(result.status).to.equal(201)
@@ -597,7 +578,6 @@ describe('Plan endpoints', () => {
       expect(result.data.minReps).to.equal(6)
       expect(result.data.maxReps).to.equal(8)
       expect(result.data.restSeconds).to.equal(90)
-      expect(result.data.restAfterSeconds).to.equal(120)
       expect(result.data.notes).to.equal('Test notes')
     })
 
@@ -681,7 +661,6 @@ describe('Plan endpoints', () => {
         minReps: 10,
         maxReps: 15,
         restSeconds: 120,
-        restAfterSeconds: 180,
         notes: 'Updated notes'
       })
       expect(result.status).to.equal(200)
@@ -689,7 +668,6 @@ describe('Plan endpoints', () => {
       expect(result.data.minReps).to.equal(10)
       expect(result.data.maxReps).to.equal(15)
       expect(result.data.restSeconds).to.equal(120)
-      expect(result.data.restAfterSeconds).to.equal(180)
       expect(result.data.notes).to.equal('Updated notes')
     })
 

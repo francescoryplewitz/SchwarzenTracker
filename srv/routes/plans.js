@@ -36,7 +36,6 @@ module.exports = (app) => {
     maxReps: { type: 'NUMBER' },
     targetWeight: { type: 'NUMBER' },
     restSeconds: { type: 'NUMBER' },
-    restAfterSeconds: { type: 'NUMBER' },
     notes: { type: 'STRING' }
   }), service.addExercise)
 
@@ -51,7 +50,6 @@ module.exports = (app) => {
     maxReps: { type: 'NUMBER' },
     targetWeight: { type: 'NUMBER' },
     restSeconds: { type: 'NUMBER' },
-    restAfterSeconds: { type: 'NUMBER' },
     notes: { type: 'STRING' }
   }), service.updatePlanExercise)
 
