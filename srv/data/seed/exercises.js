@@ -1,150 +1,130 @@
 const prisma = require('../prisma')
 
 const systemExercises = [
-  // CHEST
   {
-    name: 'Bankdrücken',
-    description: '1. Lege dich flach auf die Bank\n2. Greife die Stange etwas breiter als schulterbreit\n3. Senke die Stange kontrolliert zur Brust\n4. Drücke explosiv nach oben',
-    muscleGroups: ['CHEST', 'TRICEPS', 'SHOULDERS'],
+    name: 'Schrägbankdrücken (Langhantel)',
+    description: '1. Lege die Hantel auf Schulterhöhe ab\n2. Senke die Stange kontrolliert zur oberen Brust\n3. Drücke die Stange explosiv nach oben\n4. Halte die Schulterblätter stabil',
+    muscleGroups: ['CHEST', 'SHOULDERS', 'TRICEPS'],
     category: 'COMPOUND',
     equipment: 'BARBELL',
-    recommendedRestSeconds: 120,
+    recommendedRestSeconds: 180,
     isSystem: true
   },
   {
-    name: 'Kurzhantel-Flys',
-    description: '1. Lege dich flach auf die Bank mit Kurzhanteln\n2. Strecke die Arme nach oben\n3. Senke die Arme seitlich ab (leicht gebeugt)\n4. Führe die Arme wieder zusammen',
+    name: 'Butterfly (Maschine)',
+    description: '1. Stelle die Sitzhöhe auf Brusthöhe ein\n2. Führe die Arme kontrolliert zusammen\n3. Halte kurz in der Endposition\n4. Führe langsam zurück',
     muscleGroups: ['CHEST'],
     category: 'ISOLATION',
-    equipment: 'DUMBBELL',
-    recommendedRestSeconds: 60,
-    isSystem: true
-  },
-  {
-    name: 'Liegestütze',
-    description: '1. Stütze dich auf Händen und Zehenspitzen ab\n2. Halte den Körper gerade\n3. Senke den Körper kontrolliert ab\n4. Drücke dich wieder hoch',
-    muscleGroups: ['CHEST', 'TRICEPS', 'SHOULDERS'],
-    category: 'COMPOUND',
-    equipment: 'BODYWEIGHT',
-    recommendedRestSeconds: 90,
-    isSystem: true
-  },
-
-  // BACK
-  {
-    name: 'Kreuzheben',
-    description: '1. Stehe schulterbreit vor der Stange\n2. Greife die Stange mit gestreckten Armen\n3. Hebe die Stange durch Strecken der Hüfte\n4. Halte den Rücken gerade',
-    muscleGroups: ['BACK', 'HAMSTRINGS', 'GLUTES'],
-    category: 'COMPOUND',
-    equipment: 'BARBELL',
-    recommendedRestSeconds: 150,
-    isSystem: true
-  },
-  {
-    name: 'Klimmzüge',
-    description: '1. Greife die Stange etwas breiter als schulterbreit\n2. Hänge mit gestreckten Armen\n3. Ziehe dich hoch bis das Kinn über der Stange ist\n4. Senke dich kontrolliert ab',
-    muscleGroups: ['BACK', 'BICEPS'],
-    category: 'COMPOUND',
-    equipment: 'BODYWEIGHT',
-    recommendedRestSeconds: 120,
-    isSystem: true
-  },
-  {
-    name: 'Rudern am Kabelzug',
-    description: '1. Setze dich an die Maschine\n2. Greife den Griff\n3. Ziehe den Griff zum Bauch\n4. Drücke die Schulterblätter zusammen',
-    muscleGroups: ['BACK', 'BICEPS'],
-    category: 'COMPOUND',
-    equipment: 'CABLE',
-    recommendedRestSeconds: 90,
-    isSystem: true
-  },
-
-  // SHOULDERS
-  {
-    name: 'Schulterdrücken',
-    description: '1. Halte die Kurzhanteln auf Schulterhöhe\n2. Drücke die Gewichte nach oben\n3. Strecke die Arme vollständig\n4. Senke kontrolliert ab',
-    muscleGroups: ['SHOULDERS', 'TRICEPS'],
-    category: 'COMPOUND',
-    equipment: 'DUMBBELL',
-    recommendedRestSeconds: 120,
-    isSystem: true
-  },
-  {
-    name: 'Seitheben',
-    description: '1. Halte die Kurzhanteln seitlich am Körper\n2. Hebe die Arme seitlich bis auf Schulterhöhe\n3. Halte kurz\n4. Senke kontrolliert ab',
-    muscleGroups: ['SHOULDERS'],
-    category: 'ISOLATION',
-    equipment: 'DUMBBELL',
-    recommendedRestSeconds: 60,
-    isSystem: true
-  },
-
-  // ARMS
-  {
-    name: 'Bizeps-Curls',
-    description: '1. Halte die Kurzhanteln mit gestreckten Armen\n2. Beuge die Arme und hebe die Gewichte\n3. Halte die Ellbogen am Körper\n4. Senke kontrolliert ab',
-    muscleGroups: ['BICEPS'],
-    category: 'ISOLATION',
-    equipment: 'DUMBBELL',
-    recommendedRestSeconds: 60,
-    isSystem: true
-  },
-  {
-    name: 'Trizeps-Dips',
-    description: '1. Stütze dich auf zwei Bänken oder Griffen ab\n2. Halte den Körper aufrecht\n3. Beuge die Arme und senke den Körper\n4. Drücke dich wieder hoch',
-    muscleGroups: ['TRICEPS', 'CHEST'],
-    category: 'COMPOUND',
-    equipment: 'BODYWEIGHT',
-    recommendedRestSeconds: 90,
-    isSystem: true
-  },
-
-  // LEGS
-  {
-    name: 'Kniebeugen',
-    description: '1. Stelle dich schulterbreit hin\n2. Lege die Stange auf den oberen Rücken\n3. Beuge die Knie bis die Oberschenkel parallel sind\n4. Drücke dich durch die Fersen hoch',
-    muscleGroups: ['QUADS', 'HAMSTRINGS', 'GLUTES'],
-    category: 'COMPOUND',
-    equipment: 'BARBELL',
-    recommendedRestSeconds: 150,
-    isSystem: true
-  },
-  {
-    name: 'Ausfallschritte',
-    description: '1. Stehe aufrecht mit Kurzhanteln\n2. Mache einen großen Schritt nach vorne\n3. Senke das hintere Knie Richtung Boden\n4. Drücke dich zurück in die Ausgangsposition',
-    muscleGroups: ['QUADS', 'GLUTES', 'HAMSTRINGS'],
-    category: 'COMPOUND',
-    equipment: 'DUMBBELL',
-    recommendedRestSeconds: 90,
-    isSystem: true
-  },
-  {
-    name: 'Beinpresse',
-    description: '1. Setze dich in die Maschine\n2. Platziere die Füße schulterbreit\n3. Drücke das Gewicht nach oben\n4. Senke kontrolliert ab ohne die Knie zu überstrecken',
-    muscleGroups: ['QUADS', 'GLUTES'],
-    category: 'COMPOUND',
     equipment: 'MACHINE',
     recommendedRestSeconds: 120,
     isSystem: true
   },
   {
-    name: 'Wadenheben',
-    description: '1. Stehe auf einer Erhöhung mit den Fersen frei\n2. Senke die Fersen nach unten\n3. Drücke dich auf die Zehenspitzen\n4. Halte kurz und senke ab',
-    muscleGroups: ['CALVES'],
-    category: 'ISOLATION',
-    equipment: 'BODYWEIGHT',
-    recommendedRestSeconds: 45,
+    name: 'Hackenschmidt-Kniebeuge',
+    description: '1. Stelle die Füße schulterbreit auf die Plattform\n2. Senke kontrolliert bis die Oberschenkel parallel sind\n3. Drücke dich über die Fersen nach oben\n4. Halte den Rücken stabil',
+    muscleGroups: ['QUADS', 'GLUTES', 'HAMSTRINGS'],
+    category: 'COMPOUND',
+    equipment: 'MACHINE',
+    recommendedRestSeconds: 180,
     isSystem: true
   },
-
-  // CORE
   {
-    name: 'Plank',
-    description: '1. Stütze dich auf Unterarmen und Zehenspitzen ab\n2. Halte den Körper gerade wie ein Brett\n3. Spanne Bauch und Gesäß an\n4. Halte die Position',
-    muscleGroups: ['ABS', 'OBLIQUES'],
+    name: 'Beinstrecker (Maschine)',
+    description: '1. Stelle das Polster knapp über dem Fußgelenk ein\n2. Strecke die Knie kontrolliert nach oben\n3. Halte kurz in der Endposition\n4. Senke langsam ab',
+    muscleGroups: ['QUADS'],
     category: 'ISOLATION',
-    equipment: 'BODYWEIGHT',
-    recommendedRestSeconds: 60,
+    equipment: 'MACHINE',
+    recommendedRestSeconds: 120,
+    isSystem: true
+  },
+  {
+    name: 'Trizepsdrücken am Seil',
+    description: '1. Stelle dich stabil an den Kabelzug\n2. Drücke das Seil nach unten bis die Arme gestreckt sind\n3. Halte die Ellbogen eng am Körper\n4. Führe langsam zurück',
+    muscleGroups: ['TRICEPS'],
+    category: 'ISOLATION',
+    equipment: 'CABLE',
+    recommendedRestSeconds: 120,
+    isSystem: true
+  },
+  {
+    name: 'Seitheben (Maschine)',
+    description: '1. Stelle den Sitz so ein, dass die Arme auf Schulterhöhe starten\n2. Hebe die Arme kontrolliert seitlich an\n3. Halte kurz oben\n4. Senke langsam ab',
+    muscleGroups: ['SHOULDERS'],
+    category: 'ISOLATION',
+    equipment: 'MACHINE',
+    recommendedRestSeconds: 120,
+    isSystem: true
+  },
+  {
+    name: 'Latzug breit',
+    description: '1. Greife die Stange breit\n2. Ziehe die Stange kontrolliert zur oberen Brust\n3. Halte kurz unten\n4. Lasse langsam nach oben',
+    muscleGroups: ['BACK', 'BICEPS'],
+    category: 'COMPOUND',
+    equipment: 'CABLE',
+    recommendedRestSeconds: 180,
+    isSystem: true
+  },
+  {
+    name: 'Rudern eng (Kabel)',
+    description: '1. Setze dich stabil an den Kabelzug\n2. Ziehe den Griff eng zum Bauch\n3. Halte kurz bei zusammengezogenen Schulterblättern\n4. Führe kontrolliert zurück',
+    muscleGroups: ['BACK', 'BICEPS'],
+    category: 'COMPOUND',
+    equipment: 'CABLE',
+    recommendedRestSeconds: 120,
+    isSystem: true
+  },
+  {
+    name: 'Rudern breit (Kabel)',
+    description: '1. Greife den breiten Griff am Kabelzug\n2. Ziehe den Griff zur Brust\n3. Halte kurz in der Endposition\n4. Senke langsam ab',
+    muscleGroups: ['BACK', 'BICEPS'],
+    category: 'COMPOUND',
+    equipment: 'CABLE',
+    recommendedRestSeconds: 180,
+    isSystem: true
+  },
+  {
+    name: 'Bizepsmaschine',
+    description: '1. Stelle den Sitz und die Ellenbogenpolster ein\n2. Beuge die Arme kontrolliert nach oben\n3. Halte kurz in der Endposition\n4. Senke langsam ab',
+    muscleGroups: ['BICEPS'],
+    category: 'ISOLATION',
+    equipment: 'MACHINE',
+    recommendedRestSeconds: 180,
+    isSystem: true
+  },
+  {
+    name: 'Crunchmaschine',
+    description: '1. Stelle Sitz und Polster passend ein\n2. Rolle den Oberkörper kontrolliert ein\n3. Halte kurz unten\n4. Lasse langsam zurück',
+    muscleGroups: ['ABS'],
+    category: 'ISOLATION',
+    equipment: 'MACHINE',
+    recommendedRestSeconds: 120,
+    isSystem: true
+  },
+  {
+    name: 'Rumänisches Kreuzheben (Langhantel)',
+    description: '1. Greife die Hantel schulterbreit\n2. Schiebe die Hüfte nach hinten\n3. Senke die Hantel bis knapp unter die Knie\n4. Richte dich kontrolliert auf',
+    muscleGroups: ['HAMSTRINGS', 'GLUTES', 'BACK'],
+    category: 'COMPOUND',
+    equipment: 'BARBELL',
+    recommendedRestSeconds: 180,
+    isSystem: true
+  },
+  {
+    name: 'Beinbeuger (Maschine)',
+    description: '1. Stelle Polster knapp über dem Sprunggelenk ein\n2. Beuge die Knie kontrolliert\n3. Halte kurz in der Endposition\n4. Senke langsam ab',
+    muscleGroups: ['HAMSTRINGS'],
+    category: 'ISOLATION',
+    equipment: 'MACHINE',
+    recommendedRestSeconds: 180,
+    isSystem: true
+  },
+  {
+    name: 'Reverse Butterfly (Maschine)',
+    description: '1. Stelle den Sitz so ein, dass die Arme auf Schulterhöhe starten\n2. Führe die Arme nach hinten\n3. Halte kurz in der Endposition\n4. Führe kontrolliert zurück',
+    muscleGroups: ['SHOULDERS', 'BACK'],
+    category: 'ISOLATION',
+    equipment: 'MACHINE',
+    recommendedRestSeconds: 120,
     isSystem: true
   }
 ]

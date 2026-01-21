@@ -3,7 +3,6 @@ const fs = require('fs')
 const path = require('path')
 const { seedExercises } = require('./seed/exercises')
 const { seedPlans } = require('./seed/plans')
-const { seedWorkouts } = require('./seed/workouts')
 
 // Hilfsfunktionen zum Laden der JSON-Dateien
 const loadDirectory = (dir) => {
@@ -81,7 +80,6 @@ class DataGenerator {
     await upsertData(this.structuredata)
     await seedExercises()
     await seedPlans()
-    await seedWorkouts()
   }
 
   async resetMockdata () {
@@ -92,7 +90,6 @@ class DataGenerator {
     }
     await seedExercises()
     await seedPlans()
-    await seedWorkouts()
   }
 
   async reset () {

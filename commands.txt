@@ -1,0 +1,16 @@
+docker run -d --name schwarzentracker --network cory -p 5001:5001 schwarzentacker:dev
+
+docker rm schwarzentracker           
+
+docker logs schwarzentracker       
+docker build -t schwarzentackerv0.0.2 .     
+
+
+docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}' schwarzentracker-db-1
+docker network connect infra schwarzentracker-db-1
+
+
+docker network create infra
+
+
+ docker compose -f docker-compose.yml up -d db             

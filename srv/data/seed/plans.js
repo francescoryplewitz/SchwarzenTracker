@@ -2,70 +2,127 @@ const prisma = require('../prisma')
 
 const systemPlans = [
   {
-    name: 'Ganzkörper Anfänger',
-    description: 'Perfekt für den Einstieg ins Krafttraining. 3x pro Woche.',
+    name: 'Push',
+    description: 'Push-Plan nach Vorgabe.',
     exercises: [
-      { name: 'Kniebeugen', sets: 3, minReps: 8, maxReps: 12, restSeconds: 90 },
-      { name: 'Bankdrücken', sets: 3, minReps: 8, maxReps: 12, restSeconds: 90 },
-      { name: 'Rudern am Kabelzug', sets: 3, minReps: 8, maxReps: 12, restSeconds: 90 },
-      { name: 'Schulterdrücken', sets: 3, minReps: 8, maxReps: 12, restSeconds: 90 },
-      { name: 'Kreuzheben', sets: 3, minReps: 8, maxReps: 12, restSeconds: 90 },
-      { name: 'Bizeps-Curls', sets: 2, minReps: 10, maxReps: 15, restSeconds: 90 }
+      {
+        name: 'Schrägbankdrücken (Langhantel)',
+        sets: 3,
+        minReps: 12,
+        maxReps: 15,
+        restSeconds: 180,
+        targetWeight: 59
+      },
+      {
+        name: 'Butterfly (Maschine)',
+        sets: 2,
+        minReps: 8,
+        maxReps: 12,
+        restSeconds: 120,
+        targetWeight: 75
+      },
+      {
+        name: 'Hackenschmidt-Kniebeuge',
+        sets: 2,
+        minReps: 6,
+        maxReps: 8,
+        restSeconds: 180,
+        targetWeight: 100
+      },
+      {
+        name: 'Beinstrecker (Maschine)',
+        sets: 2,
+        minReps: 6,
+        maxReps: 8,
+        restSeconds: 120,
+        targetWeight: 100
+      },
+      {
+        name: 'Trizepsdrücken am Seil',
+        sets: 3,
+        minReps: 6,
+        maxReps: 8,
+        restSeconds: 120,
+        targetWeight: 35
+      },
+      {
+        name: 'Seitheben (Maschine)',
+        sets: 2,
+        minReps: 12,
+        maxReps: 15,
+        restSeconds: 120,
+        targetWeight: 25
+      }
     ]
   },
   {
-    name: 'Push Day',
-    description: 'Brust, Schultern, Trizeps. Teil eines PPL-Splits.',
+    name: 'Pull',
+    description: 'Pull-Plan nach Vorgabe.',
     exercises: [
-      { name: 'Bankdrücken', sets: 4, minReps: 6, maxReps: 10, restSeconds: 90 },
-      { name: 'Kurzhantel-Flys', sets: 3, minReps: 8, maxReps: 12, restSeconds: 90 },
-      { name: 'Schulterdrücken', sets: 4, minReps: 8, maxReps: 12, restSeconds: 90 },
-      { name: 'Seitheben', sets: 3, minReps: 12, maxReps: 15, restSeconds: 90 },
-      { name: 'Trizeps-Dips', sets: 3, minReps: 8, maxReps: 12, restSeconds: 90 }
-    ]
-  },
-  {
-    name: 'Pull Day',
-    description: 'Rücken, Bizeps. Teil eines PPL-Splits.',
-    exercises: [
-      { name: 'Klimmzüge', sets: 4, minReps: 6, maxReps: 10, restSeconds: 90 },
-      { name: 'Rudern am Kabelzug', sets: 4, minReps: 8, maxReps: 12, restSeconds: 90 },
-      { name: 'Kreuzheben', sets: 3, minReps: 6, maxReps: 10, restSeconds: 90 },
-      { name: 'Bizeps-Curls', sets: 3, minReps: 10, maxReps: 12, restSeconds: 90 }
-    ]
-  },
-  {
-    name: 'Leg Day',
-    description: 'Beine und Gesäß. Teil eines PPL-Splits.',
-    exercises: [
-      { name: 'Kniebeugen', sets: 4, minReps: 6, maxReps: 10, restSeconds: 90 },
-      { name: 'Kreuzheben', sets: 4, minReps: 8, maxReps: 12, restSeconds: 90 },
-      { name: 'Beinpresse', sets: 3, minReps: 10, maxReps: 12, restSeconds: 90 },
-      { name: 'Ausfallschritte', sets: 3, minReps: 10, maxReps: 12, restSeconds: 90 },
-      { name: 'Wadenheben', sets: 4, minReps: 12, maxReps: 15, restSeconds: 90 }
-    ]
-  },
-  {
-    name: 'Upper Body',
-    description: 'Kompletter Oberkörper. Für Upper/Lower Split.',
-    exercises: [
-      { name: 'Bankdrücken', sets: 4, minReps: 6, maxReps: 10, restSeconds: 90 },
-      { name: 'Rudern am Kabelzug', sets: 4, minReps: 8, maxReps: 12, restSeconds: 90 },
-      { name: 'Schulterdrücken', sets: 3, minReps: 8, maxReps: 12, restSeconds: 90 },
-      { name: 'Klimmzüge', sets: 3, minReps: 6, maxReps: 10, restSeconds: 90 },
-      { name: 'Bizeps-Curls', sets: 2, minReps: 10, maxReps: 12, restSeconds: 90 },
-      { name: 'Trizeps-Dips', sets: 2, minReps: 10, maxReps: 12, restSeconds: 90 }
-    ]
-  },
-  {
-    name: 'Lower Body',
-    description: 'Kompletter Unterkörper. Für Upper/Lower Split.',
-    exercises: [
-      { name: 'Kniebeugen', sets: 4, minReps: 6, maxReps: 10, restSeconds: 90 },
-      { name: 'Kreuzheben', sets: 4, minReps: 6, maxReps: 10, restSeconds: 90 },
-      { name: 'Ausfallschritte', sets: 3, minReps: 10, maxReps: 12, restSeconds: 90 },
-      { name: 'Beinpresse', sets: 3, minReps: 10, maxReps: 12, restSeconds: 90 },
-      { name: 'Wadenheben', sets: 4, minReps: 12, maxReps: 15, restSeconds: 90 }
+      {
+        name: 'Latzug breit',
+        sets: 2,
+        minReps: 6,
+        maxReps: 10,
+        restSeconds: 180,
+        targetWeight: 65
+      },
+      {
+        name: 'Rudern eng (Kabel)',
+        sets: 2,
+        minReps: 6,
+        maxReps: 10,
+        restSeconds: 120,
+        targetWeight: 70
+      },
+      {
+        name: 'Rudern breit (Kabel)',
+        sets: 1,
+        minReps: 6,
+        maxReps: 10,
+        restSeconds: 180,
+        targetWeight: 60
+      },
+      {
+        name: 'Bizepsmaschine',
+        sets: 3,
+        minReps: 6,
+        maxReps: 8,
+        restSeconds: 180,
+        targetWeight: 45
+      },
+      {
+        name: 'Crunchmaschine',
+        sets: 2,
+        minReps: 8,
+        maxReps: 10,
+        restSeconds: 120,
+        targetWeight: 59
+      },
+      {
+        name: 'Rumänisches Kreuzheben (Langhantel)',
+        sets: 2,
+        minReps: 6,
+        maxReps: 8,
+        restSeconds: 180,
+        targetWeight: 50
+      },
+      {
+        name: 'Beinbeuger (Maschine)',
+        sets: 2,
+        minReps: 6,
+        maxReps: 8,
+        restSeconds: 180,
+        targetWeight: 45
+      },
+      {
+        name: 'Reverse Butterfly (Maschine)',
+        sets: 1,
+        minReps: 6,
+        maxReps: 8,
+        restSeconds: 120,
+        targetWeight: 41
+      }
     ]
   }
 ]
@@ -90,9 +147,19 @@ async function seedPlans () {
         )
       )
 
-      const validExercises = planData.exercises
-        .map((ex, i) => ({ ...ex, exercise: exerciseRecords[i] }))
-        .filter(ex => ex.exercise)
+      const validExercises = []
+      for (const [index, exerciseRecord] of exerciseRecords.entries()) {
+        if (!exerciseRecord) continue
+        const planExercise = planData.exercises[index]
+        validExercises.push({
+          exercise: exerciseRecord,
+          sets: planExercise.sets,
+          minReps: planExercise.minReps,
+          maxReps: planExercise.maxReps,
+          restSeconds: planExercise.restSeconds,
+          targetWeight: planExercise.targetWeight
+        })
+      }
 
       if (validExercises.length === 0) {
         console.log(`Skipped (no exercises found): ${planData.name}`)
@@ -111,7 +178,8 @@ async function seedPlans () {
               sets: ex.sets,
               minReps: ex.minReps,
               maxReps: ex.maxReps,
-              restSeconds: ex.restSeconds || 90
+              restSeconds: ex.restSeconds,
+              targetWeight: ex.targetWeight
             }))
           }
         }

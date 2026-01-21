@@ -3,7 +3,6 @@ const fs = require('fs')
 const path = require('path')
 const { seedExercises } = require('../srv/data/seed/exercises')
 const { seedPlans } = require('../srv/data/seed/plans')
-const { seedWorkouts } = require('../srv/data/seed/workouts')
 
 const loadStructureData = () => {
   const dir = path.resolve(__dirname, '../srv/data/structuredata')
@@ -60,9 +59,6 @@ const seed = async () => {
 
   console.log('\nSeeding plans...')
   await seedPlans()
-
-  console.log('\nSeeding workouts...')
-  await seedWorkouts()
 
   console.log('\nSeed complete!')
   await prisma.$disconnect()

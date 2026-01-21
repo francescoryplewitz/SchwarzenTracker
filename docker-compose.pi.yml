@@ -1,32 +1,22 @@
 services:
-  app:
-    build:
-      context: .
-      target: runtime
-    image: schwarzentacker:pi
-    depends_on:
-      - db
-    ports:
-      - '5001:5001'
-    environment:
-      NODE_ENV: production
-      DB_TYPE: postgresql
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_DATABASE: schwarzentacker
-      DB_SCHEMA: public
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-
   db:
     image: postgres:16-bookworm
+    ports:
+      - "5432:5432"   # optional, nur wenn du vom Host drauf willst
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: schwarzentacker
+      POSTGRES_DB: cory
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cory
 
 volumes:
   postgres_data:
+
+networks:
+  cory:
+    external: true
+    name: cory

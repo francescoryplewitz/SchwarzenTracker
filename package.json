@@ -32,6 +32,7 @@
     "db:reset": "npm run set:schema && npx prisma migrate reset",
     "db:deploy": "npm run set:schema && npx prisma migrate deploy",
     "db:seed": "npm run set:schema && node ./scripts/seed-database.js",
+    "reset:training": "node ./scripts/reset-training-data.js",
     "db:view": "npm run set:schema && npx prisma studio",
     "set:schema": "node ./scripts/set-schema.js",
     "start:frontend": "cd ./frontend && npx quasar dev",
