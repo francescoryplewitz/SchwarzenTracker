@@ -2,6 +2,9 @@ const fs = require('fs')
 const path = require('path')
 require('dotenv').config()
 
+const file = path.resolve(__dirname, '../.env')
+console.log(file?.toString())
+
 const secrets = {
   auth: {
     idpUrl: process.env.AUTH_URL,
