@@ -80,6 +80,9 @@ const startServer = async () => {
       if (!user) return res.status(404).send({ error: 'User not found' })
       return res.status(200).send(user)
     })
+
+    const { seed } = require('../scripts/seed-database')
+    await seed()
   })
 
   if (process.env.NODE_ENV === 'test') {
