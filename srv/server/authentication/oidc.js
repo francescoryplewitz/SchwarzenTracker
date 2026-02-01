@@ -85,6 +85,7 @@ const registerOidc = (app) => {
       })
 
       LOG.info(`Redirecting to IDP: ${redirectTo.href}`)
+      LOG.info(`Login raw cookies: ${req.headers.cookie}`)
       LOG.info(`Login session ID: ${req.session.id}`)
       LOG.info(`Login session has pkce: ${!!req.session.pkceCodeVerifier}`)
       res.redirect(redirectTo.href)
@@ -95,6 +96,7 @@ const registerOidc = (app) => {
   })
 
   app.get('/callback', async (req, res) => {
+    LOG.info(`Callback raw cookies: ${req.headers.cookie}`)
     LOG.info(`Callback session ID: ${req.session.id}`)
     LOG.info(`Callback session keys: ${Object.keys(req.session).join(', ')}`)
     const currentUrl = new URL(req.protocol + '://' + req.get('host') + req.originalUrl)
