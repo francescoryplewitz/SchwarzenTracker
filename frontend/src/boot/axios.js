@@ -20,11 +20,25 @@ if (process.env.NODE_ENV !== 'production') {
 }
 if (process.env.NODE_ENV === 'production') {
   api = axios.create()
+
+  const fetchCsrfToken = async () => {
+    const { data } = await axios.get('/csrf-token')
+    api.defaults.headers.common['x-csrf-token'] = data.csrfToken
+  }
+
+  fetchCsrfToken()
+
   api.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
       if (error.response?.status === 401) {
         window.location.href = '/#/login'
+      }
+      if (error.response?.status === 403 && !error.config._csrfRetry) {
+        error.config._csrfRetry = true
+        await fetchCsrfToken()
+        error.config.headers['x-csrf-token'] = api.defaults.headers.common['x-csrf-token']
+        return api.request(error.config)
       }
       return Promise.reject(error)
     }
