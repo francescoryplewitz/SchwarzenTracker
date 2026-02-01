@@ -121,6 +121,15 @@ const registerOidc = (app) => {
       res.redirect('/#/')
     } catch (error) {
       LOG.error(`OIDC callback failed: ${error.message}`)
+      LOG.error(`OIDC error code: ${error.code}`)
+      LOG.error(`OIDC error cause: ${error.cause?.message || error.cause}`)
+      LOG.error(`OIDC currentUrl: ${currentUrl.href}`)
+      LOG.error(`OIDC codeVerifier present: ${!!codeVerifier}`)
+      LOG.error(`OIDC expectedState present: ${!!expectedState}`)
+      if (error.response) {
+        LOG.error(`OIDC response status: ${error.response.status}`)
+        LOG.error(`OIDC response body: ${JSON.stringify(error.response.body)}`)
+      }
       res.redirect('/#/login')
     }
   })
