@@ -37,14 +37,12 @@ export default defineComponent({
     const isAuthenticated = ref(false)
     const isMobile = ref(false)
 
-    async function getCurrentUser() {
-      const result = await api.get(`/user/current`, {
-        withCredentials: true,
-      }).catch(() => { })
-
-      if (result) {
-        LocalStorage.set('user', result.data)
+    function getCurrentUser() {
+      const user = LocalStorage.getItem('user')
+      if (user) {
         isAuthenticated.value = true
+      } else {
+        router.push('/login')
       }
     }
 

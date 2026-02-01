@@ -29,7 +29,7 @@ const registerSession = function (app) {
       domain: cookieDomain,
       path: '/',
       maxAge: 24 * 60 * 60 * 1000,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === 'production' && process.env.DOMAIN?.startsWith('https'),
       httpOnly: true
     }
   }

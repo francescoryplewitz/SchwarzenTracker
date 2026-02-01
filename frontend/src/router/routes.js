@@ -5,6 +5,13 @@ const routes = [
     component: () => import('pages/DevConfigPage.vue')
   },
 
+  // Login / Landing page
+  {
+    path: '/login',
+    component: () => import('pages/loginPage.vue'),
+    meta: { public: true }
+  },
+
   // Dashboard (Home)
   {
     path: '/',

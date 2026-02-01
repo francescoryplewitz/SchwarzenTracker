@@ -14,3 +14,8 @@ docker network create infra
 
 
  docker compose -f docker-compose.yml up -d db             
+
+
+
+docker run -d   --name caddy   --network cory   -p 80:80   -p 443:443   -v $PWD/Caddyfile:/etc/caddy/Caddyfile   -v caddy_data:/data   -v caddy_config:/config   caddy:latest
+docker exec caddy caddy reload --config /etc/caddy/Caddyfile

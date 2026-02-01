@@ -23,8 +23,8 @@ if (process.env.NODE_ENV === 'production') {
   api.interceptors.response.use(
     (response) => response,
     (error) => {
-      if (error.response.status === 401) {
-        window.location.href = error.response.data
+      if (error.response?.status === 401) {
+        window.location.href = '/#/login'
       }
       return Promise.reject(error)
     }

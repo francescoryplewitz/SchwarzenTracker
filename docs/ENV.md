@@ -71,16 +71,21 @@ In `.secrets.json` under `db.*`:
 |----------|-------------|
 | `csrfSecret` | Secret for CSRF token generation |
 
-### Authentication (Cognito OAuth)
+### Authentication (OIDC)
 
 In `.secrets.json` under `auth.*`:
 
 | Variable | Description |
 |----------|-------------|
-| `auth.cognitoUrl` | Cognito OAuth provider URL |
-| `auth.clientId` | OAuth client ID |
-| `auth.clientSecret` | OAuth client secret |
-| `auth.callbackURL` | Callback URL after login |
+| `auth.idpUrl` | OIDC Identity Provider URL (Discovery endpoint base) |
+| `auth.clientId` | OIDC client ID |
+| `auth.callbackUrl` | Callback URL after OIDC login |
+
+In `.secrets-private.json`:
+
+| Variable | Description |
+|----------|-------------|
+| `authClientSecret` | OIDC client secret (top-level key) |
 
 ### AWS
 
