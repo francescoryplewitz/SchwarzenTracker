@@ -7,6 +7,9 @@ let oidc
 
 const initOidc = async () => {
   oidc = await import('openid-client')
+  console.log('Hier------------------------------------------')
+  console.log(env.auth.idpUrl)
+  console.log('Hier------------------------------------------')
   const idpUrl = new URL(env.auth.idpUrl)
   LOG.info('Discovering OIDC provider at ' + env.auth.idpUrl)
 
