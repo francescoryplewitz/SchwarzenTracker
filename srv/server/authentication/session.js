@@ -1,22 +1,17 @@
 const session = require('express-session')
 const MemoryStore = require('memorystore')(session)
 
-const extractHostname = (urlOrHostname) => {
-  if (!urlOrHostname) return undefined
-  try {
-    const url = new URL(urlOrHostname)
-    return url.hostname
-  } catch {
-    return urlOrHostname
-  }
-}
-
 const registerSession = function (app) {
-  const cookieDomain = ['test', 'development'].includes(process.env.NODE_ENV)
-    ? undefined
-    : extractHostname(env.domain)
+  app.use((req, res, next) => {
+    if (req.cookies?.['connect.sid']) {
+      res.clearCookie('connect.sid', { path: '/' })
+      res.clearCookie('connect.sid', { path: '/', domain: req.hostname })
+    }
+    next()
+  })
 
   const params = {
+    name: 'st.sid',
     secret: 'somesecretforlocal',
     resave: false,
     rolling: true,
@@ -26,15 +21,12 @@ const registerSession = function (app) {
     }),
     cookie: {
       sameSite: 'lax',
-      domain: cookieDomain,
       path: '/',
       maxAge: 24 * 60 * 60 * 1000,
       secure: process.env.NODE_ENV === 'production' && env.domain?.startsWith('https'),
       httpOnly: true
     }
   }
-  console.log(`[SESSION] cookie config: domain=${cookieDomain}, secure=${params.cookie.secure}, sameSite=${params.cookie.sameSite}`)
-  console.log(`[SESSION] env.domain=${env.domain}`)
   app.use(session(params))
 }
 
