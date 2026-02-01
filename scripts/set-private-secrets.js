@@ -29,7 +29,7 @@ const secrets = {
   stage: process.env.STAGE,
 }
 console.log('----Setting Secrets----')
-console.log(`Example secret: DB:SCHEMA = ${process.env.DB_SCHEMA}`)
+console.log(`Example secret: DB:SCHEMA = ${process.env.AUTH_URL}`)
 
 fs.writeFileSync(path.resolve(__dirname, '../.env'), `DATABASE_URL=${secrets.db.type}://${secrets.db.username}:${secrets.db.password}@${secrets.db.host}:${secrets.db.port}/${secrets.db.database}?schema=${secrets.db.schema}`)
 fs.writeFileSync(path.resolve(__dirname, '../.secrets-private.json'), JSON.stringify(secrets))
