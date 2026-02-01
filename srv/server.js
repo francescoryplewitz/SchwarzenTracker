@@ -10,6 +10,7 @@ const useragent = require('express-useragent')
 const fs = require('fs')
 const path = require('path')
 const app = express()
+app.set('trust proxy', 1)
 const PORT = env.port ?? 5001
 const version = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../package.json')).toString())?.version
 
