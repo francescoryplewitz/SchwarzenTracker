@@ -5,6 +5,7 @@ const isProduction = process.env.NODE_ENV === 'production'
 
 const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
   getSecret: () => env.csrfSecret || 'csrf-secret-for-local-dev',
+  getSessionIdentifier: (req) => req.sessionID || '',
   cookieName: '__Host-csrf',
   cookieOptions: {
     httpOnly: true,
@@ -12,7 +13,7 @@ const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
     path: '/',
     secure: isProduction
   },
-  getTokenFromRequest: (req) => req.headers['x-csrf-token']
+  getCsrfTokenFromRequest: (req) => req.headers['x-csrf-token']
 })
 
 const csrfTokenEndpoint = (req, res) => {
