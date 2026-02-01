@@ -33,6 +33,8 @@ const registerSession = function (app) {
       httpOnly: true
     }
   }
+  console.log(`[SESSION] cookie config: domain=${cookieDomain}, secure=${params.cookie.secure}, sameSite=${params.cookie.sameSite}`)
+  console.log(`[SESSION] env.domain=${env.domain}`)
   app.use(session(params))
 }
 
