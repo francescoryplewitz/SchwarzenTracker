@@ -3,7 +3,7 @@ const LOG = new Logger('CSRF')
 
 const isProduction = process.env.NODE_ENV === 'production'
 
-const { doubleCsrfProtection, generateToken } = doubleCsrf({
+const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
   getSecret: () => env.csrfSecret || 'csrf-secret-for-local-dev',
   cookieName: '__Host-csrf',
   cookieOptions: {
@@ -16,7 +16,7 @@ const { doubleCsrfProtection, generateToken } = doubleCsrf({
 })
 
 const csrfTokenEndpoint = (req, res) => {
-  const token = generateToken(req, res)
+  const token = generateCsrfToken(req, res)
   res.json({ csrfToken: token })
 }
 
