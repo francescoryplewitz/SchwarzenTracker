@@ -4,10 +4,10 @@ require('dotenv').config()
 
 const secrets = {
   auth: {
-    cognitoUrl: process.env.AUTH_COGNITO_URL,
+    idpUrl: process.env.AUTH_URL,
     clientId: process.env.AUTH_CLIENT_ID,
     clientSecret: process.env.AUTH_CLIENT_SECRET,
-    callbackURL: process.env.AUTH_CALLBACK_URL
+    callbackUrl: process.env.AUTH_CALLBACK_URL
   },
   roleMapping: {
     [process.env.ROLEMAPPING_USER]: 'user',
