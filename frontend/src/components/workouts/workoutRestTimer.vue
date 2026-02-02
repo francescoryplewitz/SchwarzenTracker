@@ -73,6 +73,8 @@ export default defineComponent({
     const remaining = ref(props.seconds)
     const minimized = ref(false)
     const interval = ref(null)
+    const endAt = ref(0)
+    const done = ref(false)
 
     const circumference = 2 * Math.PI * 90
 
@@ -94,20 +96,32 @@ export default defineComponent({
       return `${secs}`
     })
 
+    const updateRemaining = () => {
+      const remainingSeconds = Math.max(0, Math.ceil((endAt.value - Date.now()) / 1000))
+      remaining.value = remainingSeconds
+      if (remainingSeconds <= 0 && !done.value) {
+        done.value = true
+        clearInterval(interval.value)
+        emit('done')
+      }
+    }
+
     const startTimer = () => {
+      endAt.value = Date.now() + props.seconds * 1000
+      updateRemaining()
       interval.value = setInterval(() => {
-        remaining.value--
-        if (remaining.value <= 0) {
-          clearInterval(interval.value)
-          emit('done')
-        }
+        updateRemaining()
       }, 1000)
     }
 
+    const stopTimer = () => {
+      clearInterval(interval.value)
+      interval.value = null
+    }
+
     const skip = () => {
-      if (interval.value) {
-        clearInterval(interval.value)
-      }
+      done.value = true
+      stopTimer()
       emit('skip')
     }
 
@@ -121,12 +135,16 @@ export default defineComponent({
 
     onMounted(() => {
       startTimer()
+      document.addEventListener('visibilitychange', updateRemaining)
+      window.addEventListener('pageshow', updateRemaining)
+      window.addEventListener('focus', updateRemaining)
     })
 
     onUnmounted(() => {
-      if (interval.value) {
-        clearInterval(interval.value)
-      }
+      document.removeEventListener('visibilitychange', updateRemaining)
+      window.removeEventListener('pageshow', updateRemaining)
+      window.removeEventListener('focus', updateRemaining)
+      stopTimer()
     })
 
     return {
