@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { EventBus, Dialog, Loading, LocalStorage, Notify, Quasar } from 'quasar'
+import { i18n } from 'src/i18n'
 
 export function mountWithQuasar(component, options = {}) {
   const {
@@ -29,6 +30,7 @@ export function mountWithQuasar(component, options = {}) {
           plugins: quasarPlugins,
           config: quasarOptions.config ?? {}
         }],
+        i18n,
         ...globalPlugins
       ],
       provide: {

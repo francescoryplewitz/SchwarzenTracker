@@ -12,44 +12,44 @@
       <div class="stat-card glass-card">
         <q-icon name="mdi-timer-outline" size="24px" class="stat-icon" />
         <div class="stat-value">{{ formattedDuration }}</div>
-        <div class="stat-label">Dauer</div>
+        <div class="stat-label">{{ $t('workouts.summary.duration') }}</div>
       </div>
 
       <div class="stat-card glass-card">
         <q-icon name="mdi-checkbox-marked-circle-outline" size="24px" class="stat-icon" />
         <div class="stat-value">{{ completedSets }}/{{ totalSets }}</div>
-        <div class="stat-label">Sätze</div>
+        <div class="stat-label">{{ $t('workouts.summary.sets') }}</div>
       </div>
 
       <div class="stat-card glass-card">
         <q-icon name="mdi-weight-kilogram" size="24px" class="stat-icon" />
         <div class="stat-value">{{ totalVolume.toLocaleString('de-DE') }}</div>
-        <div class="stat-label">Volumen (kg)</div>
+        <div class="stat-label">{{ $t('workouts.summary.volume') }}</div>
       </div>
 
       <div class="stat-card glass-card">
         <q-icon name="mdi-dumbbell" size="24px" class="stat-icon" />
         <div class="stat-value">{{ exerciseCount }}</div>
-        <div class="stat-label">Übungen</div>
+        <div class="stat-label">{{ $t('workouts.summary.exercises') }}</div>
       </div>
     </div>
 
     <div class="exercises-summary glass-card">
-      <h2 class="section-title">Übungen</h2>
+      <h2 class="section-title">{{ $t('workouts.summary.exercises') }}</h2>
 
       <div v-for="group in groupedSets" :key="group.exerciseId" class="exercise-item">
         <div class="exercise-header">
           <span class="exercise-name">{{ group.exerciseName }}</span>
-          <span class="exercise-sets">{{ group.completedCount }}/{{ group.sets.length }} Sätze</span>
+          <span class="exercise-sets">{{ group.completedCount }}/{{ group.sets.length }} {{ $t('units.sets') }}</span>
         </div>
 
         <div class="sets-summary">
           <div v-for="set in group.sets.filter(s => s.completedAt)" :key="set.id" class="set-row">
             <span class="set-number">{{ set.setNumber }}.</span>
-            <span class="set-values">{{ set.weight || '–' }} kg × {{ set.reps || '–' }} Wdh</span>
+            <span class="set-values">{{ set.weight || '–' }} {{ $t('units.kg') }} × {{ set.reps || '–' }} {{ $t('units.reps') }}</span>
           </div>
           <div v-if="group.completedCount === 0" class="no-sets">
-            Keine Sätze abgeschlossen
+            {{ $t('workouts.summary.noSets') }}
           </div>
         </div>
       </div>
@@ -57,13 +57,14 @@
 
     <button class="back-btn" @click="$router.push('/workouts')">
       <q-icon name="mdi-arrow-left" size="18px" />
-      Zurück zur Übersicht
+      {{ $t('workouts.backToList') }}
     </button>
   </div>
 </template>
 
 <script>
 import { defineComponent, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   name: 'WorkoutSummary',
@@ -74,6 +75,8 @@ export default defineComponent({
   },
 
   setup(props) {
+    const { locale, t } = useI18n({ useScope: 'global' })
+
     const statusClass = computed(() => {
       return props.workout.status === 'COMPLETED' ? 'completed' : 'abandoned'
     })
@@ -83,7 +86,9 @@ export default defineComponent({
     })
 
     const statusTitle = computed(() => {
-      return props.workout.status === 'COMPLETED' ? 'Workout abgeschlossen!' : 'Workout abgebrochen'
+      return props.workout.status === 'COMPLETED'
+        ? t('workouts.summary.completedTitle')
+        : t('workouts.summary.abandonedTitle')
     })
 
     const duration = computed(() => {
@@ -122,6 +127,10 @@ export default defineComponent({
         .reduce((sum, s) => sum + (s.weight * s.reps), 0)
     })
 
+    const formattedVolume = computed(() => {
+      return new Intl.NumberFormat(locale.value).format(totalVolume.value)
+    })
+
     return {
       statusClass,
       statusIcon,
@@ -130,7 +139,7 @@ export default defineComponent({
       completedSets,
       totalSets,
       exerciseCount,
-      totalVolume
+      totalVolume: formattedVolume
     }
   }
 })

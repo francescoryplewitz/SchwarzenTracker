@@ -5,7 +5,7 @@
         <span class="dialog-title" data-test="dialog-title">{{ config.title }}</span>
         <button class="close-btn" data-test="close-btn" @click="cancel">
           <q-icon name="mdi-close" size="20px" />
-          <q-tooltip>Schließen</q-tooltip>
+          <q-tooltip>{{ $t('common.close') }}</q-tooltip>
         </button>
       </div>
 
@@ -35,10 +35,10 @@
           data-test="cancel-btn"
           @click="cancel"
         >
-          Abbrechen
+          {{ $t('common.cancel') }}
         </button>
         <button class="action-btn primary" data-test="ok-btn" @click="confirm">
-          {{ config.okLabel || 'OK' }}
+          {{ config.okLabel || $t('common.confirm') }}
         </button>
       </div>
     </div>
@@ -63,7 +63,7 @@ export default defineComponent({
       type: 'confirm',
       promptConfig: null,
       cancel: true,
-      okLabel: 'OK'
+      okLabel: null
     })
 
     const open = (options) => {
@@ -72,7 +72,7 @@ export default defineComponent({
       config.type = options.type || 'confirm'
       config.promptConfig = options.promptConfig || null
       config.cancel = options.cancel !== false
-      config.okLabel = options.okLabel || 'OK'
+      config.okLabel = options.okLabel || null
 
       if (config.type === 'prompt' && config.promptConfig) {
         promptValue.value = config.promptConfig.model || ''

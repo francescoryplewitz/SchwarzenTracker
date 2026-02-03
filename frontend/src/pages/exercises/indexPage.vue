@@ -6,12 +6,12 @@
           <q-icon name="mdi-dumbbell" size="24px" />
         </div>
         <div class="header-text">
-          <h1 class="page-title">Übungen</h1>
-          <p class="page-subtitle">Deine Übungsbibliothek</p>
+          <h1 class="page-title">{{ $t('exercises.title') }}</h1>
+          <p class="page-subtitle">{{ $t('exercises.subtitle') }}</p>
         </div>
         <button class="add-btn" data-test="add-btn" @click="openCreateDialog">
           <q-icon name="mdi-plus" size="20px" />
-          <q-tooltip>Neue Übung erstellen</q-tooltip>
+          <q-tooltip>{{ $t('exercises.create') }}</q-tooltip>
         </button>
       </header>
 
@@ -19,7 +19,7 @@
         <div class="search-row">
           <div class="search-input-wrapper">
             <q-icon name="mdi-magnify" class="search-icon" />
-            <input v-model="search" type="text" placeholder="Übung suchen..." class="search-input"
+            <input v-model="search" type="text" :placeholder="$t('exercises.searchPlaceholder')" class="search-input"
               data-test="search-input" @input="debouncedSearch">
             <button v-if="search" class="clear-btn" data-test="clear-search-btn" @click="clearSearch">
               <q-icon name="mdi-close" size="16px" />
@@ -28,29 +28,29 @@
           <button class="filter-btn" data-test="filter-btn" @click="openFilterDialog">
             <q-icon name="mdi-filter-outline" size="20px" />
             <span v-if="activeFilterCount > 0" class="filter-badge" data-test="filter-badge">{{ activeFilterCount }}</span>
-            <q-tooltip>Filter</q-tooltip>
+            <q-tooltip>{{ $t('exercises.filters') }}</q-tooltip>
           </button>
         </div>
 
         <div v-if="activeFilterCount > 0" class="active-filters" data-test="active-filters">
           <span v-if="filters.muscleGroup" class="filter-chip" data-test="filter-chip-muscleGroup" @click="removeFilter('muscleGroup')">
-            {{ muscleGroupLabels[filters.muscleGroup] }}
+            {{ $t(muscleGroupLabels[filters.muscleGroup]) }}
             <q-icon name="mdi-close" size="12px" />
           </span>
           <span v-if="filters.equipment" class="filter-chip" data-test="filter-chip-equipment" @click="removeFilter('equipment')">
-            {{ equipmentLabels[filters.equipment] }}
+            {{ $t(equipmentLabels[filters.equipment]) }}
             <q-icon name="mdi-close" size="12px" />
           </span>
           <span v-if="filters.category" class="filter-chip" data-test="filter-chip-category" @click="removeFilter('category')">
-            {{ filters.category }}
+            {{ $t(categoryLabels[filters.category]) }}
             <q-icon name="mdi-close" size="12px" />
           </span>
           <span v-if="filters.onlyFavorites" class="filter-chip" data-test="filter-chip-favorites" @click="removeFilter('onlyFavorites')">
-            Favoriten
+            {{ $t('exercises.favorites') }}
             <q-icon name="mdi-close" size="12px" />
           </span>
           <span v-if="filters.onlyOwn" class="filter-chip" data-test="filter-chip-own" @click="removeFilter('onlyOwn')">
-            Eigene
+            {{ $t('exercises.own') }}
             <q-icon name="mdi-close" size="12px" />
           </span>
         </div>
@@ -58,12 +58,12 @@
 
       <div v-if="loading" class="loading-state" data-test="loading-state">
         <q-spinner color="primary" size="48px" />
-        <span class="loading-text">Lade Übungen...</span>
+        <span class="loading-text">{{ $t('exercises.loading') }}</span>
       </div>
 
       <div v-else-if="exercises.length === 0" class="empty-state glass-card" data-test="empty-state">
         <q-icon name="mdi-dumbbell" size="64px" class="empty-icon" />
-        <span class="empty-text">Keine Übungen gefunden</span>
+        <span class="empty-text">{{ $t('exercises.empty') }}</span>
       </div>
 
       <div v-else class="exercises-list" data-test="exercises-list">
@@ -72,7 +72,7 @@
         <div v-if="hasMore" class="load-more">
           <button class="load-more-btn" data-test="load-more-btn" :disabled="loadingMore" @click="loadMore">
             <q-spinner v-if="loadingMore" color="primary" size="16px" class="q-mr-sm" />
-            {{ loadingMore ? 'Lade...' : 'Mehr laden' }}
+            {{ loadingMore ? $t('exercises.loadingMore') : $t('exercises.loadMore') }}
           </button>
         </div>
       </div>
@@ -93,14 +93,21 @@ import ExerciseForm from 'components/exercises/exerciseForm.vue'
 import { muscleGroupLabels } from 'src/constants/muscleGroups'
 
 const equipmentLabels = {
-  BARBELL: 'Langhantel',
-  DUMBBELL: 'Kurzhantel',
-  MACHINE: 'Maschine',
-  CABLE: 'Kabelzug',
-  BODYWEIGHT: 'Körpergewicht',
-  KETTLEBELL: 'Kettlebell',
-  BAND: 'Widerstandsband',
-  OTHER: 'Sonstiges'
+  BARBELL: 'equipment.BARBELL',
+  DUMBBELL: 'equipment.DUMBBELL',
+  MACHINE: 'equipment.MACHINE',
+  CABLE: 'equipment.CABLE',
+  BODYWEIGHT: 'equipment.BODYWEIGHT',
+  KETTLEBELL: 'equipment.KETTLEBELL',
+  BAND: 'equipment.BAND',
+  OTHER: 'equipment.OTHER'
+}
+
+const categoryLabels = {
+  COMPOUND: 'categories.COMPOUND',
+  ISOLATION: 'categories.ISOLATION',
+  CARDIO: 'categories.CARDIO',
+  STRETCHING: 'categories.STRETCHING'
 }
 
 export default defineComponent({
@@ -226,6 +233,7 @@ export default defineComponent({
       activeFilterCount,
       muscleGroupLabels,
       equipmentLabels,
+      categoryLabels,
       debouncedSearch,
       clearSearch,
       loadMore,

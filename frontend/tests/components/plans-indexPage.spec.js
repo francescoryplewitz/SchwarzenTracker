@@ -22,25 +22,17 @@ describe('PlansIndexPage', () => {
       const wrapper = await mountComponent()
       const title = wrapper.find('[data-test="page-title"]')
       expect(title.exists()).toBe(true)
-      expect(title.text()).toBe('Trainingspläne')
+      expect(title.text()).toBe('Plans')
     })
 
-    it('displays coming soon message for Module 2', async () => {
+    it('renders library tab', async () => {
       const wrapper = await mountComponent()
-      const label = wrapper.find('[data-test="coming-soon-label"]')
-      expect(label.exists()).toBe(true)
-      expect(label.text()).toBe('Coming Soon')
+      expect(wrapper.find('[data-test="tab-library"]').exists()).toBe(true)
     })
 
-    it('displays placeholder card', async () => {
+    it('renders my plans tab', async () => {
       const wrapper = await mountComponent()
-      expect(wrapper.find('[data-test="placeholder-card"]').exists()).toBe(true)
-    })
-
-    it('displays Module 2 reference in placeholder text', async () => {
-      const wrapper = await mountComponent()
-      const card = wrapper.find('[data-test="placeholder-card"]')
-      expect(card.text()).toContain('Modul 2')
+      expect(wrapper.find('[data-test="tab-my-plans"]').exists()).toBe(true)
     })
 
     it('applies dark theme classes', async () => {

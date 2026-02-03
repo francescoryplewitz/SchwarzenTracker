@@ -8,7 +8,7 @@
       @click="navigate(item.route)"
     >
       <q-icon :name="item.icon" size="22px" />
-      <span class="nav-label">{{ item.label }}</span>
+      <span class="nav-label">{{ $t(item.labelKey) }}</span>
     </button>
   </nav>
 </template>
@@ -25,10 +25,10 @@ export default defineComponent({
     const route = useRoute()
 
     const menuItems = [
-      { name: 'dashboard', label: 'Dashboard', route: '/', icon: 'mdi-view-dashboard-outline' },
-      { name: 'exercises', label: 'Übungen', route: '/exercises', icon: 'mdi-dumbbell' },
-      { name: 'plans', label: 'Pläne', route: '/plans', icon: 'mdi-clipboard-text-outline' },
-      { name: 'workouts', label: 'Workouts', route: '/workouts', icon: 'mdi-play-circle-outline' }
+      { name: 'dashboard', labelKey: 'nav.dashboard', route: '/', icon: 'mdi-view-dashboard-outline' },
+      { name: 'exercises', labelKey: 'nav.exercises', route: '/exercises', icon: 'mdi-dumbbell' },
+      { name: 'plans', labelKey: 'nav.plans', route: '/plans', icon: 'mdi-clipboard-text-outline' },
+      { name: 'workouts', labelKey: 'nav.workouts', route: '/workouts', icon: 'mdi-play-circle-outline' }
     ]
 
     const isActive = (item) => {

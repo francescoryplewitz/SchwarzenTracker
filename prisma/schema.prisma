@@ -20,6 +20,7 @@ model User {
   modifiedAt     DateTime      @updatedAt
   isActive       Boolean       @default(true)
   filterSettings Json          @default("{}")
+  locale         String        @default("en")
 
   // Exercise relations
   createdExercises  Exercise[]
@@ -56,6 +57,7 @@ model Exercise {
 
   // Varianten
   variants      ExerciseVariant[]
+  translations  ExerciseTranslation[]
 
   // Herkunft
   isSystem      Boolean  @default(false)
@@ -85,8 +87,31 @@ model ExerciseVariant {
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  translations ExerciseVariantTranslation[]
 }
 
+model ExerciseTranslation {
+  exerciseId  String
+  locale      String
+  name        String
+  description String   @db.Text
+
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@id([exerciseId, locale])
+}
+
+model ExerciseVariantTranslation {
+  exerciseVariantId String
+  locale            String
+  title             String
+  description       String?   @db.Text
+
+  exerciseVariant   ExerciseVariant @relation(fields: [exerciseVariantId], references: [id], onDelete: Cascade)
+
+  @@id([exerciseVariantId, locale])
+}
 model ExerciseImage {
   id         String   @id @default(cuid())
   exerciseId String
@@ -158,9 +183,21 @@ model TrainingPlan {
   exercises   PlanExercise[]
   favorites   UserPlanFavorite[]
   workouts    Workout[]
+  translations TrainingPlanTranslation[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model TrainingPlanTranslation {
+  trainingPlanId String
+  locale         String
+  name           String
+  description    String?  @db.Text
+
+  trainingPlan   TrainingPlan @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
+
+  @@id([trainingPlanId, locale])
 }
 
 model PlanExercise {

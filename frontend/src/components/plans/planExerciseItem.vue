@@ -26,18 +26,18 @@
               :key="mg"
               class="muscle-badge"
             >
-              {{ muscleGroupLabels[mg] || mg }}
+              {{ $t(muscleGroupLabels[mg] || mg) }}
             </span>
           </div>
           <div class="exercise-config">
             <span class="config-item" data-test="sets-reps">
-              {{ planExercise.sets }} Sätze × {{ planExercise.minReps }}-{{ planExercise.maxReps }} Wdh
+              {{ planExercise.sets }} {{ $t('units.sets') }} × {{ planExercise.minReps }}-{{ planExercise.maxReps }} {{ $t('units.reps') }}
             </span>
             <span v-if="planExercise.targetWeight" class="config-item" data-test="target-weight">
-              Ziel: {{ planExercise.targetWeight }}kg
+              {{ $t('plans.exerciseItem.targetWeightLabel') }}: {{ planExercise.targetWeight }} {{ $t('units.kg') }}
             </span>
             <span v-if="planExercise.restSeconds" class="config-item" data-test="rest-time">
-              Pause: {{ formatRestTime(planExercise.restSeconds) }}
+              {{ $t('plans.exerciseItem.rest') }}: {{ formatRestTime(planExercise.restSeconds) }}
             </span>
           </div>
           <div v-if="planExercise.notes" class="exercise-notes" data-test="notes">
@@ -49,11 +49,11 @@
       <div v-if="canEdit && !compact" class="item-actions">
         <button class="action-btn" data-test="edit-btn" @click="toggleEdit">
           <q-icon :name="isEditing ? 'mdi-check' : 'mdi-pencil'" size="16px" />
-          <q-tooltip>{{ isEditing ? 'Speichern' : 'Bearbeiten' }}</q-tooltip>
+          <q-tooltip>{{ isEditing ? $t('common.save') : $t('common.edit') }}</q-tooltip>
         </button>
         <button class="action-btn delete" data-test="remove-btn" @click="$emit('remove')">
           <q-icon name="mdi-close" size="16px" />
-          <q-tooltip>Entfernen</q-tooltip>
+          <q-tooltip>{{ $t('plans.exerciseItem.remove') }}</q-tooltip>
         </button>
       </div>
     </div>
@@ -61,32 +61,32 @@
     <div v-if="isEditing && !compact" class="edit-section" data-test="edit-section">
       <div class="edit-row">
         <div class="edit-field">
-          <label class="edit-label">Sätze</label>
+          <label class="edit-label">{{ $t('plans.exerciseItem.setsLabel') }}</label>
           <input v-model.number="editForm.sets" type="number" min="1" class="edit-input" data-test="edit-sets">
         </div>
         <div class="edit-field">
-          <label class="edit-label">Min Wdh</label>
+          <label class="edit-label">{{ $t('plans.exerciseItem.minRepsLabel') }}</label>
           <input v-model.number="editForm.minReps" type="number" min="1" class="edit-input" data-test="edit-min-reps">
         </div>
         <div class="edit-field">
-          <label class="edit-label">Max Wdh</label>
+          <label class="edit-label">{{ $t('plans.exerciseItem.maxRepsLabel') }}</label>
           <input v-model.number="editForm.maxReps" type="number" min="1" class="edit-input" data-test="edit-max-reps">
         </div>
       </div>
       <div class="edit-row">
         <div class="edit-field">
-          <label class="edit-label">Zielgewicht (kg)</label>
+          <label class="edit-label">{{ $t('plans.exerciseItem.targetWeightLabel') }} ({{ $t('units.kg') }})</label>
           <input v-model.number="editForm.targetWeight" type="number" min="0" step="0.5" class="edit-input" data-test="edit-weight">
         </div>
         <div class="edit-field">
-          <label class="edit-label">Pause (Sek)</label>
+          <label class="edit-label">{{ $t('plans.exerciseItem.restLabel') }}</label>
           <input v-model.number="editForm.restSeconds" type="number" min="0" class="edit-input" data-test="edit-rest">
         </div>
       </div>
       <div class="edit-row full">
         <div class="edit-field full">
-          <label class="edit-label">Notizen</label>
-          <input v-model="editForm.notes" type="text" class="edit-input" placeholder="Notizen..." data-test="edit-notes">
+          <label class="edit-label">{{ $t('plans.exerciseItem.notesLabel') }}</label>
+          <input v-model="editForm.notes" type="text" class="edit-input" :placeholder="$t('plans.exerciseItem.notesPlaceholder')" data-test="edit-notes">
         </div>
       </div>
     </div>
@@ -97,6 +97,7 @@
 import { defineComponent, ref, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from 'boot/axios'
+import { useI18n } from 'vue-i18n'
 import { muscleGroupLabels } from 'src/constants/muscleGroups'
 
 export default defineComponent({
@@ -114,6 +115,7 @@ export default defineComponent({
 
   setup(props) {
     const router = useRouter()
+    const { t } = useI18n({ useScope: 'global' })
     const isEditing = ref(false)
 
     const goToExercise = () => {
@@ -142,9 +144,10 @@ export default defineComponent({
       if (seconds >= 60) {
         const mins = Math.floor(seconds / 60)
         const secs = seconds % 60
-        return secs > 0 ? `${mins}:${secs.toString().padStart(2, '0')} Min` : `${mins} Min`
+        const timeLabel = secs > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${mins}`
+        return `${timeLabel} ${t('units.minutesShort')}`
       }
-      return `${seconds} Sek`
+      return `${seconds} ${t('units.secondsShort')}`
     }
 
     const toggleEdit = async () => {

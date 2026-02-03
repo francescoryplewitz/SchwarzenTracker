@@ -2,34 +2,34 @@
   <q-dialog v-model="dialogVisible" persistent data-test="plan-form-dialog">
     <div class="form-dialog">
       <div class="dialog-header">
-        <span class="dialog-title" data-test="dialog-title">{{ isEdit ? 'Plan bearbeiten' : 'Neuen Plan erstellen' }}</span>
+        <span class="dialog-title" data-test="dialog-title">{{ isEdit ? $t('plans.form.titleEdit') : $t('plans.form.titleCreate') }}</span>
         <button class="close-btn" data-test="close-btn" @click="close">
           <q-icon name="mdi-close" size="20px" />
-          <q-tooltip>Schließen</q-tooltip>
+          <q-tooltip>{{ $t('common.close') }}</q-tooltip>
         </button>
       </div>
 
       <div class="dialog-content">
         <q-form ref="formRef" class="form-fields">
           <div class="field-group">
-            <label class="field-label">Name *</label>
+            <label class="field-label">{{ $t('plans.form.nameLabel') }}</label>
             <input
               v-model="form.name"
               type="text"
               class="text-input"
               data-test="name-input"
-              placeholder="Name des Plans"
+              :placeholder="$t('plans.form.namePlaceholder')"
             >
           </div>
 
           <div class="field-group">
-            <label class="field-label">Beschreibung</label>
+            <label class="field-label">{{ $t('plans.form.descriptionLabel') }}</label>
             <textarea
               v-model="form.description"
               class="textarea-input"
               data-test="description-input"
               rows="3"
-              placeholder="Beschreibe den Trainingsplan..."
+              :placeholder="$t('plans.form.descriptionPlaceholder')"
             ></textarea>
           </div>
         </q-form>
@@ -37,10 +37,10 @@
 
       <div class="dialog-actions">
         <button class="action-btn secondary" data-test="cancel-btn" @click="close">
-          Abbrechen
+          {{ $t('plans.form.cancel') }}
         </button>
         <button class="action-btn primary" data-test="save-btn" @click="save">
-          Speichern
+          {{ $t('plans.form.save') }}
         </button>
       </div>
     </div>

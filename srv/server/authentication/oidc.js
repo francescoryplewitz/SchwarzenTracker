@@ -112,7 +112,8 @@ const registerOidc = (app) => {
         lastName: dbUser.lastName,
         email: dbUser.email,
         externalId: dbUser.externalId,
-        roles: dbUser.roles
+        roles: dbUser.roles,
+        locale: dbUser.locale
       }
 
       res.redirect('/#/')

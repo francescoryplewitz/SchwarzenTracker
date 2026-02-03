@@ -1,4 +1,7 @@
 import { date } from 'quasar'
+import { i18n } from 'src/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 
 function checkRuleDecimal (value, min, max) {
   if (!value) return true
@@ -8,36 +11,36 @@ function checkRuleDecimal (value, min, max) {
   } else {
     floatedValue = value
   }
-  if (floatedValue < min || floatedValue > max) return `Der Wert muss zwischen ${min} und ${max} liegen.`
-  return /^\d*(,\d{1,2})?$/.test(value) || 'Zahlen müssen im Format 1000,00 angegeben werden!'
+  if (floatedValue < min || floatedValue > max) return t('validation.valueBetween', { min, max })
+  return /^\d*([.,]\d{1,2})?$/.test(value) || t('validation.decimalFormat')
 }
 
 function checkRuleDate (value, max) {
   if (!value) return true
-  if (value < 1700 || value > max) return `Der Wert muss zwischen 1700 und ${max} liegen.`
-  return /^\d{4}$/.test(value) || 'Jahreszahlen müssen im Format 2023 angegeben werden!'
+  if (value < 1700 || value > max) return t('validation.valueBetween', { min: 1700, max })
+  return /^\d{4}$/.test(value) || t('validation.yearFormat')
 }
 
 function checkRuleDateLength (value) {
   if (!value) return true
-  if (value.length !== 10) return `Erforderliches Format: 12.12.2000`
+  if (value.length !== 10) return t('validation.dateFormat')
   return true
 }
 
 function checkRuleInteger (value, min, max) {
   if (!value) return true
-  if (value < min || value > max) return `Der Wert muss zwischen ${min} und ${max} liegen.`
-  return /^\d*$/.test(value) || 'Ganze Zahlen müssen im Format 1000 (ohne Dezimalstellen) angegeben werden!'
+  if (value < min || value > max) return t('validation.valueBetween', { min, max })
+  return /^\d*$/.test(value) || t('validation.integerFormat')
 }
 
 function checkRuleZipCode (value) {
   if (!value) return true
-  return /^\d{5}$/.test(value) || 'Postleitzahlen müssen im Format 12345 angegeben werden!'
+  return /^\d{5}$/.test(value) || t('validation.zipFormat')
 }
 
 function checkPhonenumber (value) {
   if (!value) return true
-  return /^\+\d{2}\d*/.test(value) || 'Telefonnummern müssen im Format +49 171 2323234 angegeben werden!'
+  return /^\+\d{2}\d*/.test(value) || t('validation.phoneFormat')
 }
 
 function createApiDate (value) {

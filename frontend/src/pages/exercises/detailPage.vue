@@ -4,7 +4,7 @@
       <header class="page-header">
         <button class="back-btn" data-test="back-btn" @click="$router.push('/exercises')">
           <q-icon name="mdi-arrow-left" size="20px" />
-          <q-tooltip>Zurück zur Liste</q-tooltip>
+          <q-tooltip>{{ $t('common.back') }}</q-tooltip>
         </button>
         <div class="header-actions">
           <button
@@ -14,7 +14,7 @@
             @click="toggleFavorite"
           >
             <q-icon :name="exercise.isFavorite ? 'mdi-star' : 'mdi-star-outline'" size="20px" />
-            <q-tooltip>{{ exercise.isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren' }}</q-tooltip>
+            <q-tooltip>{{ exercise.isFavorite ? $t('exercises.favoritesRemove') : $t('exercises.favoritesAdd') }}</q-tooltip>
           </button>
           <button
             v-if="canEdit"
@@ -23,7 +23,7 @@
             @click="openEditDialog"
           >
             <q-icon name="mdi-pencil" size="20px" />
-            <q-tooltip>Übung bearbeiten</q-tooltip>
+            <q-tooltip>{{ $t('exercises.form.titleEdit') }}</q-tooltip>
           </button>
           <button
             v-if="canDelete"
@@ -32,27 +32,27 @@
             @click="confirmDelete"
           >
             <q-icon name="mdi-delete" size="20px" />
-            <q-tooltip>Übung löschen</q-tooltip>
+            <q-tooltip>{{ $t('common.delete') }}</q-tooltip>
           </button>
         </div>
       </header>
 
       <div v-if="loading" class="loading-state" data-test="loading-state">
         <q-spinner color="primary" size="48px" />
-        <span class="loading-text">Lade Übung...</span>
+        <span class="loading-text">{{ $t('exercises.loading') }}</span>
       </div>
 
       <div v-else-if="!exercise.id" class="empty-state glass-card" data-test="empty-state">
         <q-icon name="mdi-alert-circle" size="64px" class="empty-icon" />
-        <span class="empty-text">Übung nicht gefunden</span>
+        <span class="empty-text">{{ $t('exercises.empty') }}</span>
       </div>
 
       <template v-else>
         <div class="exercise-header glass-card" data-test="exercise-details">
           <h1 class="exercise-title" data-test="exercise-title">{{ exercise.name }}</h1>
           <span class="exercise-type" data-test="exercise-type">
-            {{ exercise.isSystem ? 'System-Übung' : 'Eigene Übung' }}
-            <span v-if="exercise.forkedFromId"> (geforkt)</span>
+            {{ exercise.isSystem ? $t('exercises.detail.system') : $t('exercises.detail.own') }}
+            <span v-if="exercise.forkedFromId"> {{ $t('exercises.detail.forked') }}</span>
           </span>
 
           <div v-if="hasVariants" class="variants-tabs" data-test="variants-tabs">
@@ -62,7 +62,7 @@
               data-test="tab-main"
               @click="activeTab = 'main'"
             >
-              Standard
+              {{ $t('exercises.detail.defaultVariant') }}
             </button>
             <button
               v-for="variant in exercise.variants"
@@ -82,30 +82,30 @@
               :key="mg"
               class="meta-chip"
             >
-              {{ muscleGroupLabels[mg] || mg }}
+              {{ $t(muscleGroupLabels[mg] || mg) }}
             </span>
           </div>
 
           <div class="exercise-tags">
             <span v-if="currentVariantData.equipment" class="tag-item" data-test="equipment-tag">
               <q-icon name="mdi-dumbbell" size="14px" />
-              {{ equipmentLabels[currentVariantData.equipment] }}
+              {{ $t(equipmentLabels[currentVariantData.equipment]) }}
             </span>
             <span class="tag-item" data-test="category-tag">
               <q-icon name="mdi-tag" size="14px" />
-              {{ categoryLabels[exercise.category] }}
+              {{ $t(categoryLabels[exercise.category]) }}
             </span>
             <span v-if="exercise.recommendedRestSeconds" class="tag-item" data-test="rest-tag">
               <q-icon name="mdi-timer-outline" size="14px" />
-              {{ formatRestTime(exercise.recommendedRestSeconds) }} Pause
+              {{ formatRestTime(exercise.recommendedRestSeconds) }} {{ $t('exercises.detail.rest') }}
             </span>
           </div>
 
           <div class="exercise-separator"></div>
 
-          <div class="section-label">Ausführung</div>
+          <div class="section-label">{{ $t('exercises.detail.execution') }}</div>
           <p class="exercise-description" data-test="exercise-description">
-            {{ currentVariantData.description || 'Keine Beschreibung vorhanden.' }}
+            {{ currentVariantData.description || $t('exercises.detail.noDescription') }}
           </p>
 
           <button
@@ -115,13 +115,13 @@
             @click="openVideo"
           >
             <q-icon name="mdi-play-circle" size="20px" />
-            Video ansehen
+            {{ $t('exercises.detail.video') }}
           </button>
         </div>
 
         <div v-if="exercise.muscleGroups?.length > 0" class="muscle-section glass-card" data-test="muscle-section">
           <div class="section-header-inline">
-            <span class="section-label-small">Trainierte Muskelgruppen</span>
+            <span class="section-label-small">{{ $t('exercises.detail.trainedMuscles') }}</span>
           </div>
           <muscle-body-diagram
             :sets="muscleGroupSets"
@@ -144,24 +144,24 @@
     >
       <q-fab-action
         icon="mdi-playlist-plus"
-        label="Variante"
+        :label="$t('exercises.detail.variantsTab')"
         label-position="left"
         external-label
         data-test="fab-variant"
         @click="openVariantDialog"
       >
-        <q-tooltip anchor="center left" self="center right">Neue Variante erstellen</q-tooltip>
+        <q-tooltip anchor="center left" self="center right">{{ $t('exercises.variantDialog.title') }}</q-tooltip>
       </q-fab-action>
       <q-fab-action
         v-if="exercise.isSystem"
         icon="mdi-source-fork"
-        label="Forken"
+        :label="$t('exercises.detail.fork')"
         label-position="left"
         external-label
         data-test="fab-fork"
         @click="forkExercise"
       >
-        <q-tooltip anchor="center left" self="center right">Eigene Kopie erstellen</q-tooltip>
+        <q-tooltip anchor="center left" self="center right">{{ $t('exercises.detail.forkCopy') }}</q-tooltip>
       </q-fab-action>
     </q-fab>
 
@@ -175,6 +175,7 @@
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api } from 'boot/axios'
+import { useI18n } from 'vue-i18n'
 import ExerciseForm from 'components/exercises/exerciseForm.vue'
 import ExerciseVariantDialog from 'components/exercises/exerciseVariantDialog.vue'
 import MuscleBodyDiagram from 'components/plans/muscleBodyDiagram.vue'
@@ -182,21 +183,21 @@ import ConfirmDialog from 'components/common/confirmDialog.vue'
 import { muscleGroupLabels } from 'src/constants/muscleGroups'
 
 const equipmentLabels = {
-  BARBELL: 'Langhantel',
-  DUMBBELL: 'Kurzhantel',
-  MACHINE: 'Maschine',
-  CABLE: 'Kabelzug',
-  BODYWEIGHT: 'Körpergewicht',
-  KETTLEBELL: 'Kettlebell',
-  BAND: 'Widerstandsband',
-  OTHER: 'Sonstiges'
+  BARBELL: 'equipment.BARBELL',
+  DUMBBELL: 'equipment.DUMBBELL',
+  MACHINE: 'equipment.MACHINE',
+  CABLE: 'equipment.CABLE',
+  BODYWEIGHT: 'equipment.BODYWEIGHT',
+  KETTLEBELL: 'equipment.KETTLEBELL',
+  BAND: 'equipment.BAND',
+  OTHER: 'equipment.OTHER'
 }
 
 const categoryLabels = {
-  COMPOUND: 'Compound',
-  ISOLATION: 'Isolation',
-  CARDIO: 'Cardio',
-  STRETCHING: 'Dehnung'
+  COMPOUND: 'categories.COMPOUND',
+  ISOLATION: 'categories.ISOLATION',
+  CARDIO: 'categories.CARDIO',
+  STRETCHING: 'categories.STRETCHING'
 }
 
 export default defineComponent({
@@ -212,6 +213,7 @@ export default defineComponent({
   setup() {
     const route = useRoute()
     const router = useRouter()
+    const { t } = useI18n({ useScope: 'global' })
 
     const exercise = ref({})
     const loading = ref(true)
@@ -275,8 +277,8 @@ export default defineComponent({
     const confirmDelete = async () => {
       try {
         await confirmDialogRef.value.open({
-          title: 'Übung löschen',
-          message: `Möchtest du "${exercise.value.name}" wirklich löschen?`,
+          title: t('exercises.detail.deleteTitle'),
+          message: t('exercises.detail.deleteMessage', { name: exercise.value.name }),
           type: 'confirm'
         })
         await api.delete(`/api/exercises/${exercise.value.id}`)
@@ -307,9 +309,10 @@ export default defineComponent({
       if (seconds >= 60) {
         const mins = Math.floor(seconds / 60)
         const secs = seconds % 60
-        return secs > 0 ? `${mins}:${secs.toString().padStart(2, '0')} Min` : `${mins} Min`
+        const timeLabel = secs > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${mins}`
+        return `${timeLabel} ${t('units.minutesShort')}`
       }
-      return `${seconds} Sek`
+      return `${seconds} ${t('units.secondsShort')}`
     }
 
     onMounted(() => {

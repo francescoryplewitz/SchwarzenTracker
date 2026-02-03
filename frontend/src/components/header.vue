@@ -14,7 +14,7 @@
           :class="{ active: isActive(item) }"
           @click="navigate(item.route)"
         >
-          {{ item.label }}
+          {{ $t(item.labelKey) }}
         </button>
       </nav>
     </div>
@@ -23,9 +23,19 @@
       <div v-if="stage !== 'production' && environment" class="env-badge">
         {{ environment }}
       </div>
+      <div class="locale-toggle">
+        <button class="locale-btn" :class="{ active: locale === 'en' }" @click="changeLocale('en')">
+          EN
+          <q-tooltip>{{ $t('locale.en') }}</q-tooltip>
+        </button>
+        <button class="locale-btn" :class="{ active: locale === 'de' }" @click="changeLocale('de')">
+          DE
+          <q-tooltip>{{ $t('locale.de') }}</q-tooltip>
+        </button>
+      </div>
       <button class="logout-btn" @click="logout">
         <q-icon name="mdi-logout" size="18px" />
-        <q-tooltip>Ausloggen</q-tooltip>
+        <q-tooltip>{{ $t('header.logout') }}</q-tooltip>
       </button>
     </div>
   </div>
@@ -36,6 +46,8 @@ import { defineComponent, ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { api } from 'boot/axios'
 import { LocalStorage } from 'quasar'
+import { useI18n } from 'vue-i18n'
+import { setLocale } from 'src/i18n'
 
 export default defineComponent({
   name: 'HeaderComponent',
@@ -50,11 +62,12 @@ export default defineComponent({
     const router = useRouter()
     const route = useRoute()
     const logoUrl = ref(null)
+    const { locale } = useI18n({ useScope: 'global' })
 
     const menuItems = [
-      { name: 'dashboard', label: 'Dashboard', route: '/dashboard' },
-      { name: 'exercises', label: 'Übungen', route: '/exercises' },
-      { name: 'plans', label: 'Pläne', route: '/plans' }
+      { name: 'dashboard', labelKey: 'nav.dashboard', route: '/dashboard' },
+      { name: 'exercises', labelKey: 'nav.exercises', route: '/exercises' },
+      { name: 'plans', labelKey: 'nav.plans', route: '/plans' }
     ]
 
     const isActive = (item) => {
@@ -85,6 +98,12 @@ export default defineComponent({
       window.open('/logout', '_self')
     }
 
+    const changeLocale = async (nextLocale) => {
+      const { data } = await api.patch('/user/locale', { locale: nextLocale })
+      LocalStorage.set('user', data)
+      setLocale(nextLocale)
+    }
+
     onMounted(() => {
       fetchEnvironment()
     })
@@ -97,7 +116,9 @@ export default defineComponent({
       logoUrl,
       menuItems,
       isActive,
-      navigate
+      navigate,
+      locale,
+      changeLocale
     }
   }
 })
@@ -177,6 +198,35 @@ export default defineComponent({
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.locale-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.locale-btn {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.locale-btn.active {
+  border-color: rgba(0, 255, 194, 0.5);
+  color: #00ffc2;
+  background: rgba(0, 255, 194, 0.12);
+}
+
+.locale-btn:hover {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .env-badge {

@@ -49,15 +49,15 @@ describe('ExerciseCard', () => {
       const wrapper = await mountComponent(singleExercise)
       const chips = wrapper.findAll('[data-test="muscle-chip"]')
       expect(chips.length).toBe(2)
-      expect(chips[0].text()).toBe('Brust')
-      expect(chips[1].text()).toBe('Trizeps')
+      expect(chips[0].text()).toBe('Chest')
+      expect(chips[1].text()).toBe('Triceps')
     })
 
     it('displays equipment label translated', async () => {
       const wrapper = await mountComponent(singleExercise)
       const equipment = wrapper.find('[data-test="equipment-label"]')
       expect(equipment.exists()).toBe(true)
-      expect(equipment.text()).toBe('Langhantel')
+      expect(equipment.text()).toBe('Barbell')
     })
 
     it('does not display equipment label when not set', async () => {
@@ -78,14 +78,14 @@ describe('ExerciseCard', () => {
       const wrapper = await mountComponent(exerciseOneVariant)
       const count = wrapper.find('[data-test="variants-count"]')
       expect(count.exists()).toBe(true)
-      expect(count.text()).toBe('1 Variante')
+      expect(count.text()).toBe('1 Variant')
     })
 
     it('displays variants count with plural form', async () => {
       const wrapper = await mountComponent(singleExercise)
       const count = wrapper.find('[data-test="variants-count"]')
       expect(count.exists()).toBe(true)
-      expect(count.text()).toBe('2 Varianten')
+      expect(count.text()).toBe('2 Variants')
     })
 
     it('does not display variants count when zero', async () => {

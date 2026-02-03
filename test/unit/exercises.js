@@ -21,33 +21,36 @@ describe('Exercise Service Helper Functions', () => {
   describe('buildExerciseWhere', () => {
     it('should return empty where object when no filters', () => {
       const req = createMockReq({})
-      const where = buildExerciseWhere(req)
+      const where = buildExerciseWhere(req, 'en')
       expect(where).to.deep.equal({})
     })
 
     it('should filter by search term', () => {
-      const req = createMockReq({ search: 'Bank' })
-      const where = buildExerciseWhere(req)
-      expect(where).to.have.property('name')
-      expect(where.name).to.deep.equal({ contains: 'Bank', mode: 'insensitive' })
+      const req = createMockReq({ search: 'Press' })
+      const where = buildExerciseWhere(req, 'en')
+      expect(where).to.have.property('OR')
+      expect(where.OR).to.deep.equal([
+        { name: { contains: 'Press', mode: 'insensitive' } },
+        { translations: { some: { locale: 'en', name: { contains: 'Press', mode: 'insensitive' } } } }
+      ])
     })
 
     it('should filter by muscleGroup', () => {
       const req = createMockReq({ muscleGroup: 'CHEST' })
-      const where = buildExerciseWhere(req)
+      const where = buildExerciseWhere(req, 'en')
       expect(where).to.have.property('muscleGroups')
       expect(where.muscleGroups).to.deep.equal({ has: 'CHEST' })
     })
 
     it('should filter by equipment', () => {
       const req = createMockReq({ equipment: 'BARBELL' })
-      const where = buildExerciseWhere(req)
+      const where = buildExerciseWhere(req, 'en')
       expect(where).to.have.property('equipment', 'BARBELL')
     })
 
     it('should filter by category', () => {
       const req = createMockReq({ category: 'COMPOUND' })
-      const where = buildExerciseWhere(req)
+      const where = buildExerciseWhere(req, 'en')
       expect(where).to.have.property('category', 'COMPOUND')
     })
 
@@ -56,14 +59,14 @@ describe('Exercise Service Helper Functions', () => {
         { onlyFavorites: true },
         { user: { id: 1 } }
       )
-      const where = buildExerciseWhere(req)
+      const where = buildExerciseWhere(req, 'en')
       expect(where).to.have.property('userFavorites')
       expect(where.userFavorites).to.deep.equal({ some: { userId: 1 } })
     })
 
     it('should not filter by onlyFavorites when user is not logged in', () => {
       const req = createMockReq({ onlyFavorites: true })
-      const where = buildExerciseWhere(req)
+      const where = buildExerciseWhere(req, 'en')
       expect(where).to.not.have.property('userFavorites')
     })
 
@@ -72,13 +75,13 @@ describe('Exercise Service Helper Functions', () => {
         { onlyOwn: true },
         { user: { id: 1 } }
       )
-      const where = buildExerciseWhere(req)
+      const where = buildExerciseWhere(req, 'en')
       expect(where).to.have.property('createdById', 1)
     })
 
     it('should not filter by onlyOwn when user is not logged in', () => {
       const req = createMockReq({ onlyOwn: true })
-      const where = buildExerciseWhere(req)
+      const where = buildExerciseWhere(req, 'en')
       expect(where).to.not.have.property('createdById')
     })
 
@@ -89,8 +92,8 @@ describe('Exercise Service Helper Functions', () => {
         equipment: 'BARBELL',
         category: 'COMPOUND'
       })
-      const where = buildExerciseWhere(req)
-      expect(where).to.have.property('name')
+      const where = buildExerciseWhere(req, 'en')
+      expect(where).to.have.property('OR')
       expect(where).to.have.property('muscleGroups')
       expect(where).to.have.property('equipment', 'BARBELL')
       expect(where).to.have.property('category', 'COMPOUND')

@@ -6,12 +6,12 @@
           <q-icon name="mdi-play-circle-outline" size="24px" />
         </div>
         <div class="header-text">
-          <h1 class="page-title">Workouts</h1>
-          <p class="page-subtitle">Deine Trainingshistorie</p>
+          <h1 class="page-title">{{ $t('workouts.title') }}</h1>
+          <p class="page-subtitle">{{ $t('workouts.subtitle') }}</p>
         </div>
         <button class="add-btn" data-test="add-btn" @click="openPlanPicker">
           <q-icon name="mdi-plus" size="20px" />
-          <q-tooltip>Neues Workout starten</q-tooltip>
+          <q-tooltip>{{ $t('workouts.start') }}</q-tooltip>
         </button>
       </header>
 
@@ -24,21 +24,21 @@
           :data-test="`status-filter-${filter.value}`"
           @click="selectStatus(filter.value)"
         >
-          {{ filter.label }}
+          {{ $t(filter.labelKey) }}
         </button>
       </div>
 
       <div v-if="loading" class="loading-state" data-test="loading">
         <q-spinner color="primary" size="48px" />
-        <span class="loading-text">Lade Workouts...</span>
+        <span class="loading-text">{{ $t('workouts.loading') }}</span>
       </div>
 
       <div v-else-if="workouts.length === 0" class="empty-state glass-card" data-test="empty">
         <q-icon name="mdi-play-circle-outline" size="64px" class="empty-icon" />
-        <span class="empty-text">Noch keine Workouts vorhanden</span>
+        <span class="empty-text">{{ $t('workouts.empty') }}</span>
         <button class="create-first-btn" @click="openPlanPicker">
           <q-icon name="mdi-plus" size="18px" />
-          Erstes Workout starten
+          {{ $t('workouts.start') }}
         </button>
       </div>
 
@@ -48,7 +48,7 @@
         <div v-if="hasMore" class="load-more">
           <button class="load-more-btn" data-test="load-more" :disabled="loadingMore" @click="loadMore">
             <q-spinner v-if="loadingMore" color="primary" size="16px" class="q-mr-sm" />
-            {{ loadingMore ? 'Lade...' : 'Mehr laden' }}
+            {{ loadingMore ? $t('workouts.loadingMore') : $t('workouts.loadMore') }}
           </button>
         </div>
       </div>
@@ -66,9 +66,9 @@ import WorkoutCard from 'components/workouts/workoutCard.vue'
 import PlanPickerDialog from 'components/workouts/planPickerDialog.vue'
 
 const STATUS_FILTERS = [
-  { value: '', label: 'Alle' },
-  { value: 'COMPLETED', label: 'Abgeschlossen' },
-  { value: 'ABANDONED', label: 'Abgebrochen' }
+  { value: '', labelKey: 'workouts.filters.all' },
+  { value: 'COMPLETED', labelKey: 'workouts.filters.completed' },
+  { value: 'ABANDONED', labelKey: 'workouts.filters.abandoned' }
 ]
 
 export default defineComponent({

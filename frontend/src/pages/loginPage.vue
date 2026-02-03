@@ -6,20 +6,19 @@
           <q-icon name="mdi-dumbbell" size="32px" />
         </div>
         <h1 class="logo-title">SchwarzenTracker</h1>
-        <p class="logo-subtitle">Dein persoenlicher Fitness-Tracker</p>
+        <p class="logo-subtitle">{{ $t('login.subtitle') }}</p>
       </header>
 
       <div class="info-section glass-card">
         <p class="info-text">
-          Verwalte deine Uebungen, erstelle Trainingsplaene und tracke deine
-          Workouts — alles an einem Ort.
+          {{ $t('login.info') }}
         </p>
       </div>
 
       <div class="login-section">
         <a href="/login" class="login-btn">
           <q-icon name="mdi-login" size="20px" class="q-mr-sm" />
-          Anmelden
+          {{ $t('login.action') }}
         </a>
       </div>
     </div>

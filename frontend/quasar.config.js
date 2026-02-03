@@ -13,7 +13,8 @@ export default defineConfig(( /* ctx */) => {
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
       'axios',
-      'bus'
+      'bus',
+      'i18n'
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css

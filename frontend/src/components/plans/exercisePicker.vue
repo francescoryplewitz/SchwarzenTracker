@@ -2,10 +2,10 @@
   <q-dialog v-model="dialogVisible" persistent data-test="exercise-picker-dialog">
     <div class="picker-dialog">
       <div class="dialog-header">
-        <span class="dialog-title">Übung hinzufügen</span>
+        <span class="dialog-title">{{ $t('plans.exercisePicker.title') }}</span>
         <button class="close-btn" data-test="close-btn" @click="close">
           <q-icon name="mdi-close" size="20px" />
-          <q-tooltip>Schließen</q-tooltip>
+          <q-tooltip>{{ $t('common.close') }}</q-tooltip>
         </button>
       </div>
 
@@ -16,7 +16,7 @@
             v-model="search"
             type="text"
             class="search-input"
-            placeholder="Übung suchen..."
+            :placeholder="$t('plans.exercisePicker.searchPlaceholder')"
             data-test="search-input"
             @input="debouncedSearch"
           >
@@ -41,7 +41,7 @@
             <div class="option-info">
               <span class="option-name">{{ exercise.name }}</span>
               <span class="option-meta">
-                {{ exercise.muscleGroups?.slice(0, 2).map(mg => muscleGroupLabels[mg]).join(', ') }}
+                {{ exercise.muscleGroups?.slice(0, 2).map(mg => $t(muscleGroupLabels[mg])).join(', ') }}
               </span>
             </div>
           </div>
@@ -50,25 +50,25 @@
         <div v-if="selectedExercise" class="config-section" data-test="config-section">
           <div class="config-row">
             <div class="config-field">
-              <label class="config-label">Sätze</label>
+              <label class="config-label">{{ $t('plans.exercisePicker.setsLabel') }}</label>
               <input v-model.number="config.sets" type="number" min="1" class="config-input" data-test="config-sets">
             </div>
             <div class="config-field">
-              <label class="config-label">Min Wdh</label>
+              <label class="config-label">{{ $t('plans.exercisePicker.minRepsLabel') }}</label>
               <input v-model.number="config.minReps" type="number" min="1" class="config-input" data-test="config-min-reps">
             </div>
             <div class="config-field">
-              <label class="config-label">Max Wdh</label>
+              <label class="config-label">{{ $t('plans.exercisePicker.maxRepsLabel') }}</label>
               <input v-model.number="config.maxReps" type="number" min="1" class="config-input" data-test="config-max-reps">
             </div>
           </div>
           <div class="config-row">
             <div class="config-field">
-              <label class="config-label">Zielgewicht (kg)</label>
-              <input v-model.number="config.targetWeight" type="number" min="0" step="0.5" class="config-input" placeholder="Optional" data-test="config-weight">
+              <label class="config-label">{{ $t('plans.exercisePicker.targetWeightLabel') }}</label>
+              <input v-model.number="config.targetWeight" type="number" min="0" step="0.5" class="config-input" :placeholder="$t('plans.exercisePicker.optional')" data-test="config-weight">
             </div>
             <div class="config-field">
-              <label class="config-label">Pause (Sek)</label>
+              <label class="config-label">{{ $t('plans.exercisePicker.restLabel') }}</label>
               <input v-model.number="config.restSeconds" type="number" min="0" class="config-input" placeholder="60" data-test="config-rest">
             </div>
           </div>
@@ -77,7 +77,7 @@
 
       <div class="dialog-actions">
         <button class="action-btn secondary" data-test="cancel-btn" @click="close">
-          Abbrechen
+          {{ $t('common.cancel') }}
         </button>
         <button
           class="action-btn primary"
@@ -85,7 +85,7 @@
           data-test="add-btn"
           @click="addExercise"
         >
-          Hinzufügen
+          {{ $t('plans.exercisePicker.add') }}
         </button>
       </div>
     </div>

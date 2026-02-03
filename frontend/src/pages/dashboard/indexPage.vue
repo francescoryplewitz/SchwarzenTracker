@@ -9,7 +9,7 @@
           </div>
         </div>
         <h1 class="app-name">SchwarzenTracker</h1>
-        <p class="welcome-text">Dein persönlicher Fitness-Tracker</p>
+        <p class="welcome-text">{{ $t('dashboard.subtitle') }}</p>
       </header>
 
       <div class="quick-actions">
@@ -18,8 +18,8 @@
             <q-icon name="mdi-play-circle" size="28px" />
           </div>
           <div class="action-content">
-            <span class="action-title">Workout starten</span>
-            <span class="action-desc">Beginne dein Training</span>
+            <span class="action-title">{{ $t('dashboard.actions.startWorkout') }}</span>
+            <span class="action-desc">{{ $t('dashboard.actions.startWorkoutDesc') }}</span>
           </div>
           <q-icon name="mdi-chevron-right" size="20px" class="action-arrow" />
         </button>
@@ -29,8 +29,8 @@
             <q-icon name="mdi-clipboard-text-outline" size="28px" />
           </div>
           <div class="action-content">
-            <span class="action-title">Trainingspläne</span>
-            <span class="action-desc">Pläne verwalten</span>
+            <span class="action-title">{{ $t('dashboard.actions.plans') }}</span>
+            <span class="action-desc">{{ $t('dashboard.actions.plansDesc') }}</span>
           </div>
           <q-icon name="mdi-chevron-right" size="20px" class="action-arrow" />
         </button>
@@ -40,16 +40,16 @@
             <q-icon name="mdi-dumbbell" size="28px" />
           </div>
           <div class="action-content">
-            <span class="action-title">Übungen</span>
-            <span class="action-desc">Übungskatalog durchsuchen</span>
+            <span class="action-title">{{ $t('dashboard.actions.exercises') }}</span>
+            <span class="action-desc">{{ $t('dashboard.actions.exercisesDesc') }}</span>
           </div>
           <q-icon name="mdi-chevron-right" size="20px" class="action-arrow" />
         </button>
       </div>
 
       <div class="stats-preview glass-card">
-        <span class="stats-label">Coming Soon</span>
-        <p class="stats-text">Hier erscheinen bald deine Trainingsstatistiken</p>
+        <span class="stats-label">{{ $t('dashboard.comingSoon') }}</span>
+        <p class="stats-text">{{ $t('dashboard.comingSoonText') }}</p>
       </div>
     </div>
   </div>

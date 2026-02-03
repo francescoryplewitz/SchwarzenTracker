@@ -30,13 +30,13 @@
 
           <div class="timer-display" :class="{ ending: remaining <= 5 }">
             <span class="time-value">{{ formattedTime }}</span>
-            <span class="time-label">PAUSE</span>
+            <span class="time-label">{{ $t('workouts.rest') }}</span>
           </div>
         </div>
 
         <button class="skip-btn" data-test="skip-rest-btn" @click="skip">
           <q-icon name="mdi-skip-forward" size="20px" />
-          Überspringen
+          {{ $t('workouts.restSkip') }}
         </button>
       </div>
     </Transition>

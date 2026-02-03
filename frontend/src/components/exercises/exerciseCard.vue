@@ -3,14 +3,14 @@
     <div class="card-content">
       <div class="card-main">
         <button
-          class="favorite-btn"
-          :class="{ active: exercise.isFavorite }"
-          data-test="favorite-btn"
-          @click.stop="toggleFavorite"
-        >
-          <q-icon :name="exercise.isFavorite ? 'mdi-star' : 'mdi-star-outline'" size="18px" />
-          <q-tooltip>{{ exercise.isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren' }}</q-tooltip>
-        </button>
+        class="favorite-btn"
+        :class="{ active: exercise.isFavorite }"
+        data-test="favorite-btn"
+        @click.stop="toggleFavorite"
+      >
+        <q-icon :name="exercise.isFavorite ? 'mdi-star' : 'mdi-star-outline'" size="18px" />
+        <q-tooltip>{{ exercise.isFavorite ? $t('exercises.favoritesRemove') : $t('exercises.favoritesAdd') }}</q-tooltip>
+      </button>
 
         <div class="card-info">
           <div class="exercise-name" data-test="exercise-name">{{ exercise.name }}</div>
@@ -22,16 +22,16 @@
               class="meta-chip"
               data-test="muscle-chip"
             >
-              {{ muscleGroupLabels[mg] || mg }}
+              {{ $t(muscleGroupLabels[mg] || mg) }}
             </span>
             <span v-if="exercise.equipment" class="meta-text" data-test="equipment-label">
-              {{ equipmentLabels[exercise.equipment] }}
+              {{ $t(equipmentLabels[exercise.equipment]) }}
             </span>
-            <span class="meta-text" data-test="category-label">{{ categoryLabels[exercise.category] }}</span>
+            <span class="meta-text" data-test="category-label">{{ $t(categoryLabels[exercise.category]) }}</span>
           </div>
 
           <div v-if="exercise._count?.variants > 0" class="variants-count" data-test="variants-count">
-            {{ exercise._count.variants }} {{ exercise._count.variants === 1 ? 'Variante' : 'Varianten' }}
+            {{ exercise._count.variants }} {{ exercise._count.variants === 1 ? $t('exercises.variants.singular') : $t('exercises.variants.plural') }}
           </div>
         </div>
       </div>
@@ -49,21 +49,21 @@ import { api } from 'boot/axios'
 import { muscleGroupLabels } from 'src/constants/muscleGroups'
 
 const equipmentLabels = {
-  BARBELL: 'Langhantel',
-  DUMBBELL: 'Kurzhantel',
-  MACHINE: 'Maschine',
-  CABLE: 'Kabelzug',
-  BODYWEIGHT: 'Körpergewicht',
-  KETTLEBELL: 'Kettlebell',
-  BAND: 'Widerstandsband',
-  OTHER: 'Sonstiges'
+  BARBELL: 'equipment.BARBELL',
+  DUMBBELL: 'equipment.DUMBBELL',
+  MACHINE: 'equipment.MACHINE',
+  CABLE: 'equipment.CABLE',
+  BODYWEIGHT: 'equipment.BODYWEIGHT',
+  KETTLEBELL: 'equipment.KETTLEBELL',
+  BAND: 'equipment.BAND',
+  OTHER: 'equipment.OTHER'
 }
 
 const categoryLabels = {
-  COMPOUND: 'Compound',
-  ISOLATION: 'Isolation',
-  CARDIO: 'Cardio',
-  STRETCHING: 'Dehnung'
+  COMPOUND: 'categories.COMPOUND',
+  ISOLATION: 'categories.ISOLATION',
+  CARDIO: 'categories.CARDIO',
+  STRETCHING: 'categories.STRETCHING'
 }
 
 export default defineComponent({

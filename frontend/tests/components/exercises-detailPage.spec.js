@@ -99,7 +99,7 @@ describe('ExerciseDetailPage', () => {
       await flushPromises()
 
       expect(wrapper.find('[data-test="exercise-title"]').text()).toBe('Bankdrücken')
-      expect(wrapper.find('[data-test="exercise-type"]').text()).toContain('Eigene Übung')
+      expect(wrapper.find('[data-test="exercise-type"]').text()).toContain('Custom exercise')
       expect(wrapper.find('[data-test="exercise-description"]').text()).toContain('Flach auf der Bank')
     })
 

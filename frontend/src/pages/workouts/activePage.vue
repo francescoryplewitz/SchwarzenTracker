@@ -3,7 +3,7 @@
     <div class="content-container">
       <div v-if="loading" class="loading-state">
         <q-spinner color="primary" size="48px" />
-        <span class="loading-text">Lade Workout...</span>
+        <span class="loading-text">{{ $t('workouts.loading') }}</span>
       </div>
 
       <template v-else-if="workout">
@@ -19,7 +19,7 @@
                 <div class="timer-display" :class="{ paused: workout.status === 'PAUSED' }">
                   <q-icon name="mdi-timer-outline" size="18px" />
                   <span class="timer-value">{{ formattedDuration }}</span>
-                  <span v-if="workout.status === 'PAUSED'" class="pause-indicator">PAUSIERT</span>
+                  <span v-if="workout.status === 'PAUSED'" class="pause-indicator">{{ $t('workouts.pauseLabel') }}</span>
                 </div>
               </div>
             </div>
@@ -31,15 +31,15 @@
                 @click="togglePause"
               >
                 <q-icon :name="workout.status === 'PAUSED' ? 'mdi-play' : 'mdi-pause'" size="18px" />
-                <q-tooltip>{{ workout.status === 'PAUSED' ? 'Fortsetzen' : 'Pausieren' }}</q-tooltip>
+                <q-tooltip>{{ workout.status === 'PAUSED' ? $t('workouts.resume') : $t('workouts.pause') }}</q-tooltip>
               </button>
               <button class="action-btn abandon-btn" data-test="abandon-btn" @click="confirmAbandon">
                 <q-icon name="mdi-close" size="18px" />
-                <q-tooltip>Abbrechen</q-tooltip>
+                <q-tooltip>{{ $t('workouts.abandon') }}</q-tooltip>
               </button>
               <button class="action-btn complete-btn" data-test="complete-btn" @click="completeWorkout">
                 <q-icon name="mdi-check" size="18px" />
-                Beenden
+                {{ $t('workouts.finish') }}
               </button>
             </div>
           </header>
@@ -76,20 +76,20 @@
 
       <div v-else class="not-found glass-card">
         <q-icon name="mdi-alert-circle-outline" size="48px" class="not-found-icon" />
-        <span class="not-found-text">Workout nicht gefunden</span>
+        <span class="not-found-text">{{ $t('workouts.notFound') }}</span>
         <button class="back-btn" @click="$router.push('/workouts')">
-          Zurück zur Übersicht
+          {{ $t('workouts.backToList') }}
         </button>
       </div>
     </div>
 
     <q-dialog v-model="showAbandonDialog" class="abandon-dialog">
       <div class="dialog-card glass-card">
-        <h3 class="dialog-title">Workout abbrechen?</h3>
-        <p class="dialog-text">Dein Fortschritt wird gespeichert, aber das Workout wird als abgebrochen markiert.</p>
+        <h3 class="dialog-title">{{ $t('workouts.abandonDialog.title') }}</h3>
+        <p class="dialog-text">{{ $t('workouts.abandonDialog.text') }}</p>
         <div class="dialog-actions">
-          <button class="cancel-btn" @click="showAbandonDialog = false">Zurück</button>
-          <button class="confirm-btn" @click="abandonWorkout">Abbrechen</button>
+          <button class="cancel-btn" @click="showAbandonDialog = false">{{ $t('workouts.abandonDialog.cancel') }}</button>
+          <button class="confirm-btn" @click="abandonWorkout">{{ $t('workouts.abandonDialog.confirm') }}</button>
         </div>
       </div>
     </q-dialog>

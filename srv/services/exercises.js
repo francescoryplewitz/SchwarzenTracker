@@ -1,13 +1,40 @@
 const prisma = require('../data/prisma')
 const LOG = new Logger('EXERCISES')
+const { getRequestLocale } = require('../common/locale')
 
-const buildExerciseWhere = (req) => {
+const applyVariantTranslations = (exercise) => {
+  for (const variant of exercise.variants) {
+    const translation = variant.translations[0]
+    if (exercise.isSystem && translation) {
+      variant.title = translation.title
+      if (translation.description !== undefined && translation.description !== null) {
+        variant.description = translation.description
+      }
+    }
+    delete variant.translations
+  }
+}
+
+const applyExerciseTranslations = (exercise) => {
+  const translation = exercise.translations[0]
+  if (exercise.isSystem && translation) {
+    exercise.name = translation.name
+    exercise.description = translation.description
+  }
+  delete exercise.translations
+  applyVariantTranslations(exercise)
+}
+
+const buildExerciseWhere = (req, locale) => {
   const { search, muscleGroup, equipment, category, onlyFavorites, onlyOwn } = req.query
   const userId = req.session?.user?.id
   const where = {}
 
   if (search) {
-    where.name = { contains: search, mode: 'insensitive' }
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { translations: { some: { locale, name: { contains: search, mode: 'insensitive' } } } }
+    ]
   }
   if (muscleGroup) {
     where.muscleGroups = { has: muscleGroup }
@@ -30,7 +57,8 @@ const buildExerciseWhere = (req) => {
 
 const buildExerciseQuery = (req) => {
   const { skip } = req.query
-  const where = buildExerciseWhere(req)
+  const locale = getRequestLocale(req)
+  const where = buildExerciseWhere(req, locale)
 
   return {
     where,
@@ -38,7 +66,20 @@ const buildExerciseQuery = (req) => {
     take: 30,
     skip: isNaN(parseInt(skip)) || parseInt(skip) < 0 ? 0 : parseInt(skip),
     include: {
-      variants: { select: { id: true, title: true } },
+      translations: {
+        where: { locale },
+        select: { name: true, description: true }
+      },
+      variants: {
+        select: {
+          id: true,
+          title: true,
+          translations: {
+            where: { locale },
+            select: { title: true }
+          }
+        }
+      },
       _count: { select: { variants: true } }
     }
   }
@@ -49,7 +90,8 @@ const getExercises = async (req, res) => {
 
   try {
     if (count) {
-      const where = buildExerciseWhere(req)
+      const locale = getRequestLocale(req)
+      const where = buildExerciseWhere(req, locale)
       const total = await prisma.exercise.count({ where })
       LOG.info(`Counted ${total} exercises`)
       return res.status(200).send(`${total}`)
@@ -57,6 +99,7 @@ const getExercises = async (req, res) => {
 
     const query = buildExerciseQuery(req)
     const exercises = await prisma.exercise.findMany(query)
+    exercises.forEach(applyExerciseTranslations)
     LOG.info(`Fetched ${exercises.length} exercises`)
     return res.status(200).send(exercises)
   } catch (e) {
@@ -68,12 +111,24 @@ const getExercises = async (req, res) => {
 const getExercise = async (req, res) => {
   const { id } = req.params
   const userId = req.session?.user?.id
+  const locale = getRequestLocale(req)
 
   try {
     const exercise = await prisma.exercise.findUnique({
       where: { id },
       include: {
-        variants: true,
+        translations: {
+          where: { locale },
+          select: { name: true, description: true }
+        },
+        variants: {
+          include: {
+            translations: {
+              where: { locale },
+              select: { title: true, description: true }
+            }
+          }
+        },
         images: { orderBy: { sortOrder: 'asc' } },
         userFavorites: userId ? { where: { userId } } : false
       }
@@ -83,6 +138,8 @@ const getExercise = async (req, res) => {
       LOG.info(`Exercise ${id} not found`)
       return res.status(404).send()
     }
+
+    applyExerciseTranslations(exercise)
 
     const result = {
       ...exercise,
@@ -185,11 +242,18 @@ const deleteExercise = async (req, res) => {
 const forkExercise = async (req, res) => {
   const { id } = req.params
   const userId = req.session.user.id
+  const locale = getRequestLocale(req)
 
   try {
     const original = await prisma.exercise.findUnique({
       where: { id },
-      include: { images: true }
+      include: {
+        images: true,
+        translations: {
+          where: { locale },
+          select: { name: true, description: true }
+        }
+      }
     })
 
     if (!original) {
@@ -197,10 +261,14 @@ const forkExercise = async (req, res) => {
       return res.status(404).send()
     }
 
+    const translation = original.translations[0]
+    const name = original.isSystem && translation ? translation.name : original.name
+    const description = original.isSystem && translation ? translation.description : original.description
+
     const forked = await prisma.exercise.create({
       data: {
-        name: original.name,
-        description: original.description,
+        name,
+        description,
         muscleGroups: original.muscleGroups,
         category: original.category,
         equipment: original.equipment,

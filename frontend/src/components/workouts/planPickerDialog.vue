@@ -2,20 +2,20 @@
   <q-dialog v-model="visible" class="plan-picker-dialog">
     <div class="dialog-card glass-card">
       <div class="dialog-header">
-        <h2 class="dialog-title">Workout starten</h2>
-        <p class="dialog-subtitle">Wähle einen Trainingsplan</p>
+        <h2 class="dialog-title">{{ $t('workouts.start') }}</h2>
+        <p class="dialog-subtitle">{{ $t('workouts.planPicker.subtitle') }}</p>
       </div>
 
       <div v-if="loading" class="loading-state">
         <q-spinner color="primary" size="32px" />
-        <span class="loading-text">Lade Pläne...</span>
+        <span class="loading-text">{{ $t('plans.loading') }}</span>
       </div>
 
       <div v-else-if="plans.length === 0" class="empty-state">
         <q-icon name="mdi-clipboard-text-outline" size="48px" class="empty-icon" />
-        <span class="empty-text">Du hast noch keine Trainingspläne</span>
+        <span class="empty-text">{{ $t('workouts.planPicker.empty') }}</span>
         <button class="action-btn" @click="goToPlans">
-          Plan erstellen
+          {{ $t('plans.create') }}
         </button>
       </div>
 
@@ -30,7 +30,9 @@
         >
           <div class="plan-info">
             <span class="plan-name">{{ plan.name }}</span>
-            <span class="plan-meta">{{ plan.exerciseCount }} Übungen</span>
+            <span class="plan-meta">
+              {{ plan.exerciseCount }} {{ plan.exerciseCount === 1 ? $t('plans.exerciseSingular') : $t('plans.exercisePlural') }}
+            </span>
           </div>
           <q-icon v-if="selectedPlanId === plan.id" name="mdi-check-circle" size="20px" class="check-icon" />
         </button>
@@ -43,7 +45,7 @@
 
       <div class="dialog-actions">
         <button class="cancel-btn" @click="close">
-          Abbrechen
+          {{ $t('common.cancel') }}
         </button>
         <button
           class="start-btn"
@@ -51,7 +53,7 @@
           data-test="start-btn"
           @click="startWorkout"
         >
-          Workout starten
+          {{ $t('workouts.start') }}
         </button>
       </div>
     </div>
@@ -62,6 +64,7 @@
 import { defineComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from 'boot/axios'
+import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   name: 'PlanPickerDialog',
@@ -70,6 +73,7 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const router = useRouter()
+    const { t } = useI18n({ useScope: 'global' })
     const visible = ref(false)
     const loading = ref(false)
     const plans = ref([])
@@ -83,7 +87,7 @@ export default defineComponent({
         const { data } = await api.get('/api/plans?onlyOwn=true')
         plans.value = data
       } catch (e) {
-        error.value = e.response?.data?.error || 'Fehler beim Laden der Pläne'
+        error.value = e.response?.data?.error || t('workouts.planPicker.error')
       } finally {
         loading.value = false
       }

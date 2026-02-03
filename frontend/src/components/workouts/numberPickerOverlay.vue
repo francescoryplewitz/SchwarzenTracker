@@ -7,7 +7,7 @@
             <div class="picker-header">
               <span class="picker-label">{{ label }}</span>
               <button class="done-btn" @click="close">
-                Fertig
+                {{ $t('common.done') }}
               </button>
             </div>
 

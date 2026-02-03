@@ -1,5 +1,21 @@
 const prisma = require('../data/prisma')
 const LOG = new Logger('WORKOUTS')
+const { getRequestLocale } = require('../common/locale')
+
+const applyExerciseTranslations = (exercise) => {
+  const translation = exercise.translations[0]
+  if (exercise.isSystem && translation) {
+    exercise.name = translation.name
+    exercise.description = translation.description
+  }
+  delete exercise.translations
+}
+
+const applyWorkoutTranslations = (workout) => {
+  for (const set of workout.sets) {
+    applyExerciseTranslations(set.planExercise.exercise)
+  }
+}
 
 const buildWorkoutWhere = (req) => {
   const { status } = req.query
@@ -81,6 +97,7 @@ const getWorkouts = async (req, res) => {
 
 const getActiveWorkout = async (req, res) => {
   const userId = req.session.user.id
+  const locale = getRequestLocale(req)
 
   try {
     const workout = await prisma.workout.findFirst({
@@ -93,7 +110,16 @@ const getActiveWorkout = async (req, res) => {
           orderBy: { sortOrder: 'asc' },
           include: {
             planExercise: {
-              include: { exercise: true }
+              include: {
+                exercise: {
+                  include: {
+                    translations: {
+                      where: { locale },
+                      select: { name: true, description: true }
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -105,6 +131,7 @@ const getActiveWorkout = async (req, res) => {
       return res.status(200).send(null)
     }
 
+    applyWorkoutTranslations(workout)
     LOG.info(`Found active workout ${workout.id}`)
     return res.status(200).send(workout)
   } catch (e) {
@@ -116,6 +143,7 @@ const getActiveWorkout = async (req, res) => {
 const getWorkout = async (req, res) => {
   const { id } = req.params
   const userId = req.session.user.id
+  const locale = getRequestLocale(req)
 
   try {
     const workout = await prisma.workout.findUnique({
@@ -125,7 +153,16 @@ const getWorkout = async (req, res) => {
           orderBy: { sortOrder: 'asc' },
           include: {
             planExercise: {
-              include: { exercise: true }
+              include: {
+                exercise: {
+                  include: {
+                    translations: {
+                      where: { locale },
+                      select: { name: true, description: true }
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -142,6 +179,7 @@ const getWorkout = async (req, res) => {
       return res.status(403).send({ error: 'Du kannst nur eigene Workouts sehen' })
     }
 
+    applyWorkoutTranslations(workout)
     LOG.info(`Fetched workout ${id}`)
     return res.status(200).send(workout)
   } catch (e) {
@@ -153,6 +191,7 @@ const getWorkout = async (req, res) => {
 const createWorkout = async (req, res) => {
   const userId = req.session.user.id
   const { planId } = req.body
+  const locale = getRequestLocale(req)
 
   try {
     // Check if user has an active workout
@@ -172,9 +211,22 @@ const createWorkout = async (req, res) => {
     const plan = await prisma.trainingPlan.findUnique({
       where: { id: planId },
       include: {
+        translations: {
+          where: { locale },
+          select: { name: true, description: true }
+        },
         exercises: {
           orderBy: { sortOrder: 'asc' },
-          include: { exercise: true }
+          include: {
+            exercise: {
+              include: {
+                translations: {
+                  where: { locale },
+                  select: { name: true, description: true }
+                }
+              }
+            }
+          }
         }
       }
     })
@@ -209,11 +261,14 @@ const createWorkout = async (req, res) => {
     }
 
     // Create workout with sets
+    const planTranslation = plan.translations[0]
+    const planName = plan.isSystem && planTranslation ? planTranslation.name : plan.name
+
     const workout = await prisma.workout.create({
       data: {
         planId,
         userId,
-        planName: plan.name,
+        planName,
         status: 'IN_PROGRESS',
         sets: {
           create: setsData
@@ -224,13 +279,23 @@ const createWorkout = async (req, res) => {
           orderBy: { sortOrder: 'asc' },
           include: {
             planExercise: {
-              include: { exercise: true }
+              include: {
+                exercise: {
+                  include: {
+                    translations: {
+                      where: { locale },
+                      select: { name: true, description: true }
+                    }
+                  }
+                }
+              }
             }
           }
         }
       }
     })
 
+    applyWorkoutTranslations(workout)
     LOG.info(`Created workout ${workout.id} for user ${userId} from plan ${planId}`)
     return res.status(201).send(workout)
   } catch (e) {
@@ -243,6 +308,7 @@ const updateWorkoutStatus = async (req, res) => {
   const { id } = req.params
   const userId = req.session.user.id
   const { action } = req.body
+  const locale = getRequestLocale(req)
 
   try {
     const workout = await prisma.workout.findUnique({ where: { id } })
@@ -329,13 +395,23 @@ const updateWorkoutStatus = async (req, res) => {
           orderBy: { sortOrder: 'asc' },
           include: {
             planExercise: {
-              include: { exercise: true }
+              include: {
+                exercise: {
+                  include: {
+                    translations: {
+                      where: { locale },
+                      select: { name: true, description: true }
+                    }
+                  }
+                }
+              }
             }
           }
         }
       }
     })
 
+    applyWorkoutTranslations(updated)
     LOG.info(`Updated workout ${id} status to ${updated.status}`)
     return res.status(200).send(updated)
   } catch (e) {
@@ -348,6 +424,7 @@ const updateSet = async (req, res) => {
   const { id, setId } = req.params
   const userId = req.session.user.id
   const { weight, reps } = req.body
+  const locale = getRequestLocale(req)
 
   try {
     const workout = await prisma.workout.findUnique({ where: { id } })
@@ -376,11 +453,21 @@ const updateSet = async (req, res) => {
       data: { weight, reps },
       include: {
         planExercise: {
-          include: { exercise: true }
+          include: {
+            exercise: {
+              include: {
+                translations: {
+                  where: { locale },
+                  select: { name: true, description: true }
+                }
+              }
+            }
+          }
         }
       }
     })
 
+    applyExerciseTranslations(updated.planExercise.exercise)
     LOG.info(`Updated set ${setId} in workout ${id}`)
     return res.status(200).send(updated)
   } catch (e) {
@@ -392,6 +479,7 @@ const updateSet = async (req, res) => {
 const completeSet = async (req, res) => {
   const { id, setId } = req.params
   const userId = req.session.user.id
+  const locale = getRequestLocale(req)
 
   try {
     const workout = await prisma.workout.findUnique({
@@ -426,10 +514,21 @@ const completeSet = async (req, res) => {
       data: { completedAt: new Date() },
       include: {
         planExercise: {
-          include: { exercise: true }
+          include: {
+            exercise: {
+              include: {
+                translations: {
+                  where: { locale },
+                  select: { name: true, description: true }
+                }
+              }
+            }
+          }
         }
       }
     })
+
+    applyExerciseTranslations(updated.planExercise.exercise)
 
     // Find next set
     const nextSet = workout.sets[setIndex + 1] || null

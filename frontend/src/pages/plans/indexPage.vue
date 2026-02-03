@@ -6,19 +6,19 @@
           <q-icon name="mdi-clipboard-text-outline" size="24px" />
         </div>
         <div class="header-text">
-          <h1 class="page-title">Trainingspläne</h1>
-          <p class="page-subtitle">{{ activeTab === 'library' ? 'Vorlagen zum Kopieren' : 'Deine eigenen Pläne' }}</p>
+          <h1 class="page-title">{{ $t('plans.title') }}</h1>
+          <p class="page-subtitle">{{ activeTab === 'library' ? $t('plans.librarySubtitle') : $t('plans.mySubtitle') }}</p>
         </div>
         <button v-if="activeTab === 'myPlans'" class="add-btn" data-test="add-btn" @click="openCreateDialog">
           <q-icon name="mdi-plus" size="20px" />
-          <q-tooltip>Neuen Plan erstellen</q-tooltip>
+          <q-tooltip>{{ $t('plans.create') }}</q-tooltip>
         </button>
       </header>
 
       <div class="search-section glass-card">
         <div class="search-input-wrapper">
           <q-icon name="mdi-magnify" class="search-icon" />
-          <input v-model="search" type="text" placeholder="Plan suchen..." class="search-input"
+          <input v-model="search" type="text" :placeholder="$t('plans.searchPlaceholder')" class="search-input"
             data-test="search-input" @input="debouncedSearch">
           <button v-if="search" class="clear-btn" data-test="clear-search-btn" @click="clearSearch">
             <q-icon name="mdi-close" size="16px" />
@@ -34,8 +34,8 @@
         align="justify"
         narrow-indicator
       >
-        <q-tab name="library" label="Bibliothek" data-test="tab-library" />
-        <q-tab name="myPlans" label="Meine Pläne" data-test="tab-my-plans" />
+        <q-tab name="library" :label="$t('plans.tabs.library')" data-test="tab-library" />
+        <q-tab name="myPlans" :label="$t('plans.tabs.myPlans')" data-test="tab-my-plans" />
       </q-tabs>
 
       <q-tab-panels v-model="activeTab" animated class="plans-tab-panels">
@@ -45,23 +45,23 @@
               v-for="group in muscleGroupOptions"
               :key="group.key"
               class="muscle-chip"
-              :class="{ active: selectedMuscleGroups.includes(group.key) }"
-              :data-test="`muscle-filter-${group.key}`"
-              @click="toggleMuscleGroup(group.key)"
-            >
-              {{ group.label }}
-            </button>
-          </div>
+            :class="{ active: selectedMuscleGroups.includes(group.key) }"
+            :data-test="`muscle-filter-${group.key}`"
+            @click="toggleMuscleGroup(group.key)"
+          >
+            {{ $t(group.labelKey) }}
+          </button>
+        </div>
 
-          <div v-if="libraryLoading" class="loading-state" data-test="library-loading">
-            <q-spinner color="primary" size="48px" />
-            <span class="loading-text">Lade Bibliothek...</span>
-          </div>
+        <div v-if="libraryLoading" class="loading-state" data-test="library-loading">
+          <q-spinner color="primary" size="48px" />
+          <span class="loading-text">{{ $t('plans.libraryLoading') }}</span>
+        </div>
 
-          <div v-else-if="libraryPlans.length === 0" class="empty-state glass-card" data-test="library-empty">
-            <q-icon name="mdi-bookshelf" size="64px" class="empty-icon" />
-            <span class="empty-text">Keine Vorlagen gefunden</span>
-          </div>
+        <div v-else-if="libraryPlans.length === 0" class="empty-state glass-card" data-test="library-empty">
+          <q-icon name="mdi-bookshelf" size="64px" class="empty-icon" />
+          <span class="empty-text">{{ $t('plans.libraryEmpty') }}</span>
+        </div>
 
           <div v-else class="plans-list" data-test="library-list">
             <plan-card v-for="plan in libraryPlans" :key="plan.id" :plan="plan" />
@@ -69,7 +69,7 @@
             <div v-if="libraryHasMore" class="load-more">
               <button class="load-more-btn" data-test="library-load-more" :disabled="libraryLoadingMore" @click="loadMoreLibrary">
                 <q-spinner v-if="libraryLoadingMore" color="primary" size="16px" class="q-mr-sm" />
-                {{ libraryLoadingMore ? 'Lade...' : 'Mehr laden' }}
+                {{ libraryLoadingMore ? $t('plans.loadingMore') : $t('plans.loadMore') }}
               </button>
             </div>
           </div>
@@ -84,21 +84,21 @@
               @click="toggleFavorites"
             >
               <q-icon :name="onlyFavorites ? 'mdi-star' : 'mdi-star-outline'" size="16px" />
-              Favoriten
+              {{ $t('plans.favorites') }}
             </button>
           </div>
 
           <div v-if="myPlansLoading" class="loading-state" data-test="my-plans-loading">
             <q-spinner color="primary" size="48px" />
-            <span class="loading-text">Lade deine Pläne...</span>
+            <span class="loading-text">{{ $t('plans.myLoading') }}</span>
           </div>
 
           <div v-else-if="myPlans.length === 0" class="empty-state glass-card" data-test="my-plans-empty">
             <q-icon name="mdi-clipboard-text-outline" size="64px" class="empty-icon" />
-            <span class="empty-text">{{ onlyFavorites ? 'Keine Favoriten gefunden' : 'Du hast noch keine eigenen Pläne' }}</span>
+            <span class="empty-text">{{ onlyFavorites ? $t('plans.emptyFavorites') : $t('plans.emptyOwn') }}</span>
             <button v-if="!onlyFavorites" class="create-first-btn" @click="openCreateDialog">
               <q-icon name="mdi-plus" size="18px" />
-              Ersten Plan erstellen
+              {{ $t('plans.createFirst') }}
             </button>
           </div>
 
@@ -108,7 +108,7 @@
             <div v-if="myPlansHasMore" class="load-more">
               <button class="load-more-btn" data-test="my-plans-load-more" :disabled="myPlansLoadingMore" @click="loadMoreMyPlans">
                 <q-spinner v-if="myPlansLoadingMore" color="primary" size="16px" class="q-mr-sm" />
-                {{ myPlansLoadingMore ? 'Lade...' : 'Mehr laden' }}
+                {{ myPlansLoadingMore ? $t('plans.loadingMore') : $t('plans.loadMore') }}
               </button>
             </div>
           </div>
@@ -128,12 +128,12 @@ import PlanCard from 'components/plans/planCard.vue'
 import PlanForm from 'components/plans/planForm.vue'
 
 const MUSCLE_GROUP_OPTIONS = [
-  { key: 'chest', label: 'Brust', values: ['CHEST'] },
-  { key: 'back', label: 'Rücken', values: ['BACK'] },
-  { key: 'shoulders', label: 'Schultern', values: ['SHOULDERS'] },
-  { key: 'arms', label: 'Arme', values: ['BICEPS', 'TRICEPS', 'FOREARMS'] },
-  { key: 'core', label: 'Core', values: ['ABS', 'OBLIQUES'] },
-  { key: 'legs', label: 'Beine', values: ['QUADS', 'HAMSTRINGS', 'GLUTES', 'CALVES'] }
+  { key: 'chest', labelKey: 'muscleGroups.CHEST', values: ['CHEST'] },
+  { key: 'back', labelKey: 'muscleGroups.BACK', values: ['BACK'] },
+  { key: 'shoulders', labelKey: 'muscleGroups.SHOULDERS', values: ['SHOULDERS'] },
+  { key: 'arms', labelKey: 'plans.muscleGroups.arms', values: ['BICEPS', 'TRICEPS', 'FOREARMS'] },
+  { key: 'core', labelKey: 'plans.muscleGroups.core', values: ['ABS', 'OBLIQUES'] },
+  { key: 'legs', labelKey: 'plans.muscleGroups.legs', values: ['QUADS', 'HAMSTRINGS', 'GLUTES', 'CALVES'] }
 ]
 
 export default defineComponent({

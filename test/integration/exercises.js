@@ -51,7 +51,7 @@ describe('Exercise endpoints', () => {
     })
 
     it('should search by name', async () => {
-      const result = await GET('/exercises?search=Bank')
+      const result = await GET('/exercises?search=bench')
       expect(result.status).to.equal(200)
       expect(result.data).to.be.an('array')
       expect(result.data.length).to.be.greaterThan(0)

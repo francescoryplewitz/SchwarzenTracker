@@ -65,7 +65,7 @@ describe('ExerciseForm', () => {
       await flushPromises()
 
       const title = document.querySelector('[data-test="dialog-title"]')
-      expect(title.textContent).toBe('Neue Übung erstellen')
+      expect(title.textContent).toBe('Create exercise')
     })
 
     it('has save button in create mode', async () => {
@@ -391,7 +391,7 @@ describe('ExerciseForm', () => {
       await flushPromises()
 
       const title = document.querySelector('[data-test="dialog-title"]')
-      expect(title.textContent).toBe('Übung bearbeiten')
+      expect(title.textContent).toBe('Edit exercise')
     })
 
     it('calls PATCH API when editing exercise', async () => {

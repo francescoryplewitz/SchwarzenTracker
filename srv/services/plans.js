@@ -1,5 +1,24 @@
 const prisma = require('../data/prisma')
 const LOG = new Logger('PLANS')
+const { getCopySuffix, getRequestLocale } = require('../common/locale')
+
+const applyExerciseTranslations = (exercise) => {
+  const translation = exercise.translations[0]
+  if (exercise.isSystem && translation) {
+    exercise.name = translation.name
+    exercise.description = translation.description
+  }
+  delete exercise.translations
+}
+
+const applyPlanTranslations = (plan) => {
+  const translation = plan.translations[0]
+  if (plan.isSystem && translation) {
+    plan.name = translation.name
+    plan.description = translation.description
+  }
+  delete plan.translations
+}
 
 const calculatePlanDuration = (exercises) => {
   if (!exercises || exercises.length === 0) return 0
@@ -17,13 +36,16 @@ const calculatePlanDuration = (exercises) => {
   return totalDuration
 }
 
-const buildPlanWhere = (req) => {
+const buildPlanWhere = (req, locale) => {
   const { search, onlyFavorites, onlyOwn, onlySystem, muscleGroups } = req.query
   const userId = req.session?.user?.id
   const where = {}
 
   if (search) {
-    where.name = { contains: search, mode: 'insensitive' }
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { translations: { some: { locale, name: { contains: search, mode: 'insensitive' } } } }
+    ]
   }
   if (onlySystem) {
     where.isSystem = true
@@ -51,7 +73,8 @@ const buildPlanWhere = (req) => {
 const buildPlanQuery = (req) => {
   const { skip } = req.query
   const userId = req.session?.user?.id
-  const where = buildPlanWhere(req)
+  const locale = getRequestLocale(req)
+  const where = buildPlanWhere(req, locale)
 
   return {
     where,
@@ -59,6 +82,10 @@ const buildPlanQuery = (req) => {
     take: 30,
     skip: isNaN(parseInt(skip)) || parseInt(skip) < 0 ? 0 : parseInt(skip),
     include: {
+      translations: {
+        where: { locale },
+        select: { name: true, description: true }
+      },
       exercises: {
         select: {
           id: true,
@@ -77,7 +104,8 @@ const getPlans = async (req, res) => {
 
   try {
     if (count) {
-      const where = buildPlanWhere(req)
+      const locale = getRequestLocale(req)
+      const where = buildPlanWhere(req, locale)
       const total = await prisma.trainingPlan.count({ where })
       LOG.info(`Counted ${total} plans`)
       return res.status(200).send(`${total}`)
@@ -85,6 +113,7 @@ const getPlans = async (req, res) => {
 
     const query = buildPlanQuery(req)
     const plans = await prisma.trainingPlan.findMany(query)
+    plans.forEach(applyPlanTranslations)
 
     const result = plans.map(p => ({
       ...p,
@@ -106,14 +135,28 @@ const getPlans = async (req, res) => {
 const getPlan = async (req, res) => {
   const { id } = req.params
   const userId = req.session?.user?.id
+  const locale = getRequestLocale(req)
 
   try {
     const plan = await prisma.trainingPlan.findUnique({
       where: { id },
       include: {
+        translations: {
+          where: { locale },
+          select: { name: true, description: true }
+        },
         exercises: {
           orderBy: { sortOrder: 'asc' },
-          include: { exercise: true }
+          include: {
+            exercise: {
+              include: {
+                translations: {
+                  where: { locale },
+                  select: { name: true, description: true }
+                }
+              }
+            }
+          }
         },
         favorites: userId ? { where: { userId }, select: { userId: true } } : false
       }
@@ -123,6 +166,9 @@ const getPlan = async (req, res) => {
       LOG.info(`Plan ${id} not found`)
       return res.status(404).send()
     }
+
+    applyPlanTranslations(plan)
+    plan.exercises.forEach(planExercise => applyExerciseTranslations(planExercise.exercise))
 
     const result = {
       ...plan,
@@ -229,11 +275,18 @@ const deletePlan = async (req, res) => {
 const copyPlan = async (req, res) => {
   const { id } = req.params
   const userId = req.session.user.id
+  const locale = getRequestLocale(req)
 
   try {
     const original = await prisma.trainingPlan.findUnique({
       where: { id },
-      include: { exercises: true }
+      include: {
+        translations: {
+          where: { locale },
+          select: { name: true, description: true }
+        },
+        exercises: true
+      }
     })
 
     if (!original) {
@@ -241,10 +294,14 @@ const copyPlan = async (req, res) => {
       return res.status(404).send()
     }
 
+    const translation = original.translations[0]
+    const name = original.isSystem && translation ? translation.name : original.name
+    const description = original.isSystem && translation ? translation.description : original.description
+
     const copy = await prisma.trainingPlan.create({
       data: {
-        name: `${original.name} (Kopie)`,
-        description: original.description,
+        name: `${name} (${getCopySuffix(locale)})`,
+        description,
         createdById: userId,
         isSystem: false,
         exercises: {
@@ -263,11 +320,21 @@ const copyPlan = async (req, res) => {
       include: {
         exercises: {
           orderBy: { sortOrder: 'asc' },
-          include: { exercise: true }
+          include: {
+            exercise: {
+              include: {
+                translations: {
+                  where: { locale },
+                  select: { name: true, description: true }
+                }
+              }
+            }
+          }
         }
       }
     })
 
+    copy.exercises.forEach(planExercise => applyExerciseTranslations(planExercise.exercise))
     LOG.info(`Copied plan ${id} to ${copy.id} by user ${userId}`)
     return res.status(201).send(copy)
   } catch (e) {
@@ -280,6 +347,7 @@ const addExercise = async (req, res) => {
   const { id } = req.params
   const userId = req.session.user.id
   const { exerciseId, sets, minReps, maxReps, targetWeight, restSeconds, notes } = req.body
+  const locale = getRequestLocale(req)
 
   try {
     const plan = await prisma.trainingPlan.findUnique({ where: { id } })
@@ -316,9 +384,19 @@ const addExercise = async (req, res) => {
         restSeconds,
         notes
       },
-      include: { exercise: true }
+      include: {
+        exercise: {
+          include: {
+            translations: {
+              where: { locale },
+              select: { name: true, description: true }
+            }
+          }
+        }
+      }
     })
 
+    applyExerciseTranslations(planExercise.exercise)
     LOG.info(`Added exercise ${exerciseId} to plan ${id}`)
     return res.status(201).send(planExercise)
   } catch (e) {
@@ -331,6 +409,7 @@ const updatePlanExercise = async (req, res) => {
   const { id, exerciseId } = req.params
   const userId = req.session.user.id
   const { sets, minReps, maxReps, targetWeight, restSeconds, notes } = req.body
+  const locale = getRequestLocale(req)
 
   try {
     const plan = await prisma.trainingPlan.findUnique({ where: { id } })
@@ -362,9 +441,19 @@ const updatePlanExercise = async (req, res) => {
     const updated = await prisma.planExercise.update({
       where: { id: planExercise.id },
       data: { sets, minReps, maxReps, targetWeight, restSeconds, notes },
-      include: { exercise: true }
+      include: {
+        exercise: {
+          include: {
+            translations: {
+              where: { locale },
+              select: { name: true, description: true }
+            }
+          }
+        }
+      }
     })
 
+    applyExerciseTranslations(updated.exercise)
     LOG.info(`Updated exercise ${exerciseId} in plan ${id}`)
     return res.status(200).send(updated)
   } catch (e) {

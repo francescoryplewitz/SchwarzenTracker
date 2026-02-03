@@ -7,7 +7,8 @@
     "roles": ["user"],
     "externalId": "user-001",
     "isActive": true,
-    "filterSettings": {}
+    "filterSettings": {},
+    "locale": "en"
   },
   {
     "id": 2,
@@ -17,6 +18,7 @@
     "roles": ["admin", "user"],
     "externalId": "admin-001",
     "isActive": true,
-    "filterSettings": {}
+    "filterSettings": {},
+    "locale": "en"
   }
 ]

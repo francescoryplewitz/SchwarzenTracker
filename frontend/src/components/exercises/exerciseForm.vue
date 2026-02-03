@@ -2,39 +2,39 @@
   <q-dialog v-model="dialogVisible" persistent data-test="exercise-form-dialog">
     <div class="form-dialog">
       <div class="dialog-header">
-        <span class="dialog-title" data-test="dialog-title">{{ isEdit ? 'Übung bearbeiten' : 'Neue Übung erstellen' }}</span>
+        <span class="dialog-title" data-test="dialog-title">{{ isEdit ? $t('exercises.form.titleEdit') : $t('exercises.form.titleCreate') }}</span>
         <button class="close-btn" data-test="close-btn" @click="close">
           <q-icon name="mdi-close" size="20px" />
-          <q-tooltip>Schließen</q-tooltip>
+          <q-tooltip>{{ $t('exercises.form.close') }}</q-tooltip>
         </button>
       </div>
 
       <div class="dialog-content">
         <q-form ref="formRef" class="form-fields">
           <div class="field-group">
-            <label class="field-label">Name *</label>
+            <label class="field-label">{{ $t('exercises.form.nameLabel') }}</label>
             <input
               v-model="form.name"
               type="text"
               class="text-input"
               data-test="name-input"
-              placeholder="Name der Übung"
+              :placeholder="$t('exercises.form.namePlaceholder')"
             >
           </div>
 
           <div class="field-group">
-            <label class="field-label">Beschreibung / Ausführung</label>
+            <label class="field-label">{{ $t('exercises.form.descriptionLabel') }}</label>
             <textarea
               v-model="form.description"
               class="textarea-input"
               data-test="description-input"
               rows="4"
-              placeholder="Beschreibe die Ausführung der Übung..."
+              :placeholder="$t('exercises.form.descriptionPlaceholder')"
             ></textarea>
           </div>
 
           <div class="field-group">
-            <label class="field-label">Muskelgruppen</label>
+            <label class="field-label">{{ $t('exercises.form.muscleGroupsLabel') }}</label>
             <div class="chip-select">
               <button
                 v-for="mg in muscleGroupOptions"
@@ -45,13 +45,13 @@
                 :data-test="`muscle-btn-${mg.value}`"
                 @click="toggleMuscleGroup(mg.value)"
               >
-                {{ mg.label }}
+                {{ $t(mg.labelKey) }}
               </button>
             </div>
           </div>
 
           <div class="field-group">
-            <label class="field-label">Kategorie *</label>
+            <label class="field-label">{{ $t('exercises.form.categoryLabel') }}</label>
             <div class="chip-select">
               <button
                 v-for="cat in categoryOptions"
@@ -62,13 +62,13 @@
                 :data-test="`category-btn-${cat.value}`"
                 @click="form.category = form.category === cat.value ? null : cat.value"
               >
-                {{ cat.label }}
+                {{ $t(cat.labelKey) }}
               </button>
             </div>
           </div>
 
           <div class="field-group">
-            <label class="field-label">Equipment</label>
+            <label class="field-label">{{ $t('exercises.form.equipmentLabel') }}</label>
             <div class="chip-select">
               <button
                 v-for="eq in equipmentOptions"
@@ -79,31 +79,31 @@
                 :data-test="`equipment-btn-${eq.value}`"
                 @click="form.equipment = form.equipment === eq.value ? null : eq.value"
               >
-                {{ eq.label }}
+                {{ $t(eq.labelKey) }}
               </button>
             </div>
           </div>
 
           <div class="field-group">
-            <label class="field-label">Video URL (optional)</label>
+            <label class="field-label">{{ $t('exercises.form.videoLabel') }}</label>
             <input
               v-model="form.videoUrl"
               type="url"
               class="text-input"
               data-test="video-input"
-              placeholder="https://..."
+              :placeholder="$t('exercises.form.videoPlaceholder')"
             >
           </div>
 
           <div class="field-group">
-            <label class="field-label">Empfohlene Pausenzeit (Sekunden)</label>
+            <label class="field-label">{{ $t('exercises.form.restLabel') }}</label>
             <input
               v-model.number="form.recommendedRestSeconds"
               type="number"
               min="0"
               class="text-input"
               data-test="rest-input"
-              placeholder="z.B. 90"
+              :placeholder="$t('exercises.form.restPlaceholder')"
             >
           </div>
         </q-form>
@@ -111,10 +111,10 @@
 
       <div class="dialog-actions">
         <button class="action-btn secondary" data-test="cancel-btn" @click="close">
-          Abbrechen
+          {{ $t('exercises.form.cancel') }}
         </button>
         <button class="action-btn primary" data-test="save-btn" @click="save">
-          Speichern
+          {{ $t('exercises.form.save') }}
         </button>
       </div>
     </div>
@@ -126,36 +126,36 @@ import { defineComponent, ref, reactive } from 'vue'
 import { api } from 'boot/axios'
 
 const muscleGroupOptions = [
-  { value: 'CHEST', label: 'Brust' },
-  { value: 'BACK', label: 'Rücken' },
-  { value: 'SHOULDERS', label: 'Schultern' },
-  { value: 'BICEPS', label: 'Bizeps' },
-  { value: 'TRICEPS', label: 'Trizeps' },
-  { value: 'FOREARMS', label: 'Unterarme' },
-  { value: 'ABS', label: 'Bauch' },
-  { value: 'OBLIQUES', label: 'Seitliche Bauchmuskeln' },
-  { value: 'QUADS', label: 'Oberschenkel' },
-  { value: 'HAMSTRINGS', label: 'Beinbeuger' },
-  { value: 'GLUTES', label: 'Gesäß' },
-  { value: 'CALVES', label: 'Waden' }
+  { value: 'CHEST', labelKey: 'muscleGroups.CHEST' },
+  { value: 'BACK', labelKey: 'muscleGroups.BACK' },
+  { value: 'SHOULDERS', labelKey: 'muscleGroups.SHOULDERS' },
+  { value: 'BICEPS', labelKey: 'muscleGroups.BICEPS' },
+  { value: 'TRICEPS', labelKey: 'muscleGroups.TRICEPS' },
+  { value: 'FOREARMS', labelKey: 'muscleGroups.FOREARMS' },
+  { value: 'ABS', labelKey: 'muscleGroups.ABS' },
+  { value: 'OBLIQUES', labelKey: 'muscleGroups.OBLIQUES' },
+  { value: 'QUADS', labelKey: 'muscleGroups.QUADS' },
+  { value: 'HAMSTRINGS', labelKey: 'muscleGroups.HAMSTRINGS' },
+  { value: 'GLUTES', labelKey: 'muscleGroups.GLUTES' },
+  { value: 'CALVES', labelKey: 'muscleGroups.CALVES' }
 ]
 
 const categoryOptions = [
-  { value: 'COMPOUND', label: 'Compound' },
-  { value: 'ISOLATION', label: 'Isolation' },
-  { value: 'CARDIO', label: 'Cardio' },
-  { value: 'STRETCHING', label: 'Dehnung' }
+  { value: 'COMPOUND', labelKey: 'categories.COMPOUND' },
+  { value: 'ISOLATION', labelKey: 'categories.ISOLATION' },
+  { value: 'CARDIO', labelKey: 'categories.CARDIO' },
+  { value: 'STRETCHING', labelKey: 'categories.STRETCHING' }
 ]
 
 const equipmentOptions = [
-  { value: 'BARBELL', label: 'Langhantel' },
-  { value: 'DUMBBELL', label: 'Kurzhantel' },
-  { value: 'MACHINE', label: 'Maschine' },
-  { value: 'CABLE', label: 'Kabelzug' },
-  { value: 'BODYWEIGHT', label: 'Körpergewicht' },
-  { value: 'KETTLEBELL', label: 'Kettlebell' },
-  { value: 'BAND', label: 'Widerstandsband' },
-  { value: 'OTHER', label: 'Sonstiges' }
+  { value: 'BARBELL', labelKey: 'equipment.BARBELL' },
+  { value: 'DUMBBELL', labelKey: 'equipment.DUMBBELL' },
+  { value: 'MACHINE', labelKey: 'equipment.MACHINE' },
+  { value: 'CABLE', labelKey: 'equipment.CABLE' },
+  { value: 'BODYWEIGHT', labelKey: 'equipment.BODYWEIGHT' },
+  { value: 'KETTLEBELL', labelKey: 'equipment.KETTLEBELL' },
+  { value: 'BAND', labelKey: 'equipment.BAND' },
+  { value: 'OTHER', labelKey: 'equipment.OTHER' }
 ]
 
 export default defineComponent({
