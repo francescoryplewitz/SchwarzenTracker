@@ -7,7 +7,8 @@ export default {
     dashboard: 'Dashboard',
     exercises: 'Übungen',
     plans: 'Pläne',
-    workouts: 'Workouts'
+    workouts: 'Workouts',
+    user: 'User'
   },
   common: {
     add: 'Hinzufügen',
