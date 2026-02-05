@@ -188,6 +188,14 @@ describe('Workout endpoints', () => {
       expect(result.data.sets[0].planExercise).to.have.property('exercise')
     })
 
+    it('should include exercise userNote when available', async () => {
+      await PATCH(`/exercises/${testExerciseId}/note`, { note: 'Don\'t bounce the reps' })
+      const result = await GET(`/workouts/${workoutIdForGet}`)
+      expect(result.status).to.equal(200)
+      expect(result.data.sets[0].planExercise.exercise.userNote).to.equal('Don\'t bounce the reps')
+      await PATCH(`/exercises/${testExerciseId}/note`, { note: '' })
+    })
+
     it('should return 404 for non-existent workout', async () => {
       const result = await GET('/workouts/non-existent-id')
       expect(result.status).to.equal(404)

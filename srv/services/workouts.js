@@ -9,6 +9,10 @@ const applyExerciseTranslations = (exercise) => {
     exercise.description = translation.description
   }
   delete exercise.translations
+
+  const note = exercise.exerciseNotes[0]?.note
+  exercise.userNote = note || null
+  delete exercise.exerciseNotes
 }
 
 const applyWorkoutTranslations = (workout) => {
@@ -116,6 +120,10 @@ const getActiveWorkout = async (req, res) => {
                     translations: {
                       where: { locale },
                       select: { name: true, description: true }
+                    },
+                    exerciseNotes: {
+                      where: { userId },
+                      select: { note: true }
                     }
                   }
                 }
@@ -159,6 +167,10 @@ const getWorkout = async (req, res) => {
                     translations: {
                       where: { locale },
                       select: { name: true, description: true }
+                    },
+                    exerciseNotes: {
+                      where: { userId },
+                      select: { note: true }
                     }
                   }
                 }
@@ -285,6 +297,10 @@ const createWorkout = async (req, res) => {
                     translations: {
                       where: { locale },
                       select: { name: true, description: true }
+                    },
+                    exerciseNotes: {
+                      where: { userId },
+                      select: { note: true }
                     }
                   }
                 }
@@ -401,6 +417,10 @@ const updateWorkoutStatus = async (req, res) => {
                     translations: {
                       where: { locale },
                       select: { name: true, description: true }
+                    },
+                    exerciseNotes: {
+                      where: { userId },
+                      select: { note: true }
                     }
                   }
                 }

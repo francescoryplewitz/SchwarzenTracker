@@ -69,6 +69,12 @@
                   @update="onSetUpdate"
                 />
               </div>
+
+              <workout-exercise-note
+                :exercise-id="group.exerciseId"
+                :note="group.userNote"
+                @saved="note => onNoteSaved(group.exerciseId, note)"
+              />
             </div>
           </div>
         </template>
@@ -103,6 +109,7 @@ import { api } from 'boot/axios'
 import WorkoutSetItem from 'components/workouts/workoutSetItem.vue'
 import WorkoutRestTimer from 'components/workouts/workoutRestTimer.vue'
 import WorkoutSummary from 'components/workouts/workoutSummary.vue'
+import WorkoutExerciseNote from 'components/workouts/workoutExerciseNote.vue'
 
 export default defineComponent({
   name: 'WorkoutActivePage',
@@ -110,7 +117,8 @@ export default defineComponent({
   components: {
     WorkoutSetItem,
     WorkoutRestTimer,
-    WorkoutSummary
+    WorkoutSummary,
+    WorkoutExerciseNote
   },
 
   setup() {
@@ -150,11 +158,12 @@ export default defineComponent({
 
       const groups = {}
       for (const set of workout.value.sets) {
-        const exerciseId = set.planExercise.id
+        const exerciseId = set.planExercise.exercise.id
         if (!groups[exerciseId]) {
           groups[exerciseId] = {
             exerciseId,
             exerciseName: set.planExercise.exercise.name,
+            userNote: set.planExercise.exercise.userNote,
             sets: [],
             completedCount: 0
           }
@@ -214,6 +223,13 @@ export default defineComponent({
       }
     }
 
+    const onNoteSaved = (exerciseId, note) => {
+      for (const set of workout.value.sets) {
+        if (set.planExercise.exercise.id !== exerciseId) continue
+        set.planExercise.exercise.userNote = note
+      }
+    }
+
     const skipRest = () => {
       restTimerActive.value = false
     }
@@ -258,6 +274,7 @@ export default defineComponent({
       completeWorkout,
       onSetComplete,
       onSetUpdate,
+      onNoteSaved,
       skipRest,
       onRestDone
     }

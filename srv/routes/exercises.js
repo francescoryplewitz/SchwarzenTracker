@@ -36,6 +36,10 @@ module.exports = (app) => {
     recommendedRestSeconds: { type: 'NUMBER' }
   }), service.updateExercise)
 
+  app.patch('/api/exercises/:id/note', authorize(['user']), validate({
+    note: { type: 'STRING', required: true }
+  }), service.updateExerciseNote)
+
   app.delete('/api/exercises/:id', authorize(['user']), service.deleteExercise)
 
   app.post('/api/exercises/:id/fork', authorize(['user']), service.forkExercise)

@@ -25,6 +25,7 @@ model User {
   // Exercise relations
   createdExercises  Exercise[]
   exerciseFavorites UserExerciseFavorite[]
+  exerciseNotes     ExerciseNote[]
 
   // Plan relations
   createdPlans   TrainingPlan[]
@@ -73,7 +74,21 @@ model Exercise {
 
   // Relations
   userFavorites UserExerciseFavorite[]
+  exerciseNotes ExerciseNote[]
   planExercises PlanExercise[]
+}
+
+model ExerciseNote {
+  id         String   @id @default(cuid())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  note       String   @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, exerciseId])
 }
 
 model ExerciseVariant {

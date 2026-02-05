@@ -43,6 +43,11 @@
           <span class="exercise-sets">{{ group.completedCount }}/{{ group.sets.length }} {{ $t('units.sets') }}</span>
         </div>
 
+        <div v-if="group.userNote" class="exercise-note" data-test="exercise-note">
+          <div class="note-label">{{ $t('workouts.notes.label') }}</div>
+          <div class="note-text">{{ group.userNote }}</div>
+        </div>
+
         <div class="sets-summary">
           <div v-for="set in group.sets.filter(s => s.completedAt)" :key="set.id" class="set-row">
             <span class="set-number">{{ set.setNumber }}.</span>
@@ -257,6 +262,29 @@ export default defineComponent({
 .exercise-sets {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.4);
+}
+
+.exercise-note {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+.note-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 6px;
+}
+
+.note-text {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: pre-wrap;
 }
 
 .sets-summary {

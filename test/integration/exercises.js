@@ -147,6 +147,41 @@ describe('Exercise endpoints', () => {
     })
   })
 
+  describe('PATCH /exercises/:id/note', () => {
+    it('should set a note for an exercise', async () => {
+      const result = await PATCH(`/exercises/${createdExerciseId}/note`, {
+        note: 'Keep elbows tucked'
+      })
+      expect(result.status).to.equal(200)
+      expect(result.data.exerciseId).to.equal(createdExerciseId)
+      expect(result.data.note).to.equal('Keep elbows tucked')
+    })
+
+    it('should overwrite an existing note', async () => {
+      await PATCH(`/exercises/${createdExerciseId}/note`, {
+        note: 'Initial note'
+      })
+
+      const result = await PATCH(`/exercises/${createdExerciseId}/note`, {
+        note: 'Updated note'
+      })
+      expect(result.status).to.equal(200)
+      expect(result.data.note).to.equal('Updated note')
+    })
+
+    it('should delete the note when empty', async () => {
+      await PATCH(`/exercises/${createdExerciseId}/note`, {
+        note: 'Some note'
+      })
+
+      const result = await PATCH(`/exercises/${createdExerciseId}/note`, {
+        note: '   '
+      })
+      expect(result.status).to.equal(200)
+      expect(result.data.note).to.equal(null)
+    })
+  })
+
   describe('POST /exercises/:id/fork', () => {
     it('should fork existing exercise', async () => {
       const result = await POST(`/exercises/${systemExerciseId}/fork`)

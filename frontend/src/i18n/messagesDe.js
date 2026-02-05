@@ -325,6 +325,17 @@ export default {
       subtitle: 'Wähle einen Trainingsplan',
       empty: 'Du hast noch keine Trainingspläne',
       error: 'Fehler beim Laden der Pläne'
+    },
+    notes: {
+      label: 'Notiz',
+      add: 'Notiz hinzufügen',
+      edit: 'Notiz bearbeiten',
+      title: 'Übungsnotiz',
+      placeholder: 'Schreib hier Deine Notiz...',
+      saving: 'Speichere...',
+      saved: 'Gespeichert',
+      error: 'Konnte Notiz nicht speichern',
+      done: 'Fertig'
     }
   },
   errors: {

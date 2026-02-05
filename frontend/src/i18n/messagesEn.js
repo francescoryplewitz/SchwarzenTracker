@@ -325,6 +325,17 @@ export default {
       subtitle: 'Choose a training plan',
       empty: 'You do not have any training plans yet',
       error: 'Failed to load plans'
+    },
+    notes: {
+      label: 'Note',
+      add: 'Add note',
+      edit: 'Edit note',
+      title: 'Exercise note',
+      placeholder: 'Write your note...',
+      saving: 'Saving...',
+      saved: 'Saved',
+      error: 'Could not save note',
+      done: 'Done'
     }
   },
   errors: {

@@ -239,6 +239,46 @@ const deleteExercise = async (req, res) => {
   }
 }
 
+const updateExerciseNote = async (req, res) => {
+  const { id } = req.params
+  const userId = req.session.user.id
+  const { note } = req.body
+
+  try {
+    const exercise = await prisma.exercise.findUnique({
+      where: { id },
+      select: { id: true }
+    })
+
+    if (!exercise) {
+      LOG.info(`Exercise ${id} not found for note update`)
+      return res.status(404).send()
+    }
+
+    const trimmedNote = note.trim()
+
+    if (!trimmedNote) {
+      await prisma.exerciseNote.deleteMany({
+        where: { userId, exerciseId: id }
+      })
+      LOG.info(`Deleted note for exercise ${id} by user ${userId}`)
+      return res.status(200).send({ exerciseId: id, note: null })
+    }
+
+    const saved = await prisma.exerciseNote.upsert({
+      where: { userId_exerciseId: { userId, exerciseId: id } },
+      update: { note: trimmedNote },
+      create: { userId, exerciseId: id, note: trimmedNote }
+    })
+
+    LOG.info(`Updated note for exercise ${id} by user ${userId}`)
+    return res.status(200).send({ exerciseId: id, note: saved.note })
+  } catch (e) {
+    LOG.error(`Could not update note for exercise ${id}: ${e}`)
+    return res.status(400).send()
+  }
+}
+
 const forkExercise = async (req, res) => {
   const { id } = req.params
   const userId = req.session.user.id
@@ -376,6 +416,7 @@ module.exports = {
   getExercise,
   createExercise,
   updateExercise,
+  updateExerciseNote,
   deleteExercise,
   forkExercise,
   addVariant,
