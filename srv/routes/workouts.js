@@ -18,7 +18,8 @@ module.exports = (app) => {
   }), service.createWorkout)
 
   app.patch('/api/workouts/:id', authorize(['user']), validate({
-    action: { type: 'STRING', required: true }
+    action: { type: 'STRING', required: true },
+    forceComplete: { type: 'BOOLEAN' }
   }), service.updateWorkoutStatus)
 
   app.patch('/api/workouts/:id/sets/:setId', authorize(['user']), validate({

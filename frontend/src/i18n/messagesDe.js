@@ -311,6 +311,14 @@ export default {
       cancel: 'Zurück',
       confirm: 'Abbrechen'
     },
+    finishWarning: {
+      title: 'Workout wirklich beenden?',
+      text: 'Nicht alle Sätze sind abgeschlossen. Wenn Du trotzdem beendest, werden die fehlenden Sätze mit 0 Wiederholungen gespeichert.',
+      missingTitle: 'Fehlende Sätze',
+      setLabel: 'Satz {number}',
+      cancel: 'Zurück',
+      confirm: 'Trotzdem beenden'
+    },
     setItem: {
       weight: 'Gewicht',
       reps: 'Wdh',

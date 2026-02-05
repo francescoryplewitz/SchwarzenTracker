@@ -311,6 +311,14 @@ export default {
       cancel: 'Back',
       confirm: 'Abandon'
     },
+    finishWarning: {
+      title: 'Finish workout anyway?',
+      text: 'Not all sets are completed. If you finish anyway, the missing sets will be saved with 0 reps.',
+      missingTitle: 'Missing sets',
+      setLabel: 'Set {number}',
+      cancel: 'Back',
+      confirm: 'Finish anyway'
+    },
     setItem: {
       weight: 'Weight',
       reps: 'Reps',

@@ -58,7 +58,7 @@ describe('Workout endpoints', () => {
 
     it('should return 404 for non-existent plan', async () => {
       // First complete the active workout
-      await PATCH(`/workouts/${createdWorkoutId}`, { action: 'complete' })
+      await PATCH(`/workouts/${createdWorkoutId}`, { action: 'complete', forceComplete: true })
 
       const result = await POST('/workouts', { planId: 'non-existent-plan-id' })
       expect(result.status).to.equal(404)
@@ -160,7 +160,7 @@ describe('Workout endpoints', () => {
     it('should return null when no active workout', async () => {
       // Complete the active workout first
       if (createdWorkoutId) {
-        await PATCH(`/workouts/${createdWorkoutId}`, { action: 'complete' })
+        await PATCH(`/workouts/${createdWorkoutId}`, { action: 'complete', forceComplete: true })
       }
 
       const result = await GET('/workouts/active')
@@ -214,7 +214,7 @@ describe('Workout endpoints', () => {
 
     after(async () => {
       if (workoutIdForGet) {
-        await PATCH(`/workouts/${workoutIdForGet}`, { action: 'complete' })
+        await PATCH(`/workouts/${workoutIdForGet}`, { action: 'complete', forceComplete: true })
       }
     })
   })
@@ -255,10 +255,16 @@ describe('Workout endpoints', () => {
     })
 
     it('should complete a workout', async () => {
-      const result = await PATCH(`/workouts/${statusWorkoutId}`, { action: 'complete' })
+      const result = await PATCH(`/workouts/${statusWorkoutId}`, { action: 'complete', forceComplete: true })
       expect(result.status).to.equal(200)
       expect(result.data.status).to.equal('COMPLETED')
       expect(result.data.completedAt).to.not.equal(null)
+    })
+
+    it('should require forceComplete when sets are missing', async () => {
+      const result = await PATCH(`/workouts/${statusWorkoutId}`, { action: 'complete' })
+      expect(result.status).to.equal(409)
+      expect(result.data.error).to.include('Nicht alle Sätze')
     })
 
     it('should abandon a workout', async () => {
@@ -280,14 +286,14 @@ describe('Workout endpoints', () => {
     })
 
     it('should return 404 for non-existent workout', async () => {
-      const result = await PATCH('/workouts/non-existent-id', { action: 'complete' })
+      const result = await PATCH('/workouts/non-existent-id', { action: 'complete', forceComplete: true })
       expect(result.status).to.equal(404)
     })
 
     it('should return 403 for workout owned by another user', async () => {
       await server.setAuth('standard')
 
-      const result = await PATCH(`/workouts/${statusWorkoutId}`, { action: 'complete' })
+      const result = await PATCH(`/workouts/${statusWorkoutId}`, { action: 'complete', forceComplete: true })
       expect(result.status).to.equal(403)
 
       await server.setAuth('admin')
@@ -362,7 +368,7 @@ describe('Workout endpoints', () => {
 
     after(async () => {
       if (setWorkoutId) {
-        await PATCH(`/workouts/${setWorkoutId}`, { action: 'complete' })
+        await PATCH(`/workouts/${setWorkoutId}`, { action: 'complete', forceComplete: true })
       }
     })
   })
@@ -428,7 +434,7 @@ describe('Workout endpoints', () => {
 
     after(async () => {
       if (completeWorkoutId) {
-        await PATCH(`/workouts/${completeWorkoutId}`, { action: 'complete' })
+        await PATCH(`/workouts/${completeWorkoutId}`, { action: 'complete', forceComplete: true })
       }
     })
   })
@@ -440,7 +446,7 @@ describe('Workout endpoints', () => {
       const result = await POST('/workouts', { planId: testPlanId })
       deleteWorkoutId = result.data.id
       // Complete it so we can create another one if needed
-      await PATCH(`/workouts/${deleteWorkoutId}`, { action: 'complete' })
+      await PATCH(`/workouts/${deleteWorkoutId}`, { action: 'complete', forceComplete: true })
     })
 
     it('should delete own workout', async () => {
@@ -501,7 +507,7 @@ describe('Workout endpoints', () => {
 
     after(async () => {
       if (durationWorkoutId) {
-        await PATCH(`/workouts/${durationWorkoutId}`, { action: 'complete' })
+        await PATCH(`/workouts/${durationWorkoutId}`, { action: 'complete', forceComplete: true })
       }
     })
   })

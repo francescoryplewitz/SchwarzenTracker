@@ -338,7 +338,7 @@ const createWorkout = async (req, res) => {
 const updateWorkoutStatus = async (req, res) => {
   const { id } = req.params
   const userId = req.session.user.id
-  const { action } = req.body
+  const { action, forceComplete } = req.body
   const locale = getRequestLocale(req)
 
   try {
@@ -384,6 +384,17 @@ const updateWorkoutStatus = async (req, res) => {
         if (!['IN_PROGRESS', 'PAUSED'].includes(workout.status)) {
           return res.status(400).send({ error: 'Workout kann nicht abgeschlossen werden' })
         }
+        if (!forceComplete) {
+          const missingSets = await prisma.workoutSet.count({
+            where: {
+              workoutId: id,
+              completedAt: null
+            }
+          })
+          if (missingSets > 0) {
+            return res.status(409).send({ error: 'Nicht alle Sätze sind abgeschlossen. Möchtest Du trotzdem beenden?' })
+          }
+        }
         let finalPausedMs = workout.totalPausedMs
         if (workout.pausedAt) {
           finalPausedMs += Date.now() - new Date(workout.pausedAt).getTime()
@@ -420,6 +431,17 @@ const updateWorkoutStatus = async (req, res) => {
 
     const updated = action === 'complete'
       ? await prisma.$transaction(async (tx) => {
+        if (forceComplete) {
+          await tx.workoutSet.updateMany({
+            where: {
+              workoutId: id,
+              completedAt: null
+            },
+            data: {
+              reps: 0
+            }
+          })
+        }
         const updatedWorkout = await tx.workout.update({
           where: { id },
           data: updateData,

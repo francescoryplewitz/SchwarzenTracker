@@ -37,7 +37,7 @@
                 <q-icon name="mdi-close" size="18px" />
                 <q-tooltip>{{ $t('workouts.abandon') }}</q-tooltip>
               </button>
-              <button class="action-btn complete-btn" data-test="complete-btn" @click="completeWorkout">
+              <button class="action-btn complete-btn" data-test="complete-btn" @click="confirmComplete">
                 <q-icon name="mdi-check" size="18px" />
                 {{ $t('workouts.finish') }}
               </button>
@@ -99,6 +99,32 @@
         </div>
       </div>
     </q-dialog>
+
+    <q-dialog v-model="showCompleteDialog" class="complete-dialog">
+      <div class="dialog-card glass-card">
+        <h3 class="dialog-title">{{ $t('workouts.finishWarning.title') }}</h3>
+        <p class="dialog-text">{{ $t('workouts.finishWarning.text') }}</p>
+        <div v-if="missingSetGroups.length" class="missing-sets">
+          <div class="missing-title">{{ $t('workouts.finishWarning.missingTitle') }}</div>
+          <div v-for="group in missingSetGroups" :key="group.exerciseId" class="missing-group">
+            <div class="missing-exercise">{{ group.exerciseName }}</div>
+            <div class="missing-set-list">
+              <span
+                v-for="setNumber in group.setNumbers"
+                :key="`${group.exerciseId}-${setNumber}`"
+                class="missing-set"
+              >
+                {{ $t('workouts.finishWarning.setLabel', { number: setNumber }) }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="dialog-actions">
+          <button class="cancel-btn" @click="showCompleteDialog = false">{{ $t('workouts.finishWarning.cancel') }}</button>
+          <button class="confirm-btn" @click="completeWorkout(true)">{{ $t('workouts.finishWarning.confirm') }}</button>
+        </div>
+      </div>
+    </q-dialog>
   </div>
 </template>
 
@@ -126,6 +152,7 @@ export default defineComponent({
     const workout = ref(null)
     const loading = ref(true)
     const showAbandonDialog = ref(false)
+    const showCompleteDialog = ref(false)
     const restTimerActive = ref(false)
     const restSeconds = ref(0)
     const timerInterval = ref(null)
@@ -175,6 +202,19 @@ export default defineComponent({
       return Object.values(groups)
     })
 
+    const missingSetGroups = computed(() => {
+      return groupedSets.value.map(group => {
+        const missingSets = group.sets.filter(set => !set.completedAt)
+        return {
+          exerciseId: group.exerciseId,
+          exerciseName: group.exerciseName,
+          setNumbers: missingSets.map(set => set.setNumber)
+        }
+      }).filter(group => group.setNumbers.length > 0)
+    })
+
+    const hasMissingSets = computed(() => missingSetGroups.value.length > 0)
+
     const fetchWorkout = async () => {
       loading.value = true
       const { data } = await api.get(`/api/workouts/${route.params.id}`)
@@ -198,9 +238,30 @@ export default defineComponent({
       showAbandonDialog.value = false
     }
 
-    const completeWorkout = async () => {
-      const { data } = await api.patch(`/api/workouts/${workout.value.id}`, { action: 'complete' })
-      workout.value = data
+    const confirmComplete = () => {
+      if (hasMissingSets.value) {
+        showCompleteDialog.value = true
+        return
+      }
+      completeWorkout()
+    }
+
+    const completeWorkout = async (forceComplete = false) => {
+      try {
+        const payload = { action: 'complete' }
+        if (forceComplete) {
+          payload.forceComplete = true
+        }
+        const { data } = await api.patch(`/api/workouts/${workout.value.id}`, payload)
+        workout.value = data
+        showCompleteDialog.value = false
+      } catch (e) {
+        if (e.response?.status === 409) {
+          showCompleteDialog.value = true
+          return
+        }
+        throw e
+      }
     }
 
     const onSetComplete = (result) => {
@@ -264,13 +325,16 @@ export default defineComponent({
       workout,
       loading,
       showAbandonDialog,
+      showCompleteDialog,
       restTimerActive,
       restSeconds,
       formattedDuration,
       groupedSets,
+      missingSetGroups,
       togglePause,
       confirmAbandon,
       abandonWorkout,
+      confirmComplete,
       completeWorkout,
       onSetComplete,
       onSetUpdate,
@@ -492,6 +556,51 @@ export default defineComponent({
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+}
+
+.missing-sets {
+  margin: 16px 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.missing-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.missing-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.missing-exercise {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+
+.missing-set-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.missing-set {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 82, 82, 0.15);
+  border: 1px solid rgba(255, 82, 82, 0.25);
+  padding: 4px 8px;
+  border-radius: 999px;
 }
 
 .cancel-btn {
