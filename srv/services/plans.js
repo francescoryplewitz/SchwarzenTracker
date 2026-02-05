@@ -20,6 +20,21 @@ const applyPlanTranslations = (plan) => {
   delete plan.translations
 }
 
+const buildPlanSetsData = (sets, minReps, maxReps, targetWeight) => {
+  const planSets = []
+
+  for (let i = 1; i <= sets; i += 1) {
+    planSets.push({
+      setNumber: i,
+      targetWeight,
+      targetMinReps: minReps,
+      targetMaxReps: maxReps
+    })
+  }
+
+  return planSets
+}
+
 const calculatePlanDuration = (exercises) => {
   if (!exercises || exercises.length === 0) return 0
 
@@ -148,6 +163,9 @@ const getPlan = async (req, res) => {
         exercises: {
           orderBy: { sortOrder: 'asc' },
           include: {
+            planSets: {
+              orderBy: { setNumber: 'asc' }
+            },
             exercise: {
               include: {
                 translations: {
@@ -285,7 +303,13 @@ const copyPlan = async (req, res) => {
           where: { locale },
           select: { name: true, description: true }
         },
-        exercises: true
+        exercises: {
+          include: {
+            planSets: {
+              orderBy: { setNumber: 'asc' }
+            }
+          }
+        }
       }
     })
 
@@ -313,7 +337,15 @@ const copyPlan = async (req, res) => {
             maxReps: e.maxReps,
             targetWeight: e.targetWeight,
             restSeconds: e.restSeconds,
-            notes: e.notes
+            notes: e.notes,
+            planSets: {
+              create: e.planSets.map(planSet => ({
+                setNumber: planSet.setNumber,
+                targetWeight: planSet.targetWeight,
+                targetMinReps: planSet.targetMinReps,
+                targetMaxReps: planSet.targetMaxReps
+              }))
+            }
           }))
         }
       },
@@ -382,7 +414,15 @@ const addExercise = async (req, res) => {
         maxReps: maxReps || 12,
         targetWeight,
         restSeconds,
-        notes
+        notes,
+        planSets: {
+          create: buildPlanSetsData(
+            sets || 3,
+            minReps || 8,
+            maxReps || 12,
+            targetWeight || null
+          )
+        }
       },
       include: {
         exercise: {
@@ -438,19 +478,31 @@ const updatePlanExercise = async (req, res) => {
       return res.status(404).send()
     }
 
-    const updated = await prisma.planExercise.update({
-      where: { id: planExercise.id },
-      data: { sets, minReps, maxReps, targetWeight, restSeconds, notes },
-      include: {
-        exercise: {
-          include: {
-            translations: {
-              where: { locale },
-              select: { name: true, description: true }
+    const updated = await prisma.$transaction(async (tx) => {
+      const updatedExercise = await tx.planExercise.update({
+        where: { id: planExercise.id },
+        data: { sets, minReps, maxReps, targetWeight, restSeconds, notes },
+        include: {
+          exercise: {
+            include: {
+              translations: {
+                where: { locale },
+                select: { name: true, description: true }
+              }
             }
           }
         }
-      }
+      })
+
+      await tx.planExerciseSet.deleteMany({ where: { planExerciseId: planExercise.id } })
+      await tx.planExerciseSet.createMany({
+        data: buildPlanSetsData(sets, minReps, maxReps, targetWeight || null).map(planSet => ({
+          ...planSet,
+          planExerciseId: planExercise.id
+        }))
+      })
+
+      return updatedExercise
     })
 
     applyExerciseTranslations(updated.exercise)

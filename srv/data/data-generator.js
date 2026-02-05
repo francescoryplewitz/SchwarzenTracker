@@ -33,6 +33,8 @@ const resetEntities = async () => {
       prisma.workoutSet.deleteMany(),
       prisma.workout.deleteMany(),
       // Plans (PlanExercise references Exercise and TrainingPlan)
+      prisma.planExerciseProgressSet.deleteMany(),
+      prisma.planExerciseSet.deleteMany(),
       prisma.planExercise.deleteMany(),
       prisma.userPlanFavorite.deleteMany(),
       prisma.trainingPlanTranslation.deleteMany(),

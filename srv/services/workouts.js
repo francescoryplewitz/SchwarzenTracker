@@ -230,6 +230,13 @@ const createWorkout = async (req, res) => {
         exercises: {
           orderBy: { sortOrder: 'asc' },
           include: {
+            planSets: {
+              orderBy: { setNumber: 'asc' }
+            },
+            progressSets: {
+              where: { userId },
+              orderBy: { setNumber: 'asc' }
+            },
             exercise: {
               include: {
                 translations: {
@@ -259,13 +266,21 @@ const createWorkout = async (req, res) => {
     let sortOrder = 0
 
     for (const planExercise of plan.exercises) {
-      for (let setNumber = 1; setNumber <= planExercise.sets; setNumber++) {
+      const progressMap = {}
+      for (const progressSet of planExercise.progressSets) {
+        progressMap[progressSet.setNumber] = progressSet
+      }
+
+      for (const planSet of planExercise.planSets) {
+        const progressSet = progressMap[planSet.setNumber]
         setsData.push({
           planExerciseId: planExercise.id,
-          setNumber,
-          targetWeight: planExercise.targetWeight,
-          targetMinReps: planExercise.minReps,
-          targetMaxReps: planExercise.maxReps,
+          setNumber: planSet.setNumber,
+          targetWeight: planSet.targetWeight,
+          targetMinReps: planSet.targetMinReps,
+          targetMaxReps: planSet.targetMaxReps,
+          weight: progressSet ? progressSet.weight : null,
+          reps: progressSet ? progressSet.reps : null,
           restSeconds: planExercise.restSeconds || planExercise.exercise.recommendedRestSeconds || 90,
           sortOrder: sortOrder++
         })
@@ -403,24 +418,104 @@ const updateWorkoutStatus = async (req, res) => {
         return res.status(400).send({ error: 'Ungültige Aktion' })
     }
 
-    const updated = await prisma.workout.update({
-      where: { id },
-      data: updateData,
-      include: {
-        sets: {
-          orderBy: { sortOrder: 'asc' },
+    const updated = action === 'complete'
+      ? await prisma.$transaction(async (tx) => {
+        const updatedWorkout = await tx.workout.update({
+          where: { id },
+          data: updateData,
           include: {
-            planExercise: {
+            sets: {
+              orderBy: { sortOrder: 'asc' },
               include: {
-                exercise: {
+                planExercise: {
                   include: {
-                    translations: {
-                      where: { locale },
-                      select: { name: true, description: true }
-                    },
-                    exerciseNotes: {
-                      where: { userId },
-                      select: { note: true }
+                    exercise: {
+                      include: {
+                        translations: {
+                          where: { locale },
+                          select: { name: true, description: true }
+                        },
+                        exerciseNotes: {
+                          where: { userId },
+                          select: { note: true }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        })
+
+        const completedSets = await tx.workoutSet.findMany({
+          where: {
+            workoutId: id,
+            completedAt: { not: null },
+            reps: { not: null }
+          },
+          orderBy: [
+            { planExerciseId: 'asc' },
+            { setNumber: 'asc' }
+          ]
+        })
+
+        const planExerciseIds = []
+        const progressSetsData = []
+        let currentPlanExerciseId = null
+        let currentSetNumber = 0
+
+        for (const set of completedSets) {
+          if (set.planExerciseId !== currentPlanExerciseId) {
+            currentPlanExerciseId = set.planExerciseId
+            currentSetNumber = 0
+            planExerciseIds.push(currentPlanExerciseId)
+          }
+
+          currentSetNumber += 1
+          progressSetsData.push({
+            userId,
+            planExerciseId: currentPlanExerciseId,
+            setNumber: currentSetNumber,
+            weight: set.weight,
+            reps: set.reps
+          })
+        }
+
+        if (planExerciseIds.length > 0) {
+          await tx.planExerciseProgressSet.deleteMany({
+            where: {
+              userId,
+              planExerciseId: { in: planExerciseIds }
+            }
+          })
+        }
+
+        if (progressSetsData.length > 0) {
+          await tx.planExerciseProgressSet.createMany({ data: progressSetsData })
+        }
+
+        return updatedWorkout
+      })
+      : await prisma.workout.update({
+        where: { id },
+        data: updateData,
+        include: {
+          sets: {
+            orderBy: { sortOrder: 'asc' },
+            include: {
+              planExercise: {
+                include: {
+                  exercise: {
+                    include: {
+                      translations: {
+                        where: { locale },
+                        select: { name: true, description: true }
+                      },
+                      exerciseNotes: {
+                        where: { userId },
+                        select: { note: true }
+                      }
                     }
                   }
                 }
@@ -428,8 +523,7 @@ const updateWorkoutStatus = async (req, res) => {
             }
           }
         }
-      }
-    })
+      })
 
     applyWorkoutTranslations(updated)
     LOG.info(`Updated workout ${id} status to ${updated.status}`)
@@ -479,6 +573,10 @@ const updateSet = async (req, res) => {
                 translations: {
                   where: { locale },
                   select: { name: true, description: true }
+                },
+                exerciseNotes: {
+                  where: { userId },
+                  select: { note: true }
                 }
               }
             }
@@ -540,6 +638,10 @@ const completeSet = async (req, res) => {
                 translations: {
                   where: { locale },
                   select: { name: true, description: true }
+                },
+                exerciseNotes: {
+                  where: { userId },
+                  select: { note: true }
                 }
               }
             }

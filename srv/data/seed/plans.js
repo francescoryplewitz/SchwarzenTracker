@@ -161,6 +161,21 @@ const upsertPlanTranslations = async (planId, translations) => {
   )
 }
 
+const buildPlanSetsData = (sets, minReps, maxReps, targetWeight) => {
+  const planSets = []
+
+  for (let i = 1; i <= sets; i += 1) {
+    planSets.push({
+      setNumber: i,
+      targetWeight,
+      targetMinReps: minReps,
+      targetMaxReps: maxReps
+    })
+  }
+
+  return planSets
+}
+
 async function seedPlans () {
   try {
     console.log('Seeding training plans...')
@@ -222,7 +237,15 @@ async function seedPlans () {
               minReps: ex.minReps,
               maxReps: ex.maxReps,
               restSeconds: ex.restSeconds,
-              targetWeight: ex.targetWeight
+              targetWeight: ex.targetWeight,
+              planSets: {
+                create: buildPlanSetsData(
+                  ex.sets,
+                  ex.minReps,
+                  ex.maxReps,
+                  ex.targetWeight
+                )
+              }
             }))
           }
         }

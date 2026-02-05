@@ -33,6 +33,9 @@ model User {
 
   // Workout relations
   workouts       Workout[]
+
+  // Progress relations
+  planExerciseProgressSets PlanExerciseProgressSet[]
 }
 
 // ============================================
@@ -230,12 +233,47 @@ model PlanExercise {
   restSeconds  Int?
   notes        String?  @db.Text
 
+  planSets     PlanExerciseSet[]
+  progressSets PlanExerciseProgressSet[]
   workoutSets  WorkoutSet[]
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   @@unique([planId, exerciseId])
+}
+
+model PlanExerciseProgressSet {
+  id             String   @id @default(cuid())
+  userId         Int
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planExerciseId String
+  planExercise   PlanExercise @relation(fields: [planExerciseId], references: [id], onDelete: Cascade)
+
+  setNumber      Int
+  weight         Float?
+  reps           Int
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, planExerciseId, setNumber])
+}
+
+model PlanExerciseSet {
+  id             String   @id @default(cuid())
+  planExerciseId String
+  planExercise   PlanExercise @relation(fields: [planExerciseId], references: [id], onDelete: Cascade)
+
+  setNumber      Int
+  targetWeight   Float?
+  targetMinReps  Int
+  targetMaxReps  Int
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([planExerciseId, setNumber])
 }
 
 model UserPlanFavorite {

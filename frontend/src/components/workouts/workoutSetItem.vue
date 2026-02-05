@@ -138,10 +138,16 @@ export default defineComponent({
       return val.toFixed(1).replace('.', ',')
     }
 
+    const normalizeNumber = (value) => {
+      if (value === null || value === undefined) return null
+      const parsed = typeof value === 'number' ? value : Number(value)
+      return Number.isNaN(parsed) ? null : parsed
+    }
+
     const saveValues = async () => {
       await api.patch(`/api/workouts/${props.workoutId}/sets/${props.set.id}`, {
-        weight: localWeight.value,
-        reps: localReps.value
+        weight: normalizeNumber(localWeight.value),
+        reps: normalizeNumber(localReps.value)
       })
     }
 
