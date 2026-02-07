@@ -299,11 +299,15 @@ export default {
     summary: {
       duration: 'Duration',
       sets: 'Sets',
+      personalRecords: 'Personal records',
       volume: 'Volume (kg)',
       exercises: 'Exercises',
       noSets: 'No sets completed',
       completedTitle: 'Workout completed!',
-      abandonedTitle: 'Workout abandoned'
+      abandonedTitle: 'Workout abandoned',
+      personalRecordsTitle: 'Personal records',
+      personalRecordWeight: 'PR: +{value} {unit}',
+      personalRecordReps: 'PR: +{value} reps'
     },
     abandonDialog: {
       title: 'Abandon workout?',

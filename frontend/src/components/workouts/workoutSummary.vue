@@ -17,13 +17,13 @@
 
       <div class="stat-card glass-card">
         <q-icon name="mdi-checkbox-marked-circle-outline" size="24px" class="stat-icon" />
-        <div class="stat-value">{{ completedSets }}/{{ totalSets }}</div>
-        <div class="stat-label">{{ $t('workouts.summary.sets') }}</div>
+        <div class="stat-value">{{ personalRecordCount }}</div>
+        <div class="stat-label">{{ $t('workouts.summary.personalRecords') }}</div>
       </div>
 
       <div class="stat-card glass-card">
         <q-icon name="mdi-weight-kilogram" size="24px" class="stat-icon" />
-        <div class="stat-value">{{ totalVolume.toLocaleString('de-DE') }}</div>
+        <div class="stat-value">{{ totalVolume }}</div>
         <div class="stat-label">{{ $t('workouts.summary.volume') }}</div>
       </div>
 
@@ -31,6 +31,14 @@
         <q-icon name="mdi-dumbbell" size="24px" class="stat-icon" />
         <div class="stat-value">{{ exerciseCount }}</div>
         <div class="stat-label">{{ $t('workouts.summary.exercises') }}</div>
+      </div>
+    </div>
+
+    <div v-if="personalRecords.length" class="records-summary glass-card">
+      <h2 class="section-title">{{ $t('workouts.summary.personalRecordsTitle') }}</h2>
+      <div v-for="record in personalRecords" :key="record.planExerciseId" class="record-item">
+        <div class="record-name">{{ record.exerciseName }}</div>
+        <div class="record-value">{{ personalRecordLabel(record) }}</div>
       </div>
     </div>
 
@@ -114,16 +122,16 @@ export default defineComponent({
       return `${minutes}:${seconds.toString().padStart(2, '0')}`
     })
 
-    const completedSets = computed(() => {
-      return props.workout.sets.filter(s => s.completedAt).length
-    })
-
-    const totalSets = computed(() => {
-      return props.workout.sets.length
-    })
-
     const exerciseCount = computed(() => {
       return props.groupedSets.length
+    })
+
+    const personalRecords = computed(() => {
+      return props.workout.personalRecords
+    })
+
+    const personalRecordCount = computed(() => {
+      return personalRecords.value.length
     })
 
     const totalVolume = computed(() => {
@@ -136,15 +144,33 @@ export default defineComponent({
       return new Intl.NumberFormat(locale.value).format(totalVolume.value)
     })
 
+    const formatNumber = (value) => {
+      return new Intl.NumberFormat(locale.value, { maximumFractionDigits: 2 }).format(value)
+    }
+
+    const personalRecordLabel = (record) => {
+      if (record.type === 'WEIGHT') {
+        return t('workouts.summary.personalRecordWeight', {
+          value: formatNumber(record.delta),
+          unit: t('units.kg')
+        })
+      }
+
+      return t('workouts.summary.personalRecordReps', {
+        value: formatNumber(record.delta)
+      })
+    }
+
     return {
       statusClass,
       statusIcon,
       statusTitle,
       formattedDuration,
-      completedSets,
-      totalSets,
       exerciseCount,
-      totalVolume: formattedVolume
+      totalVolume: formattedVolume,
+      personalRecords,
+      personalRecordCount,
+      personalRecordLabel
     }
   }
 })
@@ -198,6 +224,34 @@ export default defineComponent({
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   margin-bottom: 24px;
+}
+
+.records-summary {
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.record-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.record-item:last-child {
+  border-bottom: none;
+}
+
+.record-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+
+.record-value {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .stat-card {

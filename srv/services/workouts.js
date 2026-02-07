@@ -21,6 +21,126 @@ const applyWorkoutTranslations = (workout) => {
   }
 }
 
+const buildPreviousMaxes = (sets) => {
+  const maxes = new Map()
+
+  for (const set of sets) {
+    if (!maxes.has(set.planExerciseId)) {
+      maxes.set(set.planExerciseId, { maxWeight: null, maxReps: null })
+    }
+    const entry = maxes.get(set.planExerciseId)
+    if (set.weight !== null && (entry.maxWeight === null || set.weight > entry.maxWeight)) {
+      entry.maxWeight = set.weight
+    }
+    if (set.reps !== null && (entry.maxReps === null || set.reps > entry.maxReps)) {
+      entry.maxReps = set.reps
+    }
+  }
+
+  return maxes
+}
+
+const buildCurrentMaxes = (sets) => {
+  const maxes = new Map()
+
+  for (const set of sets) {
+    if (!set.completedAt) continue
+    if (!maxes.has(set.planExerciseId)) {
+      maxes.set(set.planExerciseId, {
+        maxWeight: null,
+        maxReps: null,
+        exerciseId: set.planExercise.exercise.id,
+        exerciseName: set.planExercise.exercise.name
+      })
+    }
+    const entry = maxes.get(set.planExerciseId)
+    if (set.weight !== null && (entry.maxWeight === null || set.weight > entry.maxWeight)) {
+      entry.maxWeight = set.weight
+    }
+    if (set.reps !== null && (entry.maxReps === null || set.reps > entry.maxReps)) {
+      entry.maxReps = set.reps
+    }
+  }
+
+  return maxes
+}
+
+const buildPersonalRecords = (currentSets, previousSets) => {
+  const previousMaxes = buildPreviousMaxes(previousSets)
+  const currentMaxes = buildCurrentMaxes(currentSets)
+  const records = []
+
+  for (const [planExerciseId, current] of currentMaxes.entries()) {
+    const previous = previousMaxes.get(planExerciseId)
+    if (!previous) continue
+
+    const weightDelta = current.maxWeight !== null && previous.maxWeight !== null
+      ? current.maxWeight - previous.maxWeight
+      : null
+    const repsDelta = current.maxReps !== null && previous.maxReps !== null
+      ? current.maxReps - previous.maxReps
+      : null
+
+    if (weightDelta > 0) {
+      records.push({
+        planExerciseId,
+        exerciseId: current.exerciseId,
+        exerciseName: current.exerciseName,
+        type: 'WEIGHT',
+        delta: weightDelta,
+        currentValue: current.maxWeight,
+        previousValue: previous.maxWeight
+      })
+      continue
+    }
+
+    if (repsDelta > 0) {
+      records.push({
+        planExerciseId,
+        exerciseId: current.exerciseId,
+        exerciseName: current.exerciseName,
+        type: 'REPS',
+        delta: repsDelta,
+        currentValue: current.maxReps,
+        previousValue: previous.maxReps
+      })
+    }
+  }
+
+  return records
+}
+
+const getPersonalRecords = async (db, workout) => {
+  if (workout.status !== 'COMPLETED') return []
+
+  const previousWorkout = await db.workout.findFirst({
+    where: {
+      userId: workout.userId,
+      planId: workout.planId,
+      status: 'COMPLETED',
+      completedAt: { not: null, lt: workout.completedAt },
+      id: { not: workout.id }
+    },
+    orderBy: { completedAt: 'desc' }
+  })
+
+  if (!previousWorkout) return []
+
+  const previousSets = await db.workoutSet.findMany({
+    where: {
+      workoutId: previousWorkout.id,
+      completedAt: { not: null }
+    },
+    select: {
+      planExerciseId: true,
+      weight: true,
+      reps: true
+    }
+  })
+
+  return buildPersonalRecords(workout.sets, previousSets)
+}
+
 const buildWorkoutWhere = (req) => {
   const { status } = req.query
   const userId = req.session.user.id
@@ -192,6 +312,7 @@ const getWorkout = async (req, res) => {
     }
 
     applyWorkoutTranslations(workout)
+    workout.personalRecords = await getPersonalRecords(prisma, workout)
     LOG.info(`Fetched workout ${id}`)
     return res.status(200).send(workout)
   } catch (e) {
@@ -548,6 +669,7 @@ const updateWorkoutStatus = async (req, res) => {
       })
 
     applyWorkoutTranslations(updated)
+    updated.personalRecords = await getPersonalRecords(prisma, updated)
     LOG.info(`Updated workout ${id} status to ${updated.status}`)
     return res.status(200).send(updated)
   } catch (e) {
