@@ -270,9 +270,18 @@ export default defineComponent({
         workout.value.sets[setIndex] = result.set
       }
 
-      if (result.restSeconds) {
+      const nextSet = workout.value.sets[setIndex + 1]
+      const shouldShowRestTimer = Boolean(
+        nextSet &&
+        !nextSet.completedAt &&
+        nextSet.planExercise.id === result.set.planExercise.id
+      )
+
+      if (shouldShowRestTimer && result.restSeconds) {
         restSeconds.value = result.restSeconds
         restTimerActive.value = true
+      } else {
+        restTimerActive.value = false
       }
     }
 
