@@ -116,7 +116,7 @@
       </q-tab-panels>
     </div>
 
-    <plan-form ref="formRef" :plans="myPlans" />
+    <plan-form ref="formRef" :plans="myPlans" :redirect-after-create="true" />
   </div>
 </template>
 

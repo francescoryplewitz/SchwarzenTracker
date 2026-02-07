@@ -49,16 +49,19 @@
 
 <script>
 import { defineComponent, ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
 import { api } from 'boot/axios'
 
 export default defineComponent({
   name: 'PlanForm',
 
   props: {
-    plans: { type: Array, required: true }
+    plans: { type: Array, required: true },
+    redirectAfterCreate: { type: Boolean, default: false }
   },
 
   setup(props) {
+    const router = useRouter()
     const plans = ref(props.plans)
     const dialogVisible = ref(false)
     const formRef = ref(null)
@@ -110,6 +113,9 @@ export default defineComponent({
         data.exerciseCount = 0
         data.isFavorite = false
         plans.value.push(data)
+        if (props.redirectAfterCreate) {
+          await router.push(`/plans/${data.id}`)
+        }
       }
 
       close()
