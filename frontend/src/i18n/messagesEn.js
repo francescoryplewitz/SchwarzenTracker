@@ -210,6 +210,12 @@ export default {
     searchPlaceholder: 'Search plans...',
     estimatedDuration: 'Estimated duration:',
     trainedMuscles: 'Trained muscle groups',
+    dayType: {
+      label: 'Training day',
+      both: 'Both days',
+      a: 'Day A',
+      b: 'Day B'
+    },
     muscleGroups: {
       arms: 'Arms',
       core: 'Core',
@@ -336,7 +342,10 @@ export default {
     planPicker: {
       subtitle: 'Choose a training plan',
       empty: 'You do not have any training plans yet',
-      error: 'Failed to load plans'
+      error: 'Failed to load plans',
+      dayTypeTitle: 'Which day do you want to train?',
+      lastDayType: 'Last: Day {dayType} on {date}',
+      noLastDayType: 'No completed workout for this plan yet'
     },
     notes: {
       label: 'Note',

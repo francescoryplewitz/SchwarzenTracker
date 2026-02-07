@@ -1,6 +1,8 @@
 const prisma = require('../data/prisma')
 const LOG = new Logger('WORKOUTS')
 const { getRequestLocale } = require('../common/locale')
+const PLAN_DAY_TYPES = ['BOTH', 'A', 'B']
+const WORKOUT_DAY_TYPES = ['A', 'B']
 
 const applyExerciseTranslations = (exercise) => {
   const translation = exercise.translations[0]
@@ -185,6 +187,25 @@ const calculateDuration = (workout) => {
   return end - start - paused
 }
 
+const hasDaySpecificExercises = (planExercises) => {
+  for (const exercise of planExercises) {
+    if (exercise.dayType && exercise.dayType !== 'BOTH') {
+      return true
+    }
+  }
+  return false
+}
+
+const getSuggestedDayType = (lastCompletedWorkout) => {
+  if (!lastCompletedWorkout) return 'A'
+  return lastCompletedWorkout.dayType === 'A' ? 'B' : 'A'
+}
+
+const isPlanExerciseEnabledForDay = (planExercise, dayType) => {
+  if (planExercise.dayType === 'BOTH') return true
+  return planExercise.dayType === dayType
+}
+
 const getWorkouts = async (req, res) => {
   const { count } = req.query
 
@@ -203,6 +224,7 @@ const getWorkouts = async (req, res) => {
       id: w.id,
       planId: w.planId,
       planName: w.planName,
+      dayType: w.dayType,
       status: w.status,
       startedAt: w.startedAt,
       completedAt: w.completedAt,
@@ -268,6 +290,67 @@ const getActiveWorkout = async (req, res) => {
   }
 }
 
+const getWorkoutStartOptions = async (req, res) => {
+  const userId = req.session.user.id
+  const { planId } = req.query
+
+  try {
+    const plan = await prisma.trainingPlan.findUnique({
+      where: { id: planId },
+      include: {
+        exercises: {
+          select: {
+            id: true,
+            dayType: true
+          }
+        }
+      }
+    })
+
+    if (!plan) {
+      LOG.info(`Plan ${planId} not found for start options`)
+      return res.status(404).send({ error: 'Trainingsplan nicht gefunden' })
+    }
+
+    if (plan.createdById !== userId && !plan.isSystem) {
+      LOG.info(`User ${userId} not authorized to get start options for plan ${planId}`)
+      return res.status(403).send({ error: 'Du kannst nur eigene Pläne oder System-Pläne verwenden' })
+    }
+
+    const splitDaysEnabled = hasDaySpecificExercises(plan.exercises)
+    if (!splitDaysEnabled) {
+      return res.status(200).send({
+        splitDaysEnabled: false,
+        lastCompletedWorkout: null,
+        suggestedDayType: 'A'
+      })
+    }
+
+    const lastCompletedWorkout = await prisma.workout.findFirst({
+      where: {
+        userId,
+        planId,
+        status: 'COMPLETED'
+      },
+      orderBy: { completedAt: 'desc' },
+      select: {
+        id: true,
+        dayType: true,
+        completedAt: true
+      }
+    })
+
+    return res.status(200).send({
+      splitDaysEnabled: true,
+      lastCompletedWorkout,
+      suggestedDayType: getSuggestedDayType(lastCompletedWorkout)
+    })
+  } catch (e) {
+    LOG.error(`Could not get workout start options for plan ${planId}: ${e}`)
+    return res.status(400).send()
+  }
+}
+
 const getWorkout = async (req, res) => {
   const { id } = req.params
   const userId = req.session.user.id
@@ -323,7 +406,7 @@ const getWorkout = async (req, res) => {
 
 const createWorkout = async (req, res) => {
   const userId = req.session.user.id
-  const { planId } = req.body
+  const { planId, dayType } = req.body
   const locale = getRequestLocale(req)
 
   try {
@@ -351,13 +434,6 @@ const createWorkout = async (req, res) => {
         exercises: {
           orderBy: { sortOrder: 'asc' },
           include: {
-            planSets: {
-              orderBy: { setNumber: 'asc' }
-            },
-            progressSets: {
-              where: { userId },
-              orderBy: { setNumber: 'asc' }
-            },
             exercise: {
               include: {
                 translations: {
@@ -365,6 +441,13 @@ const createWorkout = async (req, res) => {
                   select: { name: true, description: true }
                 }
               }
+            },
+            planSets: {
+              orderBy: { setNumber: 'asc' }
+            },
+            progressSets: {
+              where: { userId },
+              orderBy: { setNumber: 'asc' }
             }
           }
         }
@@ -382,11 +465,35 @@ const createWorkout = async (req, res) => {
       return res.status(403).send({ error: 'Du kannst nur eigene Pläne oder System-Pläne verwenden' })
     }
 
+    if (dayType && !WORKOUT_DAY_TYPES.includes(dayType)) {
+      return res.status(400).send({ error: 'Ungültiger Trainingstag' })
+    }
+
+    for (const planExercise of plan.exercises) {
+      if (!PLAN_DAY_TYPES.includes(planExercise.dayType)) {
+        return res.status(400).send({ error: 'Ungültige Trainingstags-Konfiguration im Plan' })
+      }
+    }
+
+    const splitDaysEnabled = hasDaySpecificExercises(plan.exercises)
+    if (splitDaysEnabled && !dayType) {
+      return res.status(400).send({ error: 'Bitte wähle Tag A oder Tag B aus' })
+    }
+
+    const selectedDayType = splitDaysEnabled ? dayType : null
+    const activeExercises = splitDaysEnabled
+      ? plan.exercises.filter(planExercise => isPlanExerciseEnabledForDay(planExercise, selectedDayType))
+      : plan.exercises
+
+    if (activeExercises.length === 0) {
+      return res.status(400).send({ error: 'Für den gewählten Tag sind keine Übungen im Plan vorhanden' })
+    }
+
     // Generate sets from plan exercises
     const setsData = []
     let sortOrder = 0
 
-    for (const planExercise of plan.exercises) {
+    for (const planExercise of activeExercises) {
       const progressMap = {}
       for (const progressSet of planExercise.progressSets) {
         progressMap[progressSet.setNumber] = progressSet
@@ -417,6 +524,7 @@ const createWorkout = async (req, res) => {
         planId,
         userId,
         planName,
+        dayType: selectedDayType,
         status: 'IN_PROGRESS',
         sets: {
           create: setsData
@@ -840,6 +948,7 @@ const deleteWorkout = async (req, res) => {
 module.exports = {
   getWorkouts,
   getActiveWorkout,
+  getWorkoutStartOptions,
   getWorkout,
   createWorkout,
   updateWorkoutStatus,

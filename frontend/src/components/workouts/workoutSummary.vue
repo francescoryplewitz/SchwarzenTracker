@@ -6,6 +6,7 @@
       </div>
       <h1 class="summary-title">{{ statusTitle }}</h1>
       <p class="plan-name">{{ workout.planName }}</p>
+      <span v-if="workout.dayType" class="day-type-badge">{{ $t(`plans.dayType.${workout.dayType.toLowerCase()}`) }}</span>
     </header>
 
     <div class="stats-grid">
@@ -217,6 +218,18 @@ export default defineComponent({
   font-size: 14px;
   color: rgba(255, 255, 255, 0.5);
   margin: 0;
+}
+
+.day-type-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(0, 255, 194, 0.12);
+  border: 1px solid rgba(0, 255, 194, 0.3);
+  color: #00ffc2;
 }
 
 .stats-grid {

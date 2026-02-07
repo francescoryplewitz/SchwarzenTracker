@@ -129,8 +129,10 @@ export default defineComponent({
       planPickerRef.value.open()
     }
 
-    const startWorkout = async (planId) => {
-      const { data } = await api.post('/api/workouts', { planId })
+    const startWorkout = async ({ planId, dayType }) => {
+      const payload = { planId }
+      if (dayType) payload.dayType = dayType
+      const { data } = await api.post('/api/workouts', payload)
       router.push(`/workouts/${data.id}`)
     }
 

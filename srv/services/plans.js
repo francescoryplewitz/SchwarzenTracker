@@ -1,6 +1,7 @@
 const prisma = require('../data/prisma')
 const LOG = new Logger('PLANS')
 const { getCopySuffix, getRequestLocale } = require('../common/locale')
+const PLAN_DAY_TYPES = ['BOTH', 'A', 'B']
 
 const applyExerciseTranslations = (exercise) => {
   const translation = exercise.translations[0]
@@ -338,6 +339,7 @@ const copyPlan = async (req, res) => {
             targetWeight: e.targetWeight,
             restSeconds: e.restSeconds,
             notes: e.notes,
+            dayType: e.dayType,
             planSets: {
               create: e.planSets.map(planSet => ({
                 setNumber: planSet.setNumber,
@@ -378,8 +380,13 @@ const copyPlan = async (req, res) => {
 const addExercise = async (req, res) => {
   const { id } = req.params
   const userId = req.session.user.id
-  const { exerciseId, sets, minReps, maxReps, targetWeight, restSeconds, notes } = req.body
+  const { exerciseId, sets, minReps, maxReps, targetWeight, restSeconds, notes, dayType } = req.body
   const locale = getRequestLocale(req)
+  const selectedDayType = dayType || 'BOTH'
+
+  if (!PLAN_DAY_TYPES.includes(selectedDayType)) {
+    return res.status(400).send({ error: 'Ungültiger Trainingstag für die Übung' })
+  }
 
   try {
     const plan = await prisma.trainingPlan.findUnique({ where: { id } })
@@ -415,6 +422,7 @@ const addExercise = async (req, res) => {
         targetWeight,
         restSeconds,
         notes,
+        dayType: selectedDayType,
         planSets: {
           create: buildPlanSetsData(
             sets || 3,
@@ -448,8 +456,12 @@ const addExercise = async (req, res) => {
 const updatePlanExercise = async (req, res) => {
   const { id, exerciseId } = req.params
   const userId = req.session.user.id
-  const { sets, minReps, maxReps, targetWeight, restSeconds, notes } = req.body
+  const { sets, minReps, maxReps, targetWeight, restSeconds, notes, dayType } = req.body
   const locale = getRequestLocale(req)
+
+  if (dayType && !PLAN_DAY_TYPES.includes(dayType)) {
+    return res.status(400).send({ error: 'Ungültiger Trainingstag für die Übung' })
+  }
 
   try {
     const plan = await prisma.trainingPlan.findUnique({ where: { id } })
@@ -481,7 +493,7 @@ const updatePlanExercise = async (req, res) => {
     const updated = await prisma.$transaction(async (tx) => {
       const updatedExercise = await tx.planExercise.update({
         where: { id: planExercise.id },
-        data: { sets, minReps, maxReps, targetWeight, restSeconds, notes },
+        data: { sets, minReps, maxReps, targetWeight, restSeconds, notes, dayType },
         include: {
           exercise: {
             include: {

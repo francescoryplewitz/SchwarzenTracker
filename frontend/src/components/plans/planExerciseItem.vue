@@ -8,7 +8,12 @@
     data-test="exercise-item"
   >
     <div class="item-content">
-      <div class="item-number">{{ index + 1 }}</div>
+      <div class="item-number-column">
+        <div class="item-number">{{ index + 1 }}</div>
+        <div v-if="planExercise.dayType !== 'BOTH'" class="item-day-tag" data-test="day-badge">
+          {{ planExercise.dayType }}
+        </div>
+      </div>
 
       <div class="item-info">
         <div class="exercise-name-row">
@@ -75,6 +80,16 @@
       </div>
       <div class="edit-row">
         <div class="edit-field">
+          <label class="edit-label">{{ $t('plans.dayType.label') }}</label>
+          <select v-model="editForm.dayType" class="edit-input" data-test="edit-day-type">
+            <option v-for="option in dayTypeOptions" :key="option.value" :value="option.value">
+              {{ $t(option.labelKey) }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="edit-row">
+        <div class="edit-field">
           <label class="edit-label">{{ $t('plans.exerciseItem.targetWeightLabel') }} ({{ $t('units.kg') }})</label>
           <input v-model.number="editForm.targetWeight" type="number" min="0" step="0.5" class="edit-input" data-test="edit-weight">
         </div>
@@ -128,8 +143,15 @@ export default defineComponent({
       maxReps: props.planExercise.maxReps,
       targetWeight: props.planExercise.targetWeight,
       restSeconds: props.planExercise.restSeconds,
-      notes: props.planExercise.notes || ''
+      notes: props.planExercise.notes || '',
+      dayType: props.planExercise.dayType || 'BOTH'
     })
+
+    const dayTypeOptions = [
+      { value: 'BOTH', labelKey: 'plans.dayType.both' },
+      { value: 'A', labelKey: 'plans.dayType.a' },
+      { value: 'B', labelKey: 'plans.dayType.b' }
+    ]
 
     watch(() => props.planExercise, (newVal) => {
       editForm.sets = newVal.sets
@@ -138,6 +160,7 @@ export default defineComponent({
       editForm.targetWeight = newVal.targetWeight
       editForm.restSeconds = newVal.restSeconds
       editForm.notes = newVal.notes || ''
+      editForm.dayType = newVal.dayType || 'BOTH'
     }, { deep: true })
 
     const formatRestTime = (seconds) => {
@@ -160,7 +183,8 @@ export default defineComponent({
             maxReps: editForm.maxReps,
             targetWeight: editForm.targetWeight || null,
             restSeconds: editForm.restSeconds || null,
-            notes: editForm.notes || null
+            notes: editForm.notes || null,
+            dayType: editForm.dayType
           }
         )
         Object.assign(props.planExercise, data)
@@ -175,6 +199,7 @@ export default defineComponent({
       editForm,
       toggleEdit,
       goToExercise,
+      dayTypeOptions,
       muscleGroupLabels,
       formatRestTime
     }
@@ -202,6 +227,12 @@ export default defineComponent({
   font-size: 11px;
 }
 
+.exercise-item--compact .item-day-tag {
+  width: 22px;
+  height: 22px;
+  font-size: 10px;
+}
+
 .exercise-item--compact .exercise-name {
   font-size: 13px;
   margin-bottom: 0;
@@ -222,6 +253,14 @@ export default defineComponent({
   user-select: none;
 }
 
+.item-number-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .item-number {
   width: 28px;
   height: 28px;
@@ -235,6 +274,21 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.item-day-tag {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(33, 150, 243, 0.16);
+  border: 1px solid rgba(33, 150, 243, 0.38);
+  color: #7ec8ff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .item-info {

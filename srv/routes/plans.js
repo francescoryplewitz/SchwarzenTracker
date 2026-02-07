@@ -36,7 +36,8 @@ module.exports = (app) => {
     maxReps: { type: 'NUMBER' },
     targetWeight: { type: 'NUMBER' },
     restSeconds: { type: 'NUMBER' },
-    notes: { type: 'STRING' }
+    notes: { type: 'STRING' },
+    dayType: { type: 'STRING' }
   }), service.addExercise)
 
   // reorder must be before :exerciseId to avoid route collision
@@ -50,7 +51,8 @@ module.exports = (app) => {
     maxReps: { type: 'NUMBER' },
     targetWeight: { type: 'NUMBER' },
     restSeconds: { type: 'NUMBER' },
-    notes: { type: 'STRING' }
+    notes: { type: 'STRING' },
+    dayType: { type: 'STRING' }
   }), service.updatePlanExercise)
 
   app.delete('/api/plans/:id/exercises/:exerciseId', authorize(['user']), service.removeExercise)

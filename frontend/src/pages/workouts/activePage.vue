@@ -15,7 +15,10 @@
           <header class="workout-header glass-card">
             <div class="header-top">
               <div class="plan-info">
-                <h1 class="plan-name">{{ workout.planName }}</h1>
+                <div class="plan-title-row">
+                  <h1 class="plan-name">{{ workout.planName }}</h1>
+                  <span v-if="workout.dayType" class="day-type-badge">{{ $t(`plans.dayType.${workout.dayType.toLowerCase()}`) }}</span>
+                </div>
                 <div class="timer-display" :class="{ paused: workout.status === 'PAUSED' }">
                   <q-icon name="mdi-timer-outline" size="18px" />
                   <span class="timer-value">{{ formattedDuration }}</span>
@@ -396,11 +399,28 @@ export default defineComponent({
   gap: 8px;
 }
 
+.plan-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .plan-name {
   font-size: 20px;
   font-weight: 700;
   color: white;
   margin: 0;
+}
+
+.day-type-badge {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(0, 255, 194, 0.12);
+  border: 1px solid rgba(0, 255, 194, 0.3);
+  color: #00ffc2;
 }
 
 .timer-display {

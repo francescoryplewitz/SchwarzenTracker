@@ -11,10 +11,15 @@ module.exports = (app) => {
 
   app.get('/api/workouts/active', authorize(['user']), service.getActiveWorkout)
 
+  app.get('/api/workouts/start-options', authorize(['user']), validateQuery({
+    planId: { type: 'STRING', required: true }
+  }), service.getWorkoutStartOptions)
+
   app.get('/api/workouts/:id', authorize(['user']), service.getWorkout)
 
   app.post('/api/workouts', authorize(['user']), validate({
-    planId: { type: 'STRING', required: true }
+    planId: { type: 'STRING', required: true },
+    dayType: { type: 'STRING' }
   }), service.createWorkout)
 
   app.patch('/api/workouts/:id', authorize(['user']), validate({

@@ -7,6 +7,9 @@
         <div class="card-info">
           <div class="workout-header">
             <span class="plan-name" data-test="plan-name">{{ workout.planName }}</span>
+            <span v-if="workout.dayType" class="day-type-badge">
+              {{ $t(`plans.dayType.${workout.dayType.toLowerCase()}`) }}
+            </span>
             <span class="status-badge" :class="statusClass" data-test="status-badge">
               {{ statusLabel }}
             </span>
@@ -166,6 +169,17 @@ export default defineComponent({
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.03em;
+}
+
+.day-type-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: rgba(0, 255, 194, 0.12);
+  border: 1px solid rgba(0, 255, 194, 0.28);
+  color: #00ffc2;
 }
 
 .status-badge.completed {
