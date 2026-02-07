@@ -313,7 +313,7 @@ export default defineComponent({
 /* Minimized View */
 .rest-timer-mini {
   position: fixed;
-  bottom: 24px;
+  bottom: calc(88px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   z-index: 9998;
