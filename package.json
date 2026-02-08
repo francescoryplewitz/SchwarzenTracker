@@ -4,6 +4,7 @@
   "private": true,
   "license": "Brale Energy GmbH",
   "scripts": {
+    "build": "/bin/zsh ./scripts/build-image.sh",
     "docker:build": "docker build . --build-arg NODE_ENV=production -t $version",
     "docker:build:pi": "docker build -t schwarzentacker:pi .",
     "docker:create": "npm run docker:build && npm run docker:tag && npm run docker:push",
@@ -32,6 +33,7 @@
     "db:migrate": "npm run set:schema && npm run db:start-local && npx prisma migrate dev",
     "db:reset": "npm run set:schema && npx prisma migrate reset",
     "db:deploy": "npm run set:schema && npx prisma migrate deploy",
+    "deploy:db": "/bin/zsh ./scripts/deploy-db.sh",
     "db:seed": "npm run set:schema && node ./scripts/seed-database.js",
     "reset:training": "node ./scripts/reset-training-data.js",
     "db:view": "npm run set:schema && npx prisma studio",
