@@ -1,9 +1,9 @@
 <template>
-  <div class="muscle-diagram" data-test="muscle-diagram">
+  <div class="muscle-diagram" :class="{ interactive: interactive }" data-test="muscle-diagram">
     <div class="diagram-container">
       <div class="view-column">
         <span class="view-label">{{ $t('plans.muscleView.front') }}</span>
-        <svg viewBox="0 0 100 200" class="body-svg">
+        <svg viewBox="0 0 100 200" class="body-svg" @click="onDiagramClick">
           <g class="body-outline">
             <ellipse cx="50" cy="20" rx="15" ry="18" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" />
             <path d="M35 38 L30 45 L25 80 L30 82 L35 55 L35 38" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" />
@@ -123,7 +123,7 @@
 
       <div class="view-column">
         <span class="view-label">{{ $t('plans.muscleView.back') }}</span>
-        <svg viewBox="0 0 100 200" class="body-svg">
+        <svg viewBox="0 0 100 200" class="body-svg" @click="onDiagramClick">
           <g class="body-outline">
             <ellipse cx="50" cy="20" rx="15" ry="18" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" />
             <path d="M35 38 L30 45 L25 80 L30 82 L35 55 L35 38" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" />
@@ -232,6 +232,8 @@
         v-for="muscle in activeMuscles"
         :key="muscle"
         class="legend-item"
+        :class="{ interactive: interactive, active: selectedMuscle === muscle }"
+        @click="onLegendClick(muscle)"
       >
         <span class="legend-dot" :style="getDotStyle(muscle)" />
         <span class="legend-name">{{ $t(muscleGroupLabels[muscle]) }}</span>
@@ -248,13 +250,17 @@ import { muscleGroupLabels } from 'src/constants/muscleGroups'
 export default defineComponent({
   name: 'MuscleBodyDiagram',
 
+  emits: ['select-muscle'],
+
   props: {
     sets: { type: Object, required: true },
     maxSets: { type: Number, required: true },
-    showSets: { type: Boolean, default: true }
+    showSets: { type: Boolean, default: true },
+    interactive: { type: Boolean, default: false },
+    selectedMuscle: { type: String, default: '' }
   },
 
-  setup(props) {
+  setup(props, { emit }) {
     const activeMuscles = computed(() => {
       return Object.entries(props.sets)
         .filter(([, count]) => count > 0)
@@ -263,6 +269,21 @@ export default defineComponent({
     })
 
     const getMuscleStyle = (muscle) => {
+      if (props.selectedMuscle) {
+        if (props.selectedMuscle === muscle) {
+          return {
+            fill: 'rgba(0, 255, 194, 0.85)',
+            stroke: 'rgba(0, 255, 194, 1)',
+            filter: 'drop-shadow(0 0 8px rgba(0, 255, 194, 0.55))'
+          }
+        }
+
+        return {
+          fill: 'rgba(255, 255, 255, 0.03)',
+          stroke: 'rgba(255, 255, 255, 0.08)'
+        }
+      }
+
       const count = props.sets[muscle] || 0
       if (!count) return { fill: 'rgba(255, 255, 255, 0.03)', stroke: 'rgba(255, 255, 255, 0.05)' }
       const intensity = 0.25 + (count / props.maxSets) * 0.55
@@ -274,16 +295,37 @@ export default defineComponent({
     }
 
     const getDotStyle = (muscle) => {
+      if (props.selectedMuscle) {
+        if (props.selectedMuscle === muscle) {
+          return { background: 'rgba(0, 255, 194, 0.95)' }
+        }
+        return { background: 'rgba(255, 255, 255, 0.25)' }
+      }
+
       const count = props.sets[muscle] || 0
       const intensity = 0.4 + (count / props.maxSets) * 0.6
       return { background: `rgba(0, 255, 194, ${intensity})` }
+    }
+
+    const onDiagramClick = (event) => {
+      if (!props.interactive) return
+      const target = event.target.closest('[data-muscle]')
+      if (!target) return
+      emit('select-muscle', target.dataset.muscle)
+    }
+
+    const onLegendClick = (muscle) => {
+      if (!props.interactive) return
+      emit('select-muscle', muscle)
     }
 
     return {
       muscleGroupLabels,
       activeMuscles,
       getMuscleStyle,
-      getDotStyle
+      getDotStyle,
+      onDiagramClick,
+      onLegendClick
     }
   }
 })
@@ -325,6 +367,18 @@ export default defineComponent({
   cursor: default;
 }
 
+.muscle-diagram.interactive .body-svg path[data-muscle] {
+  cursor: pointer;
+}
+
+.muscle-diagram.interactive .body-svg path[data-muscle]:hover {
+  filter: brightness(1.08);
+}
+
+.muscle-diagram :deep(svg) {
+  user-select: none;
+}
+
 .muscle-legend {
   display: flex;
   flex-wrap: wrap;
@@ -339,6 +393,17 @@ export default defineComponent({
   display: flex;
   align-items: center;
   gap: 6px;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.legend-item.interactive {
+  cursor: pointer;
+}
+
+.legend-item.interactive.active .legend-name {
+  color: #00ffc2;
 }
 
 .legend-dot {

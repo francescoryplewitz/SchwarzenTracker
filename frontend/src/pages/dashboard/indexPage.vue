@@ -24,6 +24,17 @@
           <q-icon name="mdi-chevron-right" size="20px" class="action-arrow" />
         </button>
 
+        <button class="action-card glass-card" data-test="progress-btn" @click="$router.push('/progress')">
+          <div class="action-icon progress-icon">
+            <q-icon name="mdi-information-outline" size="28px" />
+          </div>
+          <div class="action-content">
+            <span class="action-title">{{ $t('dashboard.actions.progress') }}</span>
+            <span class="action-desc">{{ $t('dashboard.actions.progressDesc') }}</span>
+          </div>
+          <q-icon name="mdi-chevron-right" size="20px" class="action-arrow" />
+        </button>
+
         <button class="action-card glass-card" data-test="plans-btn" @click="$router.push('/plans')">
           <div class="action-icon plans-icon">
             <q-icon name="mdi-clipboard-text-outline" size="28px" />
@@ -45,11 +56,6 @@
           </div>
           <q-icon name="mdi-chevron-right" size="20px" class="action-arrow" />
         </button>
-      </div>
-
-      <div class="stats-preview glass-card">
-        <span class="stats-label">{{ $t('dashboard.comingSoon') }}</span>
-        <p class="stats-text">{{ $t('dashboard.comingSoonText') }}</p>
       </div>
     </div>
   </div>
@@ -189,6 +195,11 @@ export default defineComponent({
     background: rgba(33, 150, 243, 0.12);
     color: #2196f3;
   }
+
+  .progress-icon {
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.88);
+  }
   
   .exercises-icon {
     background: rgba(255, 193, 7, 0.12);
@@ -217,31 +228,6 @@ export default defineComponent({
     color: rgba(255, 255, 255, 0.25);
     transition: all 0.2s ease;
     flex-shrink: 0;
-  }
-  
-  .stats-preview {
-    padding: 24px;
-    text-align: center;
-  }
-  
-  .stats-label {
-    display: inline-block;
-    padding: 6px 12px;
-    background: rgba(0, 255, 194, 0.1);
-    border: 1px solid rgba(0, 255, 194, 0.2);
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #00ffc2;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 12px;
-  }
-  
-  .stats-text {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.4);
-    margin: 0;
   }
   
   @media (max-width: 480px) {

@@ -5,6 +5,7 @@ export default {
   },
   nav: {
     dashboard: 'Dashboard',
+    progress: 'Fortschritt',
     exercises: 'Übungen',
     plans: 'Pläne',
     workouts: 'Workouts',
@@ -100,10 +101,52 @@ export default {
     actions: {
       startWorkout: 'Workout starten',
       startWorkoutDesc: 'Beginne Dein Training',
+      progress: 'Fortschritt',
+      progressDesc: 'Trends und Entwicklung ansehen',
       plans: 'Trainingspläne',
       plansDesc: 'Pläne verwalten',
       exercises: 'Übungen',
       exercisesDesc: 'Übungskatalog durchsuchen'
+    }
+  },
+  progress: {
+    title: 'Fortschritt',
+    subtitle: 'Deine Entwicklung über die Zeit',
+    empty: 'Noch keine Daten im gewählten Zeitraum',
+    tabs: {
+      training: 'Training',
+      exercises: 'Übungen',
+      muscleGroups: 'Muskelgruppen'
+    },
+    training: {
+      chartTitle: 'Workouts pro Woche',
+      yAxisLabel: 'Workouts',
+      calendarWeek: 'KW {week}/{year}',
+      averageLabel: 'Durchschnitt pro Woche ({range})'
+    },
+    exercises: {
+      selectExercise: 'Übung auswählen',
+      searchPlaceholder: 'Übung suchen...',
+      noResults: 'Keine Übung gefunden',
+      chartTitle: 'Topset und e1RM',
+      formulaTitle: 'e1RM Formel',
+      formulaValue: 'e1RM = Gewicht × (1 + Wiederholungen / 30)',
+      formulaHint: 'Beispiel: 80 kg × (1 + 8/30) = 101,3 kg. So kannst Du Sätze mit unterschiedlichen Wiederholungen besser vergleichen.'
+    },
+    muscleGroups: {
+      selectGroup: 'Muskelgruppe auswählen',
+      chartTitle: 'Muskelgruppen-Index',
+      indexTitle: 'Was bedeutet der Muscle Group Index?',
+      indexIntro: 'Der Index zeigt Dir, ob Du bei {muscle} im Vergleich zu Deinem eigenen Start stärker oder schwächer geworden bist.',
+      indexStep1: 'Pro Workout nehmen wir bei jeder Übung dieser Muskelgruppe Dein bestes Top-Set.',
+      indexStep2: 'Daraus berechnen wir einen Kraftwert (e1RM) mit Gewicht und Wiederholungen.',
+      indexStep3: 'Als Startwert (100) nutzen wir den Median Deiner ersten bis zu 3 Messpunkte je Übung.',
+      indexStep4: 'Für jede Woche bilden wir einen gewichteten Durchschnitt über alle Übungs-Indizes. Das ist der Wochenwert im Chart.',
+      factorCompound: 'Compound Faktor: 1,00',
+      factorIsolation: 'Isolation Faktor: 0,85',
+      indexValue100: '100 = ungefähr Dein Startniveau',
+      indexValue110: '110 = ca. 10% stärker als zu Beginn',
+      indexValue90: '90 = ca. 10% unter Deinem Startniveau'
     }
   },
   exercises: {

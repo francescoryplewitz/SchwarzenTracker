@@ -79,6 +79,19 @@ const routes = [
     ]
   },
 
+  // Progress
+  {
+    path: '/progress',
+    component: () => import('layouts/baseLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'progress',
+        component: () => import('pages/progress/indexPage.vue')
+      }
+    ]
+  },
+
   // Always leave this as last one,
   // but you can also remove it
   {

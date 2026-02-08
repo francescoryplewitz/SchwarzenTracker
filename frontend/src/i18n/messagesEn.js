@@ -5,6 +5,7 @@ export default {
   },
   nav: {
     dashboard: 'Dashboard',
+    progress: 'Progress',
     exercises: 'Exercises',
     plans: 'Plans',
     workouts: 'Workouts',
@@ -100,10 +101,52 @@ export default {
     actions: {
       startWorkout: 'Start workout',
       startWorkoutDesc: 'Start your training',
+      progress: 'Progress',
+      progressDesc: 'View trends and development',
       plans: 'Training plans',
       plansDesc: 'Manage plans',
       exercises: 'Exercises',
       exercisesDesc: 'Browse the exercise catalog'
+    }
+  },
+  progress: {
+    title: 'Progress',
+    subtitle: 'Your development over time',
+    empty: 'No data in the selected range yet',
+    tabs: {
+      training: 'Training',
+      exercises: 'Exercises',
+      muscleGroups: 'Muscle groups'
+    },
+    training: {
+      chartTitle: 'Workouts per week',
+      yAxisLabel: 'Workouts',
+      calendarWeek: 'CW {week}/{year}',
+      averageLabel: 'Average per week ({range})'
+    },
+    exercises: {
+      selectExercise: 'Select exercise',
+      searchPlaceholder: 'Search exercise...',
+      noResults: 'No exercise found',
+      chartTitle: 'Top set and e1RM',
+      formulaTitle: 'e1RM formula',
+      formulaValue: 'e1RM = weight × (1 + reps / 30)',
+      formulaHint: 'Example: 80 kg × (1 + 8/30) = 101.3 kg. This helps compare sets with different rep counts.'
+    },
+    muscleGroups: {
+      selectGroup: 'Select muscle group',
+      chartTitle: 'Muscle group index',
+      indexTitle: 'What does the Muscle Group Index mean?',
+      indexIntro: 'This index shows if you became stronger or weaker in {muscle} compared to your own starting level.',
+      indexStep1: 'For each workout, we take your best top set for every exercise in this muscle group.',
+      indexStep2: 'From that, we calculate a strength value (e1RM) using weight and reps.',
+      indexStep3: 'As baseline (100), we use the median of your first up to 3 data points per exercise.',
+      indexStep4: 'For each week, we take a weighted average across all exercise indices. That is the weekly chart value.',
+      factorCompound: 'Compound factor: 1.00',
+      factorIsolation: 'Isolation factor: 0.85',
+      indexValue100: '100 = about your starting level',
+      indexValue110: '110 = about 10% stronger than start',
+      indexValue90: '90 = about 10% below your starting level'
     }
   },
   exercises: {
