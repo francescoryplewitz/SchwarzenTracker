@@ -4,7 +4,6 @@ export default {
     de: 'Deutsch'
   },
   nav: {
-    dashboard: 'Dashboard',
     progress: 'Fortschritt',
     exercises: 'Übungen',
     plans: 'Pläne',
@@ -92,22 +91,6 @@ export default {
     subtitle: 'Dein persönlicher Fitness-Tracker',
     info: 'Verwalte Deine Übungen, erstelle Trainingspläne und tracke Deine Workouts — alles an einem Ort.',
     action: 'Einloggen'
-  },
-  dashboard: {
-    title: 'Dashboard',
-    subtitle: 'Dein Trainingsüberblick',
-    comingSoon: 'Demnächst',
-    comingSoonText: 'Hier erscheinen bald Deine Trainingsstatistiken.',
-    actions: {
-      startWorkout: 'Workout starten',
-      startWorkoutDesc: 'Beginne Dein Training',
-      progress: 'Fortschritt',
-      progressDesc: 'Trends und Entwicklung ansehen',
-      plans: 'Trainingspläne',
-      plansDesc: 'Pläne verwalten',
-      exercises: 'Übungen',
-      exercisesDesc: 'Übungskatalog durchsuchen'
-    }
   },
   progress: {
     title: 'Fortschritt',

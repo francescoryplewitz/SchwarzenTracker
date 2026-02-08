@@ -4,7 +4,6 @@ export default {
     de: 'German'
   },
   nav: {
-    dashboard: 'Dashboard',
     progress: 'Progress',
     exercises: 'Exercises',
     plans: 'Plans',
@@ -92,22 +91,6 @@ export default {
     subtitle: 'Your personal fitness tracker',
     info: 'Manage your exercises, create training plans, and track your workouts — all in one place.',
     action: 'Log in'
-  },
-  dashboard: {
-    title: 'Dashboard',
-    subtitle: 'Your training overview',
-    comingSoon: 'Coming soon',
-    comingSoonText: 'Your training stats will appear here soon.',
-    actions: {
-      startWorkout: 'Start workout',
-      startWorkoutDesc: 'Start your training',
-      progress: 'Progress',
-      progressDesc: 'View trends and development',
-      plans: 'Training plans',
-      plansDesc: 'Manage plans',
-      exercises: 'Exercises',
-      exercisesDesc: 'Browse the exercise catalog'
-    }
   },
   progress: {
     title: 'Progress',

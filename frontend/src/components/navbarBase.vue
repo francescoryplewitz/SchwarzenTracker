@@ -56,7 +56,6 @@ export default defineComponent({
     const { locale } = useI18n({ useScope: 'global' })
 
     const menuItems = [
-      { name: 'dashboard', labelKey: 'nav.dashboard', route: '/', icon: 'mdi-view-dashboard-outline' },
       { name: 'progress', labelKey: 'nav.progress', route: '/progress', icon: 'mdi-information-outline' },
       { name: 'exercises', labelKey: 'nav.exercises', route: '/exercises', icon: 'mdi-dumbbell' },
       { name: 'plans', labelKey: 'nav.plans', route: '/plans', icon: 'mdi-clipboard-text-outline' },

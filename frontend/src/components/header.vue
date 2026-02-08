@@ -65,7 +65,6 @@ export default defineComponent({
     const { locale } = useI18n({ useScope: 'global' })
 
     const menuItems = [
-      { name: 'dashboard', labelKey: 'nav.dashboard', route: '/dashboard' },
       { name: 'progress', labelKey: 'nav.progress', route: '/progress' },
       { name: 'exercises', labelKey: 'nav.exercises', route: '/exercises' },
       { name: 'plans', labelKey: 'nav.plans', route: '/plans' }
