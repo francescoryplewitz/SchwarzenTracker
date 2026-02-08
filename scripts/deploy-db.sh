@@ -29,7 +29,7 @@ PGPASSWORD="$dbPassword" pg_dump \
 echo "Backup erstellt: $backupFile"
 
 npm run set:schema
-npx prisma migrate status
+npx prisma@6.19.2 migrate status
 npm run db:deploy
 
 echo 'Datenbankmigration abgeschlossen'
