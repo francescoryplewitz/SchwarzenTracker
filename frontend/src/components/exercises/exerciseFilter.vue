@@ -2,16 +2,16 @@
   <q-dialog v-model="dialogVisible" position="bottom" data-test="filter-dialog">
     <div class="filter-dialog">
       <div class="dialog-header">
-        <span class="dialog-title">Filter</span>
+        <span class="dialog-title">{{ $t('exercises.filters') }}</span>
         <button class="close-btn" data-test="close-btn" @click="dialogVisible = false">
           <q-icon name="mdi-close" size="20px" />
-          <q-tooltip>Schließen</q-tooltip>
+          <q-tooltip>{{ $t('common.close') }}</q-tooltip>
         </button>
       </div>
 
       <div class="dialog-content">
         <div class="filter-section">
-          <div class="section-label">Muskelgruppe</div>
+          <div class="section-label">{{ $t('exercises.filter.muscleGroup') }}</div>
           <div class="filter-options">
             <button
               v-for="mg in muscleGroupOptions"
@@ -21,13 +21,13 @@
               :data-test="`muscle-filter-${mg.value}`"
               @click="filters.muscleGroup = filters.muscleGroup === mg.value ? null : mg.value"
             >
-              {{ mg.label }}
+              {{ $t(mg.labelKey) }}
             </button>
           </div>
         </div>
 
         <div class="filter-section">
-          <div class="section-label">Equipment</div>
+          <div class="section-label">{{ $t('exercises.filter.equipment') }}</div>
           <div class="filter-options">
             <button
               v-for="eq in equipmentOptions"
@@ -37,13 +37,13 @@
               :data-test="`equipment-filter-${eq.value}`"
               @click="filters.equipment = filters.equipment === eq.value ? null : eq.value"
             >
-              {{ eq.label }}
+              {{ $t(eq.labelKey) }}
             </button>
           </div>
         </div>
 
         <div class="filter-section">
-          <div class="section-label">Kategorie</div>
+          <div class="section-label">{{ $t('exercises.filter.category') }}</div>
           <div class="filter-options">
             <button
               v-for="cat in categoryOptions"
@@ -53,7 +53,7 @@
               :data-test="`category-filter-${cat.value}`"
               @click="filters.category = filters.category === cat.value ? null : cat.value"
             >
-              {{ cat.label }}
+              {{ $t(cat.labelKey) }}
             </button>
           </div>
         </div>
@@ -68,7 +68,7 @@
               class="toggle-input"
             >
             <span class="toggle-switch"></span>
-            <span class="toggle-label">Nur Favoriten</span>
+            <span class="toggle-label">{{ $t('exercises.filter.onlyFavorites') }}</span>
           </label>
 
           <label class="toggle-option" data-test="own-toggle">
@@ -78,17 +78,17 @@
               class="toggle-input"
             >
             <span class="toggle-switch"></span>
-            <span class="toggle-label">Nur eigene Übungen</span>
+            <span class="toggle-label">{{ $t('exercises.filter.onlyOwn') }}</span>
           </label>
         </div>
       </div>
 
       <div class="dialog-actions">
         <button class="action-btn secondary" data-test="reset-btn" @click="resetFilters">
-          Zurücksetzen
+          {{ $t('exercises.filter.reset') }}
         </button>
         <button class="action-btn primary" data-test="apply-btn" @click="applyFilters">
-          Anwenden
+          {{ $t('exercises.filter.apply') }}
         </button>
       </div>
     </div>
@@ -99,29 +99,29 @@
 import { defineComponent, ref, reactive } from 'vue'
 
 const muscleGroupOptions = [
-  { value: 'CHEST', label: 'Brust' },
-  { value: 'BACK', label: 'Rücken' },
-  { value: 'SHOULDERS', label: 'Schultern' },
-  { value: 'BICEPS', label: 'Bizeps' },
-  { value: 'TRICEPS', label: 'Trizeps' },
-  { value: 'ABS', label: 'Bauch' },
-  { value: 'QUADS', label: 'Beine' },
-  { value: 'GLUTES', label: 'Gesäß' }
+  { value: 'CHEST', labelKey: 'muscleGroups.CHEST' },
+  { value: 'BACK', labelKey: 'muscleGroups.BACK' },
+  { value: 'SHOULDERS', labelKey: 'muscleGroups.SHOULDERS' },
+  { value: 'BICEPS', labelKey: 'muscleGroups.BICEPS' },
+  { value: 'TRICEPS', labelKey: 'muscleGroups.TRICEPS' },
+  { value: 'ABS', labelKey: 'muscleGroups.ABS' },
+  { value: 'QUADS', labelKey: 'muscleGroups.QUADS' },
+  { value: 'GLUTES', labelKey: 'muscleGroups.GLUTES' }
 ]
 
 const equipmentOptions = [
-  { value: 'BARBELL', label: 'Langhantel' },
-  { value: 'DUMBBELL', label: 'Kurzhantel' },
-  { value: 'MACHINE', label: 'Maschine' },
-  { value: 'CABLE', label: 'Kabelzug' },
-  { value: 'BODYWEIGHT', label: 'Körpergewicht' },
-  { value: 'KETTLEBELL', label: 'Kettlebell' }
+  { value: 'BARBELL', labelKey: 'equipment.BARBELL' },
+  { value: 'DUMBBELL', labelKey: 'equipment.DUMBBELL' },
+  { value: 'MACHINE', labelKey: 'equipment.MACHINE' },
+  { value: 'CABLE', labelKey: 'equipment.CABLE' },
+  { value: 'BODYWEIGHT', labelKey: 'equipment.BODYWEIGHT' },
+  { value: 'KETTLEBELL', labelKey: 'equipment.KETTLEBELL' }
 ]
 
 const categoryOptions = [
-  { value: 'COMPOUND', label: 'Compound' },
-  { value: 'ISOLATION', label: 'Isolation' },
-  { value: 'CARDIO', label: 'Cardio' }
+  { value: 'COMPOUND', labelKey: 'categories.COMPOUND' },
+  { value: 'ISOLATION', labelKey: 'categories.ISOLATION' },
+  { value: 'CARDIO', labelKey: 'categories.CARDIO' }
 ]
 
 export default defineComponent({

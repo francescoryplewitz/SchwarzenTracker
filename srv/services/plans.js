@@ -1,5 +1,40 @@
 const prisma = require('../data/prisma')
 const LOG = new Logger('PLANS')
+const { getCopySuffix, getRequestLocale } = require('../common/locale')
+const PLAN_DAY_TYPES = ['BOTH', 'A', 'B']
+
+const applyExerciseTranslations = (exercise) => {
+  const translation = exercise.translations[0]
+  if (exercise.isSystem && translation) {
+    exercise.name = translation.name
+    exercise.description = translation.description
+  }
+  delete exercise.translations
+}
+
+const applyPlanTranslations = (plan) => {
+  const translation = plan.translations[0]
+  if (plan.isSystem && translation) {
+    plan.name = translation.name
+    plan.description = translation.description
+  }
+  delete plan.translations
+}
+
+const buildPlanSetsData = (sets, minReps, maxReps, targetWeight) => {
+  const planSets = []
+
+  for (let i = 1; i <= sets; i += 1) {
+    planSets.push({
+      setNumber: i,
+      targetWeight,
+      targetMinReps: minReps,
+      targetMaxReps: maxReps
+    })
+  }
+
+  return planSets
+}
 
 const calculatePlanDuration = (exercises) => {
   if (!exercises || exercises.length === 0) return 0
@@ -17,13 +52,16 @@ const calculatePlanDuration = (exercises) => {
   return totalDuration
 }
 
-const buildPlanWhere = (req) => {
+const buildPlanWhere = (req, locale) => {
   const { search, onlyFavorites, onlyOwn, onlySystem, muscleGroups } = req.query
   const userId = req.session?.user?.id
   const where = {}
 
   if (search) {
-    where.name = { contains: search, mode: 'insensitive' }
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { translations: { some: { locale, name: { contains: search, mode: 'insensitive' } } } }
+    ]
   }
   if (onlySystem) {
     where.isSystem = true
@@ -51,7 +89,8 @@ const buildPlanWhere = (req) => {
 const buildPlanQuery = (req) => {
   const { skip } = req.query
   const userId = req.session?.user?.id
-  const where = buildPlanWhere(req)
+  const locale = getRequestLocale(req)
+  const where = buildPlanWhere(req, locale)
 
   return {
     where,
@@ -59,6 +98,10 @@ const buildPlanQuery = (req) => {
     take: 30,
     skip: isNaN(parseInt(skip)) || parseInt(skip) < 0 ? 0 : parseInt(skip),
     include: {
+      translations: {
+        where: { locale },
+        select: { name: true, description: true }
+      },
       exercises: {
         select: {
           id: true,
@@ -77,7 +120,8 @@ const getPlans = async (req, res) => {
 
   try {
     if (count) {
-      const where = buildPlanWhere(req)
+      const locale = getRequestLocale(req)
+      const where = buildPlanWhere(req, locale)
       const total = await prisma.trainingPlan.count({ where })
       LOG.info(`Counted ${total} plans`)
       return res.status(200).send(`${total}`)
@@ -85,6 +129,7 @@ const getPlans = async (req, res) => {
 
     const query = buildPlanQuery(req)
     const plans = await prisma.trainingPlan.findMany(query)
+    plans.forEach(applyPlanTranslations)
 
     const result = plans.map(p => ({
       ...p,
@@ -106,14 +151,31 @@ const getPlans = async (req, res) => {
 const getPlan = async (req, res) => {
   const { id } = req.params
   const userId = req.session?.user?.id
+  const locale = getRequestLocale(req)
 
   try {
     const plan = await prisma.trainingPlan.findUnique({
       where: { id },
       include: {
+        translations: {
+          where: { locale },
+          select: { name: true, description: true }
+        },
         exercises: {
           orderBy: { sortOrder: 'asc' },
-          include: { exercise: true }
+          include: {
+            planSets: {
+              orderBy: { setNumber: 'asc' }
+            },
+            exercise: {
+              include: {
+                translations: {
+                  where: { locale },
+                  select: { name: true, description: true }
+                }
+              }
+            }
+          }
         },
         favorites: userId ? { where: { userId }, select: { userId: true } } : false
       }
@@ -123,6 +185,9 @@ const getPlan = async (req, res) => {
       LOG.info(`Plan ${id} not found`)
       return res.status(404).send()
     }
+
+    applyPlanTranslations(plan)
+    plan.exercises.forEach(planExercise => applyExerciseTranslations(planExercise.exercise))
 
     const result = {
       ...plan,
@@ -229,11 +294,24 @@ const deletePlan = async (req, res) => {
 const copyPlan = async (req, res) => {
   const { id } = req.params
   const userId = req.session.user.id
+  const locale = getRequestLocale(req)
 
   try {
     const original = await prisma.trainingPlan.findUnique({
       where: { id },
-      include: { exercises: true }
+      include: {
+        translations: {
+          where: { locale },
+          select: { name: true, description: true }
+        },
+        exercises: {
+          include: {
+            planSets: {
+              orderBy: { setNumber: 'asc' }
+            }
+          }
+        }
+      }
     })
 
     if (!original) {
@@ -241,10 +319,14 @@ const copyPlan = async (req, res) => {
       return res.status(404).send()
     }
 
+    const translation = original.translations[0]
+    const name = original.isSystem && translation ? translation.name : original.name
+    const description = original.isSystem && translation ? translation.description : original.description
+
     const copy = await prisma.trainingPlan.create({
       data: {
-        name: `${original.name} (Kopie)`,
-        description: original.description,
+        name: `${name} (${getCopySuffix(locale)})`,
+        description,
         createdById: userId,
         isSystem: false,
         exercises: {
@@ -256,18 +338,37 @@ const copyPlan = async (req, res) => {
             maxReps: e.maxReps,
             targetWeight: e.targetWeight,
             restSeconds: e.restSeconds,
-            notes: e.notes
+            notes: e.notes,
+            dayType: e.dayType,
+            planSets: {
+              create: e.planSets.map(planSet => ({
+                setNumber: planSet.setNumber,
+                targetWeight: planSet.targetWeight,
+                targetMinReps: planSet.targetMinReps,
+                targetMaxReps: planSet.targetMaxReps
+              }))
+            }
           }))
         }
       },
       include: {
         exercises: {
           orderBy: { sortOrder: 'asc' },
-          include: { exercise: true }
+          include: {
+            exercise: {
+              include: {
+                translations: {
+                  where: { locale },
+                  select: { name: true, description: true }
+                }
+              }
+            }
+          }
         }
       }
     })
 
+    copy.exercises.forEach(planExercise => applyExerciseTranslations(planExercise.exercise))
     LOG.info(`Copied plan ${id} to ${copy.id} by user ${userId}`)
     return res.status(201).send(copy)
   } catch (e) {
@@ -279,7 +380,13 @@ const copyPlan = async (req, res) => {
 const addExercise = async (req, res) => {
   const { id } = req.params
   const userId = req.session.user.id
-  const { exerciseId, sets, minReps, maxReps, targetWeight, restSeconds, notes } = req.body
+  const { exerciseId, sets, minReps, maxReps, targetWeight, restSeconds, notes, dayType } = req.body
+  const locale = getRequestLocale(req)
+  const selectedDayType = dayType || 'BOTH'
+
+  if (!PLAN_DAY_TYPES.includes(selectedDayType)) {
+    return res.status(400).send({ error: 'Ungültiger Trainingstag für die Übung' })
+  }
 
   try {
     const plan = await prisma.trainingPlan.findUnique({ where: { id } })
@@ -314,11 +421,30 @@ const addExercise = async (req, res) => {
         maxReps: maxReps || 12,
         targetWeight,
         restSeconds,
-        notes
+        notes,
+        dayType: selectedDayType,
+        planSets: {
+          create: buildPlanSetsData(
+            sets || 3,
+            minReps || 8,
+            maxReps || 12,
+            targetWeight || null
+          )
+        }
       },
-      include: { exercise: true }
+      include: {
+        exercise: {
+          include: {
+            translations: {
+              where: { locale },
+              select: { name: true, description: true }
+            }
+          }
+        }
+      }
     })
 
+    applyExerciseTranslations(planExercise.exercise)
     LOG.info(`Added exercise ${exerciseId} to plan ${id}`)
     return res.status(201).send(planExercise)
   } catch (e) {
@@ -330,7 +456,12 @@ const addExercise = async (req, res) => {
 const updatePlanExercise = async (req, res) => {
   const { id, exerciseId } = req.params
   const userId = req.session.user.id
-  const { sets, minReps, maxReps, targetWeight, restSeconds, notes } = req.body
+  const { sets, minReps, maxReps, targetWeight, restSeconds, notes, dayType } = req.body
+  const locale = getRequestLocale(req)
+
+  if (dayType && !PLAN_DAY_TYPES.includes(dayType)) {
+    return res.status(400).send({ error: 'Ungültiger Trainingstag für die Übung' })
+  }
 
   try {
     const plan = await prisma.trainingPlan.findUnique({ where: { id } })
@@ -359,12 +490,34 @@ const updatePlanExercise = async (req, res) => {
       return res.status(404).send()
     }
 
-    const updated = await prisma.planExercise.update({
-      where: { id: planExercise.id },
-      data: { sets, minReps, maxReps, targetWeight, restSeconds, notes },
-      include: { exercise: true }
+    const updated = await prisma.$transaction(async (tx) => {
+      const updatedExercise = await tx.planExercise.update({
+        where: { id: planExercise.id },
+        data: { sets, minReps, maxReps, targetWeight, restSeconds, notes, dayType },
+        include: {
+          exercise: {
+            include: {
+              translations: {
+                where: { locale },
+                select: { name: true, description: true }
+              }
+            }
+          }
+        }
+      })
+
+      await tx.planExerciseSet.deleteMany({ where: { planExerciseId: planExercise.id } })
+      await tx.planExerciseSet.createMany({
+        data: buildPlanSetsData(sets, minReps, maxReps, targetWeight || null).map(planSet => ({
+          ...planSet,
+          planExerciseId: planExercise.id
+        }))
+      })
+
+      return updatedExercise
     })
 
+    applyExerciseTranslations(updated.exercise)
     LOG.info(`Updated exercise ${exerciseId} in plan ${id}`)
     return res.status(200).send(updated)
   } catch (e) {

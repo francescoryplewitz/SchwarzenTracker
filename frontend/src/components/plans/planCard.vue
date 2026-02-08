@@ -9,13 +9,13 @@
           @click.stop="toggleFavorite"
         >
           <q-icon :name="plan.isFavorite ? 'mdi-star' : 'mdi-star-outline'" size="18px" />
-          <q-tooltip>{{ plan.isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren' }}</q-tooltip>
+          <q-tooltip>{{ plan.isFavorite ? $t('plans.favoritesRemove') : $t('plans.favoritesAdd') }}</q-tooltip>
         </button>
 
         <div class="card-info">
           <div class="plan-header">
             <span class="plan-name" data-test="plan-name">{{ plan.name }}</span>
-            <span v-if="plan.isSystem" class="system-badge" data-test="system-badge">SYSTEM</span>
+            <span v-if="plan.isSystem" class="system-badge" data-test="system-badge">{{ $t('plans.system') }}</span>
           </div>
 
           <p v-if="plan.description" class="plan-description" data-test="plan-description">
@@ -24,7 +24,7 @@
 
           <div class="plan-meta">
             <span class="meta-text" data-test="exercise-count">
-              {{ plan.exerciseCount }} {{ plan.exerciseCount === 1 ? 'Übung' : 'Übungen' }}
+              {{ plan.exerciseCount }} {{ plan.exerciseCount === 1 ? $t('plans.exerciseSingular') : $t('plans.exercisePlural') }}
             </span>
             <span v-if="plan.estimatedDuration" class="meta-text duration-text" data-test="estimated-duration">
               <q-icon name="mdi-timer-outline" size="14px" />
@@ -43,6 +43,7 @@
 
 <script>
 import { defineComponent } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { api } from 'boot/axios'
 
 export default defineComponent({
@@ -53,6 +54,7 @@ export default defineComponent({
   },
 
   setup(props) {
+    const { t } = useI18n({ useScope: 'global' })
     const toggleFavorite = async () => {
       if (props.plan.isFavorite) {
         await api.delete(`/api/plans/${props.plan.id}/favorite`)
@@ -69,9 +71,10 @@ export default defineComponent({
       if (seconds >= 60) {
         const mins = Math.floor(seconds / 60)
         const secs = seconds % 60
-        return secs > 0 ? `${mins}:${secs.toString().padStart(2, '0')} Min` : `${mins} Min`
+        const timeLabel = secs > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${mins}`
+        return `${timeLabel} ${t('units.minutesShort')}`
       }
-      return `${seconds} Sek`
+      return `${seconds} ${t('units.secondsShort')}`
     }
 
     return {

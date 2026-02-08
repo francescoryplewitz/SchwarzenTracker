@@ -8,25 +8,24 @@
           <img :src="logoUrl" alt="Logo" class="header-logo" />
         </div>
         <h1 class="page-title" data-test="page-title">Ryplewitz Consulting</h1>
-        <p class="page-subtitle" data-test="page-subtitle">Project base for new applications</p>
+        <p class="page-subtitle" data-test="page-subtitle">{{ $t('start.subtitle') }}</p>
       </header>
 
       <div class="cards-container">
         <div class="glass-card info-card" data-test="info-card">
           <div class="card-header">
-            <span class="card-label">Getting Started</span>
+            <span class="card-label">{{ $t('start.gettingStarted') }}</span>
           </div>
           <div class="card-content">
             <p class="info-text">
-              This is your starter template for new Express.js + Vue projects.
-              Fork this repository and start developing.
+              {{ $t('start.gettingStartedText') }}
             </p>
           </div>
         </div>
 
         <div class="glass-card dev-card" data-test="dev-card" @click="goToDev">
           <div class="card-header">
-            <span class="card-label">Development</span>
+            <span class="card-label">{{ $t('start.development') }}</span>
             <span class="card-arrow">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -43,7 +42,7 @@
               </div>
               <div class="dev-text">
                 <span class="dev-title">/dev</span>
-                <span class="dev-desc">Local auth configuration</span>
+                <span class="dev-desc">{{ $t('start.devDesc') }}</span>
               </div>
             </div>
           </div>
@@ -51,7 +50,7 @@
       </div>
 
       <div class="glass-card stack-card" data-test="stack-card">
-        <div class="stack-label">Tech Stack</div>
+        <div class="stack-label">{{ $t('start.stackTitle') }}</div>
         <div class="stack-items">
           <div class="stack-item">
             <span class="stack-name">Vue 3</span>

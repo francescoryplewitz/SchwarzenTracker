@@ -8,7 +8,12 @@
     data-test="exercise-item"
   >
     <div class="item-content">
-      <div class="item-number">{{ index + 1 }}</div>
+      <div class="item-number-column">
+        <div class="item-number">{{ index + 1 }}</div>
+        <div v-if="planExercise.dayType !== 'BOTH'" class="item-day-tag" data-test="day-badge">
+          {{ planExercise.dayType }}
+        </div>
+      </div>
 
       <div class="item-info">
         <div class="exercise-name-row">
@@ -26,18 +31,18 @@
               :key="mg"
               class="muscle-badge"
             >
-              {{ muscleGroupLabels[mg] || mg }}
+              {{ $t(muscleGroupLabels[mg] || mg) }}
             </span>
           </div>
           <div class="exercise-config">
             <span class="config-item" data-test="sets-reps">
-              {{ planExercise.sets }} Sätze × {{ planExercise.minReps }}-{{ planExercise.maxReps }} Wdh
+              {{ planExercise.sets }} {{ $t('units.sets') }} × {{ planExercise.minReps }}-{{ planExercise.maxReps }} {{ $t('units.reps') }}
             </span>
             <span v-if="planExercise.targetWeight" class="config-item" data-test="target-weight">
-              Ziel: {{ planExercise.targetWeight }}kg
+              {{ $t('plans.exerciseItem.targetWeightLabel') }}: {{ planExercise.targetWeight }} {{ $t('units.kg') }}
             </span>
             <span v-if="planExercise.restSeconds" class="config-item" data-test="rest-time">
-              Pause: {{ formatRestTime(planExercise.restSeconds) }}
+              {{ $t('plans.exerciseItem.rest') }}: {{ formatRestTime(planExercise.restSeconds) }}
             </span>
           </div>
           <div v-if="planExercise.notes" class="exercise-notes" data-test="notes">
@@ -49,11 +54,11 @@
       <div v-if="canEdit && !compact" class="item-actions">
         <button class="action-btn" data-test="edit-btn" @click="toggleEdit">
           <q-icon :name="isEditing ? 'mdi-check' : 'mdi-pencil'" size="16px" />
-          <q-tooltip>{{ isEditing ? 'Speichern' : 'Bearbeiten' }}</q-tooltip>
+          <q-tooltip>{{ isEditing ? $t('common.save') : $t('common.edit') }}</q-tooltip>
         </button>
         <button class="action-btn delete" data-test="remove-btn" @click="$emit('remove')">
           <q-icon name="mdi-close" size="16px" />
-          <q-tooltip>Entfernen</q-tooltip>
+          <q-tooltip>{{ $t('plans.exerciseItem.remove') }}</q-tooltip>
         </button>
       </div>
     </div>
@@ -61,32 +66,42 @@
     <div v-if="isEditing && !compact" class="edit-section" data-test="edit-section">
       <div class="edit-row">
         <div class="edit-field">
-          <label class="edit-label">Sätze</label>
+          <label class="edit-label">{{ $t('plans.exerciseItem.setsLabel') }}</label>
           <input v-model.number="editForm.sets" type="number" min="1" class="edit-input" data-test="edit-sets">
         </div>
         <div class="edit-field">
-          <label class="edit-label">Min Wdh</label>
+          <label class="edit-label">{{ $t('plans.exerciseItem.minRepsLabel') }}</label>
           <input v-model.number="editForm.minReps" type="number" min="1" class="edit-input" data-test="edit-min-reps">
         </div>
         <div class="edit-field">
-          <label class="edit-label">Max Wdh</label>
+          <label class="edit-label">{{ $t('plans.exerciseItem.maxRepsLabel') }}</label>
           <input v-model.number="editForm.maxReps" type="number" min="1" class="edit-input" data-test="edit-max-reps">
         </div>
       </div>
       <div class="edit-row">
         <div class="edit-field">
-          <label class="edit-label">Zielgewicht (kg)</label>
+          <label class="edit-label">{{ $t('plans.dayType.label') }}</label>
+          <select v-model="editForm.dayType" class="edit-input" data-test="edit-day-type">
+            <option v-for="option in dayTypeOptions" :key="option.value" :value="option.value">
+              {{ $t(option.labelKey) }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="edit-row">
+        <div class="edit-field">
+          <label class="edit-label">{{ $t('plans.exerciseItem.targetWeightLabel') }} ({{ $t('units.kg') }})</label>
           <input v-model.number="editForm.targetWeight" type="number" min="0" step="0.5" class="edit-input" data-test="edit-weight">
         </div>
         <div class="edit-field">
-          <label class="edit-label">Pause (Sek)</label>
+          <label class="edit-label">{{ $t('plans.exerciseItem.restLabel') }}</label>
           <input v-model.number="editForm.restSeconds" type="number" min="0" class="edit-input" data-test="edit-rest">
         </div>
       </div>
       <div class="edit-row full">
         <div class="edit-field full">
-          <label class="edit-label">Notizen</label>
-          <input v-model="editForm.notes" type="text" class="edit-input" placeholder="Notizen..." data-test="edit-notes">
+          <label class="edit-label">{{ $t('plans.exerciseItem.notesLabel') }}</label>
+          <input v-model="editForm.notes" type="text" class="edit-input" :placeholder="$t('plans.exerciseItem.notesPlaceholder')" data-test="edit-notes">
         </div>
       </div>
     </div>
@@ -97,6 +112,7 @@
 import { defineComponent, ref, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from 'boot/axios'
+import { useI18n } from 'vue-i18n'
 import { muscleGroupLabels } from 'src/constants/muscleGroups'
 
 export default defineComponent({
@@ -114,6 +130,7 @@ export default defineComponent({
 
   setup(props) {
     const router = useRouter()
+    const { t } = useI18n({ useScope: 'global' })
     const isEditing = ref(false)
 
     const goToExercise = () => {
@@ -126,8 +143,15 @@ export default defineComponent({
       maxReps: props.planExercise.maxReps,
       targetWeight: props.planExercise.targetWeight,
       restSeconds: props.planExercise.restSeconds,
-      notes: props.planExercise.notes || ''
+      notes: props.planExercise.notes || '',
+      dayType: props.planExercise.dayType || 'BOTH'
     })
+
+    const dayTypeOptions = [
+      { value: 'BOTH', labelKey: 'plans.dayType.both' },
+      { value: 'A', labelKey: 'plans.dayType.a' },
+      { value: 'B', labelKey: 'plans.dayType.b' }
+    ]
 
     watch(() => props.planExercise, (newVal) => {
       editForm.sets = newVal.sets
@@ -136,15 +160,17 @@ export default defineComponent({
       editForm.targetWeight = newVal.targetWeight
       editForm.restSeconds = newVal.restSeconds
       editForm.notes = newVal.notes || ''
+      editForm.dayType = newVal.dayType || 'BOTH'
     }, { deep: true })
 
     const formatRestTime = (seconds) => {
       if (seconds >= 60) {
         const mins = Math.floor(seconds / 60)
         const secs = seconds % 60
-        return secs > 0 ? `${mins}:${secs.toString().padStart(2, '0')} Min` : `${mins} Min`
+        const timeLabel = secs > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${mins}`
+        return `${timeLabel} ${t('units.minutesShort')}`
       }
-      return `${seconds} Sek`
+      return `${seconds} ${t('units.secondsShort')}`
     }
 
     const toggleEdit = async () => {
@@ -157,7 +183,8 @@ export default defineComponent({
             maxReps: editForm.maxReps,
             targetWeight: editForm.targetWeight || null,
             restSeconds: editForm.restSeconds || null,
-            notes: editForm.notes || null
+            notes: editForm.notes || null,
+            dayType: editForm.dayType
           }
         )
         Object.assign(props.planExercise, data)
@@ -172,6 +199,7 @@ export default defineComponent({
       editForm,
       toggleEdit,
       goToExercise,
+      dayTypeOptions,
       muscleGroupLabels,
       formatRestTime
     }
@@ -199,6 +227,12 @@ export default defineComponent({
   font-size: 11px;
 }
 
+.exercise-item--compact .item-day-tag {
+  width: 22px;
+  height: 22px;
+  font-size: 10px;
+}
+
 .exercise-item--compact .exercise-name {
   font-size: 13px;
   margin-bottom: 0;
@@ -219,6 +253,14 @@ export default defineComponent({
   user-select: none;
 }
 
+.item-number-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .item-number {
   width: 28px;
   height: 28px;
@@ -232,6 +274,21 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.item-day-tag {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(33, 150, 243, 0.16);
+  border: 1px solid rgba(33, 150, 243, 0.38);
+  color: #7ec8ff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .item-info {

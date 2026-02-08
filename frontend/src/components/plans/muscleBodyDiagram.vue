@@ -1,9 +1,9 @@
 <template>
-  <div class="muscle-diagram" data-test="muscle-diagram">
+  <div class="muscle-diagram" :class="{ interactive: interactive }" data-test="muscle-diagram">
     <div class="diagram-container">
       <div class="view-column">
-        <span class="view-label">Vorne</span>
-        <svg viewBox="0 0 100 200" class="body-svg">
+        <span class="view-label">{{ $t('plans.muscleView.front') }}</span>
+        <svg viewBox="0 0 100 200" class="body-svg" @click="onDiagramClick">
           <g class="body-outline">
             <ellipse cx="50" cy="20" rx="15" ry="18" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" />
             <path d="M35 38 L30 45 L25 80 L30 82 L35 55 L35 38" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" />
@@ -18,14 +18,14 @@
             d="M32 40 Q25 42 28 52 L35 50 L35 40 Z"
             :style="getMuscleStyle('SHOULDERS')"
           >
-            <title>{{ muscleGroupLabels.SHOULDERS }}: {{ sets.SHOULDERS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.SHOULDERS) }}: {{ sets.SHOULDERS || 0 }} {{ $t('units.sets') }}</title>
           </path>
           <path
             data-muscle="SHOULDERS"
             d="M68 40 Q75 42 72 52 L65 50 L65 40 Z"
             :style="getMuscleStyle('SHOULDERS')"
           >
-            <title>{{ muscleGroupLabels.SHOULDERS }}: {{ sets.SHOULDERS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.SHOULDERS) }}: {{ sets.SHOULDERS || 0 }} {{ $t('units.sets') }}</title>
           </path>
 
           <path
@@ -33,7 +33,7 @@
             d="M38 42 L50 45 L62 42 L62 55 Q50 60 38 55 Z"
             :style="getMuscleStyle('CHEST')"
           >
-            <title>{{ muscleGroupLabels.CHEST }}: {{ sets.CHEST || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.CHEST) }}: {{ sets.CHEST || 0 }} {{ $t('units.sets') }}</title>
           </path>
 
           <path
@@ -41,14 +41,14 @@
             d="M30 52 L35 50 L35 70 L28 72 Q27 62 30 52"
             :style="getMuscleStyle('BICEPS')"
           >
-            <title>{{ muscleGroupLabels.BICEPS }}: {{ sets.BICEPS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.BICEPS) }}: {{ sets.BICEPS || 0 }} {{ $t('units.sets') }}</title>
           </path>
           <path
             data-muscle="BICEPS"
             d="M70 52 L65 50 L65 70 L72 72 Q73 62 70 52"
             :style="getMuscleStyle('BICEPS')"
           >
-            <title>{{ muscleGroupLabels.BICEPS }}: {{ sets.BICEPS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.BICEPS) }}: {{ sets.BICEPS || 0 }} {{ $t('units.sets') }}</title>
           </path>
 
           <path
@@ -56,14 +56,14 @@
             d="M28 74 L35 72 L35 82 L30 82 L26 80 Z"
             :style="getMuscleStyle('FOREARMS')"
           >
-            <title>{{ muscleGroupLabels.FOREARMS }}: {{ sets.FOREARMS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.FOREARMS) }}: {{ sets.FOREARMS || 0 }} {{ $t('units.sets') }}</title>
           </path>
           <path
             data-muscle="FOREARMS"
             d="M72 74 L65 72 L65 82 L70 82 L74 80 Z"
             :style="getMuscleStyle('FOREARMS')"
           >
-            <title>{{ muscleGroupLabels.FOREARMS }}: {{ sets.FOREARMS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.FOREARMS) }}: {{ sets.FOREARMS || 0 }} {{ $t('units.sets') }}</title>
           </path>
 
           <path
@@ -71,7 +71,7 @@
             d="M42 58 L50 60 L58 58 L58 88 L50 90 L42 88 Z"
             :style="getMuscleStyle('ABS')"
           >
-            <title>{{ muscleGroupLabels.ABS }}: {{ sets.ABS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.ABS) }}: {{ sets.ABS || 0 }} {{ $t('units.sets') }}</title>
           </path>
 
           <path
@@ -79,14 +79,14 @@
             d="M38 56 L42 58 L42 88 L38 86 L36 70 Z"
             :style="getMuscleStyle('OBLIQUES')"
           >
-            <title>{{ muscleGroupLabels.OBLIQUES }}: {{ sets.OBLIQUES || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.OBLIQUES) }}: {{ sets.OBLIQUES || 0 }} {{ $t('units.sets') }}</title>
           </path>
           <path
             data-muscle="OBLIQUES"
             d="M62 56 L58 58 L58 88 L62 86 L64 70 Z"
             :style="getMuscleStyle('OBLIQUES')"
           >
-            <title>{{ muscleGroupLabels.OBLIQUES }}: {{ sets.OBLIQUES || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.OBLIQUES) }}: {{ sets.OBLIQUES || 0 }} {{ $t('units.sets') }}</title>
           </path>
 
           <path
@@ -94,14 +94,14 @@
             d="M38 100 L48 100 L46 135 L36 135 L32 118 Z"
             :style="getMuscleStyle('QUADS')"
           >
-            <title>{{ muscleGroupLabels.QUADS }}: {{ sets.QUADS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.QUADS) }}: {{ sets.QUADS || 0 }} {{ $t('units.sets') }}</title>
           </path>
           <path
             data-muscle="QUADS"
             d="M62 100 L52 100 L54 135 L64 135 L68 118 Z"
             :style="getMuscleStyle('QUADS')"
           >
-            <title>{{ muscleGroupLabels.QUADS }}: {{ sets.QUADS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.QUADS) }}: {{ sets.QUADS || 0 }} {{ $t('units.sets') }}</title>
           </path>
 
           <path
@@ -109,21 +109,21 @@
             d="M28 165 L34 162 L34 185 L28 188 Z"
             :style="getMuscleStyle('CALVES')"
           >
-            <title>{{ muscleGroupLabels.CALVES }}: {{ sets.CALVES || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.CALVES) }}: {{ sets.CALVES || 0 }} {{ $t('units.sets') }}</title>
           </path>
           <path
             data-muscle="CALVES"
             d="M72 165 L66 162 L66 185 L72 188 Z"
             :style="getMuscleStyle('CALVES')"
           >
-            <title>{{ muscleGroupLabels.CALVES }}: {{ sets.CALVES || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.CALVES) }}: {{ sets.CALVES || 0 }} {{ $t('units.sets') }}</title>
           </path>
         </svg>
       </div>
 
       <div class="view-column">
-        <span class="view-label">Hinten</span>
-        <svg viewBox="0 0 100 200" class="body-svg">
+        <span class="view-label">{{ $t('plans.muscleView.back') }}</span>
+        <svg viewBox="0 0 100 200" class="body-svg" @click="onDiagramClick">
           <g class="body-outline">
             <ellipse cx="50" cy="20" rx="15" ry="18" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" />
             <path d="M35 38 L30 45 L25 80 L30 82 L35 55 L35 38" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" />
@@ -138,14 +138,14 @@
             d="M32 40 Q25 42 28 52 L35 50 L35 40 Z"
             :style="getMuscleStyle('SHOULDERS')"
           >
-            <title>{{ muscleGroupLabels.SHOULDERS }}: {{ sets.SHOULDERS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.SHOULDERS) }}: {{ sets.SHOULDERS || 0 }} {{ $t('units.sets') }}</title>
           </path>
           <path
             data-muscle="SHOULDERS"
             d="M68 40 Q75 42 72 52 L65 50 L65 40 Z"
             :style="getMuscleStyle('SHOULDERS')"
           >
-            <title>{{ muscleGroupLabels.SHOULDERS }}: {{ sets.SHOULDERS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.SHOULDERS) }}: {{ sets.SHOULDERS || 0 }} {{ $t('units.sets') }}</title>
           </path>
 
           <path
@@ -153,7 +153,7 @@
             d="M38 42 L50 40 L62 42 L64 75 L50 80 L36 75 Z"
             :style="getMuscleStyle('BACK')"
           >
-            <title>{{ muscleGroupLabels.BACK }}: {{ sets.BACK || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.BACK) }}: {{ sets.BACK || 0 }} {{ $t('units.sets') }}</title>
           </path>
 
           <path
@@ -161,14 +161,14 @@
             d="M30 52 L35 50 L35 70 L28 72 Q27 62 30 52"
             :style="getMuscleStyle('TRICEPS')"
           >
-            <title>{{ muscleGroupLabels.TRICEPS }}: {{ sets.TRICEPS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.TRICEPS) }}: {{ sets.TRICEPS || 0 }} {{ $t('units.sets') }}</title>
           </path>
           <path
             data-muscle="TRICEPS"
             d="M70 52 L65 50 L65 70 L72 72 Q73 62 70 52"
             :style="getMuscleStyle('TRICEPS')"
           >
-            <title>{{ muscleGroupLabels.TRICEPS }}: {{ sets.TRICEPS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.TRICEPS) }}: {{ sets.TRICEPS || 0 }} {{ $t('units.sets') }}</title>
           </path>
 
           <path
@@ -176,14 +176,14 @@
             d="M28 74 L35 72 L35 82 L30 82 L26 80 Z"
             :style="getMuscleStyle('FOREARMS')"
           >
-            <title>{{ muscleGroupLabels.FOREARMS }}: {{ sets.FOREARMS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.FOREARMS) }}: {{ sets.FOREARMS || 0 }} {{ $t('units.sets') }}</title>
           </path>
           <path
             data-muscle="FOREARMS"
             d="M72 74 L65 72 L65 82 L70 82 L74 80 Z"
             :style="getMuscleStyle('FOREARMS')"
           >
-            <title>{{ muscleGroupLabels.FOREARMS }}: {{ sets.FOREARMS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.FOREARMS) }}: {{ sets.FOREARMS || 0 }} {{ $t('units.sets') }}</title>
           </path>
 
           <path
@@ -191,7 +191,7 @@
             d="M36 88 L50 92 L64 88 L64 102 L50 105 L36 102 Z"
             :style="getMuscleStyle('GLUTES')"
           >
-            <title>{{ muscleGroupLabels.GLUTES }}: {{ sets.GLUTES || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.GLUTES) }}: {{ sets.GLUTES || 0 }} {{ $t('units.sets') }}</title>
           </path>
 
           <path
@@ -199,14 +199,14 @@
             d="M38 105 L48 108 L46 135 L36 135 L34 120 Z"
             :style="getMuscleStyle('HAMSTRINGS')"
           >
-            <title>{{ muscleGroupLabels.HAMSTRINGS }}: {{ sets.HAMSTRINGS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.HAMSTRINGS) }}: {{ sets.HAMSTRINGS || 0 }} {{ $t('units.sets') }}</title>
           </path>
           <path
             data-muscle="HAMSTRINGS"
             d="M62 105 L52 108 L54 135 L64 135 L66 120 Z"
             :style="getMuscleStyle('HAMSTRINGS')"
           >
-            <title>{{ muscleGroupLabels.HAMSTRINGS }}: {{ sets.HAMSTRINGS || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.HAMSTRINGS) }}: {{ sets.HAMSTRINGS || 0 }} {{ $t('units.sets') }}</title>
           </path>
 
           <path
@@ -214,14 +214,14 @@
             d="M28 165 L34 162 L34 185 L28 188 Z"
             :style="getMuscleStyle('CALVES')"
           >
-            <title>{{ muscleGroupLabels.CALVES }}: {{ sets.CALVES || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.CALVES) }}: {{ sets.CALVES || 0 }} {{ $t('units.sets') }}</title>
           </path>
           <path
             data-muscle="CALVES"
             d="M72 165 L66 162 L66 185 L72 188 Z"
             :style="getMuscleStyle('CALVES')"
           >
-            <title>{{ muscleGroupLabels.CALVES }}: {{ sets.CALVES || 0 }} Sätze</title>
+            <title>{{ $t(muscleGroupLabels.CALVES) }}: {{ sets.CALVES || 0 }} {{ $t('units.sets') }}</title>
           </path>
         </svg>
       </div>
@@ -232,10 +232,12 @@
         v-for="muscle in activeMuscles"
         :key="muscle"
         class="legend-item"
+        :class="{ interactive: interactive, active: selectedMuscle === muscle }"
+        @click="onLegendClick(muscle)"
       >
         <span class="legend-dot" :style="getDotStyle(muscle)" />
-        <span class="legend-name">{{ muscleGroupLabels[muscle] }}</span>
-        <span v-if="showSets" class="legend-count">{{ sets[muscle] }} Sätze</span>
+        <span class="legend-name">{{ $t(muscleGroupLabels[muscle]) }}</span>
+        <span v-if="showSets" class="legend-count">{{ sets[muscle] }} {{ $t('units.sets') }}</span>
       </div>
     </div>
   </div>
@@ -248,13 +250,17 @@ import { muscleGroupLabels } from 'src/constants/muscleGroups'
 export default defineComponent({
   name: 'MuscleBodyDiagram',
 
+  emits: ['select-muscle'],
+
   props: {
     sets: { type: Object, required: true },
     maxSets: { type: Number, required: true },
-    showSets: { type: Boolean, default: true }
+    showSets: { type: Boolean, default: true },
+    interactive: { type: Boolean, default: false },
+    selectedMuscle: { type: String, default: '' }
   },
 
-  setup(props) {
+  setup(props, { emit }) {
     const activeMuscles = computed(() => {
       return Object.entries(props.sets)
         .filter(([, count]) => count > 0)
@@ -263,6 +269,21 @@ export default defineComponent({
     })
 
     const getMuscleStyle = (muscle) => {
+      if (props.selectedMuscle) {
+        if (props.selectedMuscle === muscle) {
+          return {
+            fill: 'rgba(0, 255, 194, 0.85)',
+            stroke: 'rgba(0, 255, 194, 1)',
+            filter: 'drop-shadow(0 0 8px rgba(0, 255, 194, 0.55))'
+          }
+        }
+
+        return {
+          fill: 'rgba(255, 255, 255, 0.03)',
+          stroke: 'rgba(255, 255, 255, 0.08)'
+        }
+      }
+
       const count = props.sets[muscle] || 0
       if (!count) return { fill: 'rgba(255, 255, 255, 0.03)', stroke: 'rgba(255, 255, 255, 0.05)' }
       const intensity = 0.25 + (count / props.maxSets) * 0.55
@@ -274,16 +295,37 @@ export default defineComponent({
     }
 
     const getDotStyle = (muscle) => {
+      if (props.selectedMuscle) {
+        if (props.selectedMuscle === muscle) {
+          return { background: 'rgba(0, 255, 194, 0.95)' }
+        }
+        return { background: 'rgba(255, 255, 255, 0.25)' }
+      }
+
       const count = props.sets[muscle] || 0
       const intensity = 0.4 + (count / props.maxSets) * 0.6
       return { background: `rgba(0, 255, 194, ${intensity})` }
+    }
+
+    const onDiagramClick = (event) => {
+      if (!props.interactive) return
+      const target = event.target.closest('[data-muscle]')
+      if (!target) return
+      emit('select-muscle', target.dataset.muscle)
+    }
+
+    const onLegendClick = (muscle) => {
+      if (!props.interactive) return
+      emit('select-muscle', muscle)
     }
 
     return {
       muscleGroupLabels,
       activeMuscles,
       getMuscleStyle,
-      getDotStyle
+      getDotStyle,
+      onDiagramClick,
+      onLegendClick
     }
   }
 })
@@ -325,6 +367,18 @@ export default defineComponent({
   cursor: default;
 }
 
+.muscle-diagram.interactive .body-svg path[data-muscle] {
+  cursor: pointer;
+}
+
+.muscle-diagram.interactive .body-svg path[data-muscle]:hover {
+  filter: brightness(1.08);
+}
+
+.muscle-diagram :deep(svg) {
+  user-select: none;
+}
+
 .muscle-legend {
   display: flex;
   flex-wrap: wrap;
@@ -339,6 +393,17 @@ export default defineComponent({
   display: flex;
   align-items: center;
   gap: 6px;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.legend-item.interactive {
+  cursor: pointer;
+}
+
+.legend-item.interactive.active .legend-name {
+  color: #00ffc2;
 }
 
 .legend-dot {

@@ -3,10 +3,17 @@ const prisma = require('../prisma')
 const systemPlans = [
   {
     name: 'Push',
-    description: 'Push-Plan nach Vorgabe.',
+    description: 'Push plan template.',
+    translations: [
+      {
+        locale: 'de',
+        name: 'Push',
+        description: 'Push-Plan nach Vorgabe.'
+      }
+    ],
     exercises: [
       {
-        name: 'Schrägbankdrücken (Langhantel)',
+        name: 'Incline barbell bench press',
         sets: 3,
         minReps: 12,
         maxReps: 15,
@@ -14,7 +21,7 @@ const systemPlans = [
         targetWeight: 59
       },
       {
-        name: 'Butterfly (Maschine)',
+        name: 'Pec deck machine',
         sets: 2,
         minReps: 8,
         maxReps: 12,
@@ -22,7 +29,7 @@ const systemPlans = [
         targetWeight: 75
       },
       {
-        name: 'Hackenschmidt-Kniebeuge',
+        name: 'Hack squat',
         sets: 2,
         minReps: 6,
         maxReps: 8,
@@ -30,7 +37,7 @@ const systemPlans = [
         targetWeight: 100
       },
       {
-        name: 'Beinstrecker (Maschine)',
+        name: 'Leg extension machine',
         sets: 2,
         minReps: 6,
         maxReps: 8,
@@ -38,7 +45,7 @@ const systemPlans = [
         targetWeight: 100
       },
       {
-        name: 'Trizepsdrücken am Seil',
+        name: 'Cable triceps pushdown',
         sets: 3,
         minReps: 6,
         maxReps: 8,
@@ -46,7 +53,7 @@ const systemPlans = [
         targetWeight: 35
       },
       {
-        name: 'Seitheben (Maschine)',
+        name: 'Machine lateral raise',
         sets: 2,
         minReps: 12,
         maxReps: 15,
@@ -57,10 +64,17 @@ const systemPlans = [
   },
   {
     name: 'Pull',
-    description: 'Pull-Plan nach Vorgabe.',
+    description: 'Pull plan template.',
+    translations: [
+      {
+        locale: 'de',
+        name: 'Pull',
+        description: 'Pull-Plan nach Vorgabe.'
+      }
+    ],
     exercises: [
       {
-        name: 'Latzug breit',
+        name: 'Wide-grip lat pulldown',
         sets: 2,
         minReps: 6,
         maxReps: 10,
@@ -68,7 +82,7 @@ const systemPlans = [
         targetWeight: 65
       },
       {
-        name: 'Rudern eng (Kabel)',
+        name: 'Close-grip cable row',
         sets: 2,
         minReps: 6,
         maxReps: 10,
@@ -76,7 +90,7 @@ const systemPlans = [
         targetWeight: 70
       },
       {
-        name: 'Rudern breit (Kabel)',
+        name: 'Wide-grip cable row',
         sets: 1,
         minReps: 6,
         maxReps: 10,
@@ -84,7 +98,7 @@ const systemPlans = [
         targetWeight: 60
       },
       {
-        name: 'Bizepsmaschine',
+        name: 'Biceps curl machine',
         sets: 3,
         minReps: 6,
         maxReps: 8,
@@ -92,7 +106,7 @@ const systemPlans = [
         targetWeight: 45
       },
       {
-        name: 'Crunchmaschine',
+        name: 'Ab crunch machine',
         sets: 2,
         minReps: 8,
         maxReps: 10,
@@ -100,7 +114,7 @@ const systemPlans = [
         targetWeight: 59
       },
       {
-        name: 'Rumänisches Kreuzheben (Langhantel)',
+        name: 'Romanian deadlift (barbell)',
         sets: 2,
         minReps: 6,
         maxReps: 8,
@@ -108,7 +122,7 @@ const systemPlans = [
         targetWeight: 50
       },
       {
-        name: 'Beinbeuger (Maschine)',
+        name: 'Leg curl machine',
         sets: 2,
         minReps: 6,
         maxReps: 8,
@@ -116,7 +130,7 @@ const systemPlans = [
         targetWeight: 45
       },
       {
-        name: 'Reverse Butterfly (Maschine)',
+        name: 'Reverse pec deck machine',
         sets: 1,
         minReps: 6,
         maxReps: 8,
@@ -126,6 +140,41 @@ const systemPlans = [
     ]
   }
 ]
+
+const upsertPlanTranslations = async (planId, translations) => {
+  await Promise.all(
+    translations.map(translation =>
+      prisma.trainingPlanTranslation.upsert({
+        where: { trainingPlanId_locale: { trainingPlanId: planId, locale: translation.locale } },
+        update: {
+          name: translation.name,
+          description: translation.description
+        },
+        create: {
+          trainingPlanId: planId,
+          locale: translation.locale,
+          name: translation.name,
+          description: translation.description
+        }
+      })
+    )
+  )
+}
+
+const buildPlanSetsData = (sets, minReps, maxReps, targetWeight) => {
+  const planSets = []
+
+  for (let i = 1; i <= sets; i += 1) {
+    planSets.push({
+      setNumber: i,
+      targetWeight,
+      targetMinReps: minReps,
+      targetMaxReps: maxReps
+    })
+  }
+
+  return planSets
+}
 
 async function seedPlans () {
   try {
@@ -137,7 +186,15 @@ async function seedPlans () {
       })
 
       if (existing) {
-        console.log(`Skipped (exists): ${planData.name}`)
+        const updated = await prisma.trainingPlan.update({
+          where: { id: existing.id },
+          data: {
+            name: planData.name,
+            description: planData.description
+          }
+        })
+        await upsertPlanTranslations(existing.id, planData.translations)
+        console.log(`Updated: ${updated.name}`)
         continue
       }
 
@@ -171,6 +228,7 @@ async function seedPlans () {
           name: planData.name,
           description: planData.description,
           isSystem: true,
+          translations: { create: planData.translations },
           exercises: {
             create: validExercises.map((ex, index) => ({
               exerciseId: ex.exercise.id,
@@ -179,7 +237,15 @@ async function seedPlans () {
               minReps: ex.minReps,
               maxReps: ex.maxReps,
               restSeconds: ex.restSeconds,
-              targetWeight: ex.targetWeight
+              targetWeight: ex.targetWeight,
+              planSets: {
+                create: buildPlanSetsData(
+                  ex.sets,
+                  ex.minReps,
+                  ex.maxReps,
+                  ex.targetWeight
+                )
+              }
             }))
           }
         }

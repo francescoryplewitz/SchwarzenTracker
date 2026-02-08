@@ -6,10 +6,10 @@
           <q-icon name="mdi-alert-circle-outline" size="80px" />
         </div>
         <h1 class="error-code">404</h1>
-        <p class="error-text">Seite nicht gefunden</p>
+        <p class="error-text">{{ $t('errors.notFoundTitle') }}</p>
         <button class="home-btn" @click="$router.push('/')">
           <q-icon name="mdi-home" size="18px" />
-          Ab nach Hause!
+          {{ $t('errors.goHome') }}
         </button>
       </div>
     </div>

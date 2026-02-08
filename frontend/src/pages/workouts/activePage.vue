@@ -3,7 +3,7 @@
     <div class="content-container">
       <div v-if="loading" class="loading-state">
         <q-spinner color="primary" size="48px" />
-        <span class="loading-text">Lade Workout...</span>
+        <span class="loading-text">{{ $t('workouts.loading') }}</span>
       </div>
 
       <template v-else-if="workout">
@@ -15,11 +15,14 @@
           <header class="workout-header glass-card">
             <div class="header-top">
               <div class="plan-info">
-                <h1 class="plan-name">{{ workout.planName }}</h1>
+                <div class="plan-title-row">
+                  <h1 class="plan-name">{{ workout.planName }}</h1>
+                  <span v-if="workout.dayType" class="day-type-badge">{{ $t(`plans.dayType.${workout.dayType.toLowerCase()}`) }}</span>
+                </div>
                 <div class="timer-display" :class="{ paused: workout.status === 'PAUSED' }">
                   <q-icon name="mdi-timer-outline" size="18px" />
                   <span class="timer-value">{{ formattedDuration }}</span>
-                  <span v-if="workout.status === 'PAUSED'" class="pause-indicator">PAUSIERT</span>
+                  <span v-if="workout.status === 'PAUSED'" class="pause-indicator">{{ $t('workouts.pauseLabel') }}</span>
                 </div>
               </div>
             </div>
@@ -31,15 +34,15 @@
                 @click="togglePause"
               >
                 <q-icon :name="workout.status === 'PAUSED' ? 'mdi-play' : 'mdi-pause'" size="18px" />
-                <q-tooltip>{{ workout.status === 'PAUSED' ? 'Fortsetzen' : 'Pausieren' }}</q-tooltip>
+                <q-tooltip>{{ workout.status === 'PAUSED' ? $t('workouts.resume') : $t('workouts.pause') }}</q-tooltip>
               </button>
               <button class="action-btn abandon-btn" data-test="abandon-btn" @click="confirmAbandon">
                 <q-icon name="mdi-close" size="18px" />
-                <q-tooltip>Abbrechen</q-tooltip>
+                <q-tooltip>{{ $t('workouts.abandon') }}</q-tooltip>
               </button>
-              <button class="action-btn complete-btn" data-test="complete-btn" @click="completeWorkout">
+              <button class="action-btn complete-btn" data-test="complete-btn" @click="confirmComplete">
                 <q-icon name="mdi-check" size="18px" />
-                Beenden
+                {{ $t('workouts.finish') }}
               </button>
             </div>
           </header>
@@ -69,6 +72,12 @@
                   @update="onSetUpdate"
                 />
               </div>
+
+              <workout-exercise-note
+                :exercise-id="group.exerciseId"
+                :note="group.userNote"
+                @saved="note => onNoteSaved(group.exerciseId, note)"
+              />
             </div>
           </div>
         </template>
@@ -76,20 +85,46 @@
 
       <div v-else class="not-found glass-card">
         <q-icon name="mdi-alert-circle-outline" size="48px" class="not-found-icon" />
-        <span class="not-found-text">Workout nicht gefunden</span>
+        <span class="not-found-text">{{ $t('workouts.notFound') }}</span>
         <button class="back-btn" @click="$router.push('/workouts')">
-          Zurück zur Übersicht
+          {{ $t('workouts.backToList') }}
         </button>
       </div>
     </div>
 
     <q-dialog v-model="showAbandonDialog" class="abandon-dialog">
       <div class="dialog-card glass-card">
-        <h3 class="dialog-title">Workout abbrechen?</h3>
-        <p class="dialog-text">Dein Fortschritt wird gespeichert, aber das Workout wird als abgebrochen markiert.</p>
+        <h3 class="dialog-title">{{ $t('workouts.abandonDialog.title') }}</h3>
+        <p class="dialog-text">{{ $t('workouts.abandonDialog.text') }}</p>
         <div class="dialog-actions">
-          <button class="cancel-btn" @click="showAbandonDialog = false">Zurück</button>
-          <button class="confirm-btn" @click="abandonWorkout">Abbrechen</button>
+          <button class="cancel-btn" @click="showAbandonDialog = false">{{ $t('workouts.abandonDialog.cancel') }}</button>
+          <button class="confirm-btn" @click="abandonWorkout">{{ $t('workouts.abandonDialog.confirm') }}</button>
+        </div>
+      </div>
+    </q-dialog>
+
+    <q-dialog v-model="showCompleteDialog" class="complete-dialog">
+      <div class="dialog-card glass-card">
+        <h3 class="dialog-title">{{ $t('workouts.finishWarning.title') }}</h3>
+        <p class="dialog-text">{{ $t('workouts.finishWarning.text') }}</p>
+        <div v-if="missingSetGroups.length" class="missing-sets">
+          <div class="missing-title">{{ $t('workouts.finishWarning.missingTitle') }}</div>
+          <div v-for="group in missingSetGroups" :key="group.exerciseId" class="missing-group">
+            <div class="missing-exercise">{{ group.exerciseName }}</div>
+            <div class="missing-set-list">
+              <span
+                v-for="setNumber in group.setNumbers"
+                :key="`${group.exerciseId}-${setNumber}`"
+                class="missing-set"
+              >
+                {{ $t('workouts.finishWarning.setLabel', { number: setNumber }) }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="dialog-actions">
+          <button class="cancel-btn" @click="showCompleteDialog = false">{{ $t('workouts.finishWarning.cancel') }}</button>
+          <button class="confirm-btn" @click="completeWorkout(true)">{{ $t('workouts.finishWarning.confirm') }}</button>
         </div>
       </div>
     </q-dialog>
@@ -103,6 +138,7 @@ import { api } from 'boot/axios'
 import WorkoutSetItem from 'components/workouts/workoutSetItem.vue'
 import WorkoutRestTimer from 'components/workouts/workoutRestTimer.vue'
 import WorkoutSummary from 'components/workouts/workoutSummary.vue'
+import WorkoutExerciseNote from 'components/workouts/workoutExerciseNote.vue'
 
 export default defineComponent({
   name: 'WorkoutActivePage',
@@ -110,7 +146,8 @@ export default defineComponent({
   components: {
     WorkoutSetItem,
     WorkoutRestTimer,
-    WorkoutSummary
+    WorkoutSummary,
+    WorkoutExerciseNote
   },
 
   setup() {
@@ -118,6 +155,7 @@ export default defineComponent({
     const workout = ref(null)
     const loading = ref(true)
     const showAbandonDialog = ref(false)
+    const showCompleteDialog = ref(false)
     const restTimerActive = ref(false)
     const restSeconds = ref(0)
     const timerInterval = ref(null)
@@ -150,11 +188,12 @@ export default defineComponent({
 
       const groups = {}
       for (const set of workout.value.sets) {
-        const exerciseId = set.planExercise.id
+        const exerciseId = set.planExercise.exercise.id
         if (!groups[exerciseId]) {
           groups[exerciseId] = {
             exerciseId,
             exerciseName: set.planExercise.exercise.name,
+            userNote: set.planExercise.exercise.userNote,
             sets: [],
             completedCount: 0
           }
@@ -165,6 +204,19 @@ export default defineComponent({
 
       return Object.values(groups)
     })
+
+    const missingSetGroups = computed(() => {
+      return groupedSets.value.map(group => {
+        const missingSets = group.sets.filter(set => !set.completedAt)
+        return {
+          exerciseId: group.exerciseId,
+          exerciseName: group.exerciseName,
+          setNumbers: missingSets.map(set => set.setNumber)
+        }
+      }).filter(group => group.setNumbers.length > 0)
+    })
+
+    const hasMissingSets = computed(() => missingSetGroups.value.length > 0)
 
     const fetchWorkout = async () => {
       loading.value = true
@@ -189,9 +241,30 @@ export default defineComponent({
       showAbandonDialog.value = false
     }
 
-    const completeWorkout = async () => {
-      const { data } = await api.patch(`/api/workouts/${workout.value.id}`, { action: 'complete' })
-      workout.value = data
+    const confirmComplete = () => {
+      if (hasMissingSets.value) {
+        showCompleteDialog.value = true
+        return
+      }
+      completeWorkout()
+    }
+
+    const completeWorkout = async (forceComplete = false) => {
+      try {
+        const payload = { action: 'complete' }
+        if (forceComplete) {
+          payload.forceComplete = true
+        }
+        const { data } = await api.patch(`/api/workouts/${workout.value.id}`, payload)
+        workout.value = data
+        showCompleteDialog.value = false
+      } catch (e) {
+        if (e.response?.status === 409) {
+          showCompleteDialog.value = true
+          return
+        }
+        throw e
+      }
     }
 
     const onSetComplete = (result) => {
@@ -200,9 +273,18 @@ export default defineComponent({
         workout.value.sets[setIndex] = result.set
       }
 
-      if (result.restSeconds) {
+      const nextSet = workout.value.sets[setIndex + 1]
+      const shouldShowRestTimer = Boolean(
+        nextSet &&
+        !nextSet.completedAt &&
+        nextSet.planExercise.id === result.set.planExercise.id
+      )
+
+      if (shouldShowRestTimer && result.restSeconds) {
         restSeconds.value = result.restSeconds
         restTimerActive.value = true
+      } else {
+        restTimerActive.value = false
       }
     }
 
@@ -211,6 +293,13 @@ export default defineComponent({
       if (setIndex !== -1) {
         workout.value.sets[setIndex].weight = updatedSet.weight
         workout.value.sets[setIndex].reps = updatedSet.reps
+      }
+    }
+
+    const onNoteSaved = (exerciseId, note) => {
+      for (const set of workout.value.sets) {
+        if (set.planExercise.exercise.id !== exerciseId) continue
+        set.planExercise.exercise.userNote = note
       }
     }
 
@@ -248,16 +337,20 @@ export default defineComponent({
       workout,
       loading,
       showAbandonDialog,
+      showCompleteDialog,
       restTimerActive,
       restSeconds,
       formattedDuration,
       groupedSets,
+      missingSetGroups,
       togglePause,
       confirmAbandon,
       abandonWorkout,
+      confirmComplete,
       completeWorkout,
       onSetComplete,
       onSetUpdate,
+      onNoteSaved,
       skipRest,
       onRestDone
     }
@@ -306,11 +399,28 @@ export default defineComponent({
   gap: 8px;
 }
 
+.plan-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .plan-name {
   font-size: 20px;
   font-weight: 700;
   color: white;
   margin: 0;
+}
+
+.day-type-badge {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(0, 255, 194, 0.12);
+  border: 1px solid rgba(0, 255, 194, 0.3);
+  color: #00ffc2;
 }
 
 .timer-display {
@@ -475,6 +585,51 @@ export default defineComponent({
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+}
+
+.missing-sets {
+  margin: 16px 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.missing-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.missing-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.missing-exercise {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+
+.missing-set-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.missing-set {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 82, 82, 0.15);
+  border: 1px solid rgba(255, 82, 82, 0.25);
+  padding: 4px 8px;
+  border-radius: 999px;
 }
 
 .cancel-btn {

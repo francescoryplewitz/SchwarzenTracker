@@ -2,10 +2,10 @@
   <q-dialog v-model="dialogVisible" persistent data-test="exercise-picker-dialog">
     <div class="picker-dialog">
       <div class="dialog-header">
-        <span class="dialog-title">Übung hinzufügen</span>
+        <span class="dialog-title">{{ $t('plans.exercisePicker.title') }}</span>
         <button class="close-btn" data-test="close-btn" @click="close">
           <q-icon name="mdi-close" size="20px" />
-          <q-tooltip>Schließen</q-tooltip>
+          <q-tooltip>{{ $t('common.close') }}</q-tooltip>
         </button>
       </div>
 
@@ -16,7 +16,7 @@
             v-model="search"
             type="text"
             class="search-input"
-            placeholder="Übung suchen..."
+            :placeholder="$t('plans.exercisePicker.searchPlaceholder')"
             data-test="search-input"
             @input="debouncedSearch"
           >
@@ -41,7 +41,7 @@
             <div class="option-info">
               <span class="option-name">{{ exercise.name }}</span>
               <span class="option-meta">
-                {{ exercise.muscleGroups?.slice(0, 2).map(mg => muscleGroupLabels[mg]).join(', ') }}
+                {{ exercise.muscleGroups?.slice(0, 2).map(mg => $t(muscleGroupLabels[mg])).join(', ') }}
               </span>
             </div>
           </div>
@@ -49,26 +49,43 @@
 
         <div v-if="selectedExercise" class="config-section" data-test="config-section">
           <div class="config-row">
+            <div class="config-field config-field-full">
+              <label class="config-label">{{ $t('plans.dayType.label') }}</label>
+              <div class="day-type-toggle" data-test="config-day-type">
+                <button
+                  v-for="option in dayTypeOptions"
+                  :key="option.value"
+                  type="button"
+                  class="day-type-btn"
+                  :class="{ active: config.dayType === option.value }"
+                  @click="config.dayType = option.value"
+                >
+                  {{ $t(option.labelKey) }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="config-row">
             <div class="config-field">
-              <label class="config-label">Sätze</label>
+              <label class="config-label">{{ $t('plans.exercisePicker.setsLabel') }}</label>
               <input v-model.number="config.sets" type="number" min="1" class="config-input" data-test="config-sets">
             </div>
             <div class="config-field">
-              <label class="config-label">Min Wdh</label>
+              <label class="config-label">{{ $t('plans.exercisePicker.minRepsLabel') }}</label>
               <input v-model.number="config.minReps" type="number" min="1" class="config-input" data-test="config-min-reps">
             </div>
             <div class="config-field">
-              <label class="config-label">Max Wdh</label>
+              <label class="config-label">{{ $t('plans.exercisePicker.maxRepsLabel') }}</label>
               <input v-model.number="config.maxReps" type="number" min="1" class="config-input" data-test="config-max-reps">
             </div>
           </div>
           <div class="config-row">
             <div class="config-field">
-              <label class="config-label">Zielgewicht (kg)</label>
-              <input v-model.number="config.targetWeight" type="number" min="0" step="0.5" class="config-input" placeholder="Optional" data-test="config-weight">
+              <label class="config-label">{{ $t('plans.exercisePicker.targetWeightLabel') }}</label>
+              <input v-model.number="config.targetWeight" type="number" min="0" step="0.5" class="config-input" :placeholder="$t('plans.exercisePicker.optional')" data-test="config-weight">
             </div>
             <div class="config-field">
-              <label class="config-label">Pause (Sek)</label>
+              <label class="config-label">{{ $t('plans.exercisePicker.restLabel') }}</label>
               <input v-model.number="config.restSeconds" type="number" min="0" class="config-input" placeholder="60" data-test="config-rest">
             </div>
           </div>
@@ -77,7 +94,7 @@
 
       <div class="dialog-actions">
         <button class="action-btn secondary" data-test="cancel-btn" @click="close">
-          Abbrechen
+          {{ $t('common.cancel') }}
         </button>
         <button
           class="action-btn primary"
@@ -85,7 +102,7 @@
           data-test="add-btn"
           @click="addExercise"
         >
-          Hinzufügen
+          {{ $t('plans.exercisePicker.add') }}
         </button>
       </div>
     </div>
@@ -119,8 +136,15 @@ export default defineComponent({
       minReps: 8,
       maxReps: 12,
       targetWeight: null,
-      restSeconds: null
+      restSeconds: null,
+      dayType: 'BOTH'
     })
+
+    const dayTypeOptions = [
+      { value: 'BOTH', labelKey: 'plans.dayType.both' },
+      { value: 'A', labelKey: 'plans.dayType.a' },
+      { value: 'B', labelKey: 'plans.dayType.b' }
+    ]
 
     const resetConfig = () => {
       config.sets = 3
@@ -128,6 +152,7 @@ export default defineComponent({
       config.maxReps = 12
       config.targetWeight = null
       config.restSeconds = null
+      config.dayType = 'BOTH'
     }
 
     const loadExercises = async () => {
@@ -170,7 +195,8 @@ export default defineComponent({
         minReps: config.minReps,
         maxReps: config.maxReps,
         targetWeight: config.targetWeight || null,
-        restSeconds: config.restSeconds || null
+        restSeconds: config.restSeconds || null,
+        dayType: config.dayType
       })
       emit('added', data)
       close()
@@ -183,6 +209,7 @@ export default defineComponent({
       loading,
       selectedExercise,
       config,
+      dayTypeOptions,
       muscleGroupLabels,
       debouncedSearch,
       open,
@@ -375,6 +402,10 @@ export default defineComponent({
   flex: 1;
 }
 
+.config-field-full {
+  width: 100%;
+}
+
 .config-label {
   display: block;
   font-size: 11px;
@@ -402,6 +433,29 @@ export default defineComponent({
 
 .config-input:focus {
   border-color: rgba(0, 255, 194, 0.4);
+}
+
+.day-type-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.day-type-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.day-type-btn.active {
+  background: rgba(0, 255, 194, 0.15);
+  border-color: rgba(0, 255, 194, 0.35);
+  color: #00ffc2;
 }
 
 .dialog-actions {

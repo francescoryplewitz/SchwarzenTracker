@@ -51,7 +51,7 @@ describe('Exercise endpoints', () => {
     })
 
     it('should search by name', async () => {
-      const result = await GET('/exercises?search=Bank')
+      const result = await GET('/exercises?search=bench')
       expect(result.status).to.equal(200)
       expect(result.data).to.be.an('array')
       expect(result.data.length).to.be.greaterThan(0)
@@ -144,6 +144,41 @@ describe('Exercise endpoints', () => {
         name: 'Hacked Name'
       })
       expect(result.status).to.equal(403)
+    })
+  })
+
+  describe('PATCH /exercises/:id/note', () => {
+    it('should set a note for an exercise', async () => {
+      const result = await PATCH(`/exercises/${createdExerciseId}/note`, {
+        note: 'Keep elbows tucked'
+      })
+      expect(result.status).to.equal(200)
+      expect(result.data.exerciseId).to.equal(createdExerciseId)
+      expect(result.data.note).to.equal('Keep elbows tucked')
+    })
+
+    it('should overwrite an existing note', async () => {
+      await PATCH(`/exercises/${createdExerciseId}/note`, {
+        note: 'Initial note'
+      })
+
+      const result = await PATCH(`/exercises/${createdExerciseId}/note`, {
+        note: 'Updated note'
+      })
+      expect(result.status).to.equal(200)
+      expect(result.data.note).to.equal('Updated note')
+    })
+
+    it('should delete the note when empty', async () => {
+      await PATCH(`/exercises/${createdExerciseId}/note`, {
+        note: 'Some note'
+      })
+
+      const result = await PATCH(`/exercises/${createdExerciseId}/note`, {
+        note: '   '
+      })
+      expect(result.status).to.equal(200)
+      expect(result.data.note).to.equal(null)
     })
   })
 

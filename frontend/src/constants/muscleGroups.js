@@ -1,14 +1,14 @@
 export const muscleGroupLabels = {
-  CHEST: 'Brust',
-  BACK: 'Rücken',
-  SHOULDERS: 'Schultern',
-  BICEPS: 'Bizeps',
-  TRICEPS: 'Trizeps',
-  FOREARMS: 'Unterarme',
-  ABS: 'Bauch',
-  OBLIQUES: 'Seitliche Bauchmuskeln',
-  QUADS: 'Oberschenkel',
-  HAMSTRINGS: 'Beinbeuger',
-  GLUTES: 'Gesäß',
-  CALVES: 'Waden'
+  CHEST: 'muscleGroups.CHEST',
+  BACK: 'muscleGroups.BACK',
+  SHOULDERS: 'muscleGroups.SHOULDERS',
+  BICEPS: 'muscleGroups.BICEPS',
+  TRICEPS: 'muscleGroups.TRICEPS',
+  FOREARMS: 'muscleGroups.FOREARMS',
+  ABS: 'muscleGroups.ABS',
+  OBLIQUES: 'muscleGroups.OBLIQUES',
+  QUADS: 'muscleGroups.QUADS',
+  HAMSTRINGS: 'muscleGroups.HAMSTRINGS',
+  GLUTES: 'muscleGroups.GLUTES',
+  CALVES: 'muscleGroups.CALVES'
 }

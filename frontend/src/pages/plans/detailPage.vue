@@ -4,44 +4,44 @@
       <header class="page-header">
         <button class="back-btn" data-test="back-btn" @click="$router.push('/plans')">
           <q-icon name="mdi-arrow-left" size="20px" />
-          <q-tooltip>Zurück zur Liste</q-tooltip>
+          <q-tooltip>{{ $t('common.back') }}</q-tooltip>
         </button>
         <div class="header-actions">
           <button class="action-icon-btn" :class="{ active: plan.isFavorite }" data-test="favorite-btn"
             @click="toggleFavorite">
             <q-icon :name="plan.isFavorite ? 'mdi-star' : 'mdi-star-outline'" size="20px" />
-            <q-tooltip>{{ plan.isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren' }}</q-tooltip>
+            <q-tooltip>{{ plan.isFavorite ? $t('plans.favoritesRemove') : $t('plans.favoritesAdd') }}</q-tooltip>
           </button>
           <button class="action-icon-btn" data-test="copy-btn" @click="copyPlan">
             <q-icon name="mdi-content-copy" size="20px" />
-            <q-tooltip>Plan kopieren</q-tooltip>
+            <q-tooltip>{{ $t('plans.detail.copy') }}</q-tooltip>
           </button>
           <button v-if="canEdit" class="action-icon-btn" data-test="edit-btn" @click="openEditDialog">
             <q-icon name="mdi-pencil" size="20px" />
-            <q-tooltip>Plan bearbeiten</q-tooltip>
+            <q-tooltip>{{ $t('plans.form.titleEdit') }}</q-tooltip>
           </button>
           <button v-if="canDelete" class="action-icon-btn delete" data-test="delete-btn" @click="confirmDelete">
             <q-icon name="mdi-delete" size="20px" />
-            <q-tooltip>Plan löschen</q-tooltip>
+            <q-tooltip>{{ $t('common.delete') }}</q-tooltip>
           </button>
         </div>
       </header>
 
       <div v-if="loading" class="loading-state" data-test="loading-state">
         <q-spinner color="primary" size="48px" />
-        <span class="loading-text">Lade Plan...</span>
+        <span class="loading-text">{{ $t('plans.detail.loading') }}</span>
       </div>
 
       <div v-else-if="!plan.id" class="empty-state glass-card" data-test="empty-state">
         <q-icon name="mdi-alert-circle" size="64px" class="empty-icon" />
-        <span class="empty-text">Plan nicht gefunden</span>
+        <span class="empty-text">{{ $t('plans.detail.notFound') }}</span>
       </div>
 
       <template v-else>
         <div class="plan-header glass-card" data-test="plan-details">
           <h1 class="plan-title" data-test="plan-title">{{ plan.name }}</h1>
           <span class="plan-type" data-test="plan-type">
-            {{ plan.isSystem ? 'System-Plan' : 'Eigener Plan' }}
+            {{ plan.isSystem ? $t('plans.detail.system') : $t('plans.detail.own') }}
           </span>
 
           <p v-if="plan.description" class="plan-description" data-test="plan-description">
@@ -50,25 +50,25 @@
 
           <div v-if="plan.exercises?.length > 0" class="plan-duration" data-test="plan-duration">
             <q-icon name="mdi-timer-outline" size="16px" />
-            <span>Geschätzte Dauer: {{ formatRestTime(estimatedDuration) }}</span>
+            <span>{{ $t('plans.estimatedDuration') }} {{ formatRestTime(estimatedDuration) }}</span>
           </div>
         </div>
 
         <div v-if="plan.exercises?.length > 0" class="muscle-section glass-card" data-test="muscle-section">
           <div class="section-header-inline">
-            <span class="section-label">Trainierte Muskelgruppen</span>
+            <span class="section-label">{{ $t('plans.trainedMuscles') }}</span>
           </div>
           <muscle-body-diagram :sets="muscleGroupSets" :max-sets="maxMuscleSets" />
         </div>
 
         <div class="exercises-section">
           <div class="section-header">
-            <span class="section-title">Übungen ({{ plan.exercises?.length || 0 }})</span>
+            <span class="section-title">{{ $t('plans.detail.exercisesTitle', { count: plan.exercises?.length || 0 }) }}</span>
           </div>
 
           <div v-if="plan.exercises?.length === 0" class="empty-exercises glass-card">
             <q-icon name="mdi-dumbbell" size="48px" class="empty-icon" />
-            <span class="empty-text">Noch keine Übungen hinzugefügt</span>
+            <span class="empty-text">{{ $t('plans.detail.emptyExercises') }}</span>
           </div>
 
           <div
@@ -105,7 +105,7 @@
           <button v-if="canEdit" class="add-exercise-btn glass-card" data-test="add-exercise-btn"
             @click="openExercisePicker">
             <q-icon name="mdi-plus" size="20px" />
-            <span>Übung hinzufügen</span>
+            <span>{{ $t('plans.exercisePicker.title') }}</span>
           </button>
         </div>
       </template>
@@ -133,6 +133,7 @@
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api } from 'boot/axios'
+import { useI18n } from 'vue-i18n'
 import PlanForm from 'components/plans/planForm.vue'
 import PlanExerciseItem from 'components/plans/planExerciseItem.vue'
 import ExercisePicker from 'components/plans/exercisePicker.vue'
@@ -154,6 +155,7 @@ export default defineComponent({
   setup() {
     const route = useRoute()
     const router = useRouter()
+    const { t } = useI18n({ useScope: 'global' })
 
     const plan = ref({})
     const loading = ref(true)
@@ -251,8 +253,8 @@ export default defineComponent({
     const confirmDelete = async () => {
       try {
         await confirmDialogRef.value.open({
-          title: 'Plan löschen',
-          message: `Möchtest du "${plan.value.name}" wirklich löschen?`,
+          title: t('plans.detail.deleteTitle'),
+          message: t('plans.detail.deleteMessage', { name: plan.value.name }),
           type: 'confirm'
         })
         await api.delete(`/api/plans/${plan.value.id}`)
@@ -273,8 +275,8 @@ export default defineComponent({
     const removeExercise = async (planExercise) => {
       try {
         await confirmDialogRef.value.open({
-          title: 'Übung entfernen',
-          message: `Möchtest du "${planExercise.exercise.name}" aus dem Plan entfernen?`,
+          title: t('plans.detail.removeExerciseTitle'),
+          message: t('plans.detail.removeExerciseMessage', { name: planExercise.exercise.name }),
           type: 'confirm'
         })
         await api.delete(`/api/plans/${plan.value.id}/exercises/${planExercise.exerciseId}`)
@@ -289,9 +291,10 @@ export default defineComponent({
       if (seconds >= 60) {
         const mins = Math.floor(seconds / 60)
         const secs = seconds % 60
-        return secs > 0 ? `${mins}:${secs.toString().padStart(2, '0')} Min` : `${mins} Min`
+        const timeLabel = secs > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${mins}`
+        return `${timeLabel} ${t('units.minutesShort')}`
       }
-      return `${seconds} Sek`
+      return `${seconds} ${t('units.secondsShort')}`
     }
 
     const getItemRects = () => {

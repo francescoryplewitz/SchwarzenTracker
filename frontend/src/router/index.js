@@ -2,6 +2,7 @@ import { defineRouter } from '#q-app/wrappers'
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
 import { LocalStorage } from 'quasar'
 import { api } from 'boot/axios'
+import { defaultLocale, setLocale, supportedLocales } from 'src/i18n'
 import routes from './routes'
 
 /*
@@ -28,15 +29,24 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE)
   })
 
+  const applyUserLocale = (user) => {
+    const locale = supportedLocales.includes(user?.locale) ? user.locale : defaultLocale
+    setLocale(locale)
+  }
+
   if (process.env.NODE_ENV === 'production') {
     Router.beforeEach(async (to, from, next) => {
       if (to.meta.public || to.path === '/dev') return next()
       const user = LocalStorage.getItem('user')
-      if (user) return next()
+      if (user) {
+        applyUserLocale(user)
+        return next()
+      }
 
       const result = await api.get('/user/current', { withCredentials: true }).catch(() => null)
       if (result) {
         LocalStorage.set('user', result.data)
+        applyUserLocale(result.data)
         return next()
       }
       next('/login')

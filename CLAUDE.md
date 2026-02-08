@@ -66,10 +66,6 @@ BEFORE writing any code, you MUST read the appropriate guidance file:
 ## Branch instructions
 - do not use extra long branch names. keep it short and descriptive.
 
-## Commit instructions
-- use npm run commit to commit your changes and follow cli instructions afterwards 
-
-
 # Final Review & Target State Guidelines
 
 ## Final Review (Simplicity Pass)

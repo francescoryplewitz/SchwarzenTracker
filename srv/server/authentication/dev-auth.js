@@ -31,7 +31,8 @@ const registerDevAuth = (app) => {
           lastName: dbUser.lastName,
           email: dbUser.email,
           externalId: dbUser.externalId,
-          roles: devConfig.roles || []
+          roles: devConfig.roles || [],
+          locale: dbUser.locale
         }
         req.session.user = req.user
         LOG.debug(`Dev auth: User ${dbUser.id} (${dbUser.firstName} ${dbUser.lastName}) with roles [${devConfig.roles.join(', ')}]`)

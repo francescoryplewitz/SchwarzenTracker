@@ -1,14 +1,10 @@
 <template>
   <q-layout v-if="isAuthenticated" view="hHh lpR fFf" class="app-layout">
-    <q-header class="app-header">
-      <header-component :is-mobile="isMobile" />
-    </q-header>
-
     <q-page-container>
       <router-view :key="route.fullPath" />
     </q-page-container>
 
-    <q-footer v-if="isMobile" class="app-footer">
+    <q-footer class="app-footer">
       <navbar-bottom />
     </q-footer>
   </q-layout>
@@ -19,15 +15,14 @@ import { defineComponent, onBeforeMount, ref } from 'vue'
 import { LocalStorage, Platform } from 'quasar'
 import { api } from 'boot/axios'
 import { useRoute, useRouter } from 'vue-router'
-import HeaderComponent from 'components/header.vue'
 import NavbarBottom from 'src/components/navbarBase.vue'
 import { hasRole } from 'src/components/common/helper.js'
+import { defaultLocale, setLocale, supportedLocales } from 'src/i18n'
 
 export default defineComponent({
   name: 'BaseLayout',
 
   components: {
-    HeaderComponent,
     NavbarBottom
   },
 
@@ -35,25 +30,37 @@ export default defineComponent({
     const route = useRoute()
     const router = useRouter()
     const isAuthenticated = ref(false)
-    const isMobile = ref(false)
 
-    function getCurrentUser() {
-      const user = LocalStorage.getItem('user')
-      if (user) {
+    const applyUserLocale = (user) => {
+      const locale = supportedLocales.includes(user?.locale) ? user.locale : defaultLocale
+      setLocale(locale)
+    }
+
+    const loadUser = async () => {
+      const storedUser = LocalStorage.getItem('user')
+      if (storedUser) {
         isAuthenticated.value = true
-      } else {
-        router.push('/login')
+        applyUserLocale(storedUser)
+        return storedUser
       }
+
+      const response = await api.get('/user/current', { withCredentials: true })
+      LocalStorage.set('user', response.data)
+      isAuthenticated.value = true
+      applyUserLocale(response.data)
+      return response.data
     }
 
     onBeforeMount(async () => {
-      const [response] = await Promise.all([
-        api.get('/device'),
-        getCurrentUser()
-      ])
-
+      const response = await api.get('/device')
       Platform.is.mobile = response.data.isMobile
-      isMobile.value = response.data.isMobile
+
+      try {
+        await loadUser()
+      } catch {
+        router.push('/login')
+        return
+      }
 
       if (!hasRole('user')) {
         router.push('/')
@@ -63,8 +70,7 @@ export default defineComponent({
 
     return {
       route,
-      isAuthenticated,
-      isMobile
+      isAuthenticated
     }
   }
 })
@@ -78,13 +84,6 @@ export default defineComponent({
     radial-gradient(ellipse at center, rgba(0, 255, 194, 0.03) 0%, transparent 70%),
     linear-gradient(135deg, #040d16 0%, #061219 50%, #040d16 100%);
   min-height: 100vh;
-}
-
-.app-header {
-  background: rgba(4, 13, 22, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .app-footer {

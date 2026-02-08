@@ -10,14 +10,14 @@
 
     <div class="set-content">
       <div class="target-info">
-        Ziel: {{ set.targetMinReps }}-{{ set.targetMaxReps }} Wdh
-        <template v-if="set.targetWeight"> @ {{ set.targetWeight }}kg</template>
+        {{ $t('workouts.setItem.target') }}: {{ set.targetMinReps }}-{{ set.targetMaxReps }} {{ $t('units.reps') }}
+        <template v-if="set.targetWeight"> @ {{ set.targetWeight }} {{ $t('units.kg') }}</template>
       </div>
 
       <div v-if="set.completedAt && !editing" class="completed-values">
-        <span class="value">{{ set.weight ? formatWeight(set.weight) : '–' }} kg</span>
+        <span class="value">{{ set.weight ? formatWeight(set.weight) : '–' }} {{ $t('units.kg') }}</span>
         <span class="separator">×</span>
-        <span class="value">{{ set.reps || '–' }} Wdh</span>
+        <span class="value">{{ set.reps || '–' }} {{ $t('units.reps') }}</span>
         <button class="edit-btn" data-test="edit-set-btn" @click="startEdit">
           <q-icon name="mdi-pencil" size="14px" />
         </button>
@@ -26,15 +26,15 @@
 
       <div v-else class="input-row">
         <div class="input-group" @click="openWeightPicker">
-          <label class="input-label">Gewicht</label>
+          <label class="input-label">{{ $t('workouts.setItem.weight') }}</label>
           <div class="touch-input">
             <span class="touch-value">{{ localWeight ? formatWeight(localWeight) : '–' }}</span>
-            <span class="touch-unit">kg</span>
+            <span class="touch-unit">{{ $t('units.kg') }}</span>
           </div>
         </div>
 
         <div class="input-group" @click="openRepsPicker">
-          <label class="input-label">Wdh</label>
+          <label class="input-label">{{ $t('workouts.setItem.reps') }}</label>
           <div class="touch-input">
             <span class="touch-value">{{ localReps || '–' }}</span>
           </div>
@@ -74,7 +74,7 @@
     <number-picker-overlay
       v-model="showRepsPicker"
       :value="localReps || 0"
-      label="Wiederholungen"
+      :label="$t('workouts.setItem.repetitions')"
       :min="0"
       :max="100"
       :step="1"
@@ -138,10 +138,16 @@ export default defineComponent({
       return val.toFixed(1).replace('.', ',')
     }
 
+    const normalizeNumber = (value) => {
+      if (value === null || value === undefined) return null
+      const parsed = typeof value === 'number' ? value : Number(value)
+      return Number.isNaN(parsed) ? null : parsed
+    }
+
     const saveValues = async () => {
       await api.patch(`/api/workouts/${props.workoutId}/sets/${props.set.id}`, {
-        weight: localWeight.value,
-        reps: localReps.value
+        weight: normalizeNumber(localWeight.value),
+        reps: normalizeNumber(localReps.value)
       })
     }
 

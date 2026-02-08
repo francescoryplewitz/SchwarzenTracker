@@ -1,7 +1,7 @@
 # PR Review
 
 This file describes requirements for reviewing a PR.
-
+> If the user did not tell you what you have to review, ask him. A pr review can be created for staged changes,  uncommitted changes or for diff between two specific branches or commits.
 > *ALWAYS* check the existing AGENTS.md or CLAUDE.md file to see base instructions. There are linked md files which describe specific instructions for your task, take these instructions into account as well!
 
 ## Categories

@@ -12,17 +12,9 @@ const routes = [
     meta: { public: true }
   },
 
-  // Dashboard (Home)
   {
     path: '/',
-    component: () => import('layouts/baseLayout.vue'),
-    children: [
-      {
-        path: '',
-        name: 'dashboard',
-        component: () => import('pages/dashboard/indexPage.vue')
-      }
-    ]
+    redirect: '/workouts'
   },
 
   // Exercises module
@@ -75,6 +67,19 @@ const routes = [
         path: ':id',
         name: 'workout-active',
         component: () => import('pages/workouts/activePage.vue')
+      }
+    ]
+  },
+
+  // Progress
+  {
+    path: '/progress',
+    component: () => import('layouts/baseLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'progress',
+        component: () => import('pages/progress/indexPage.vue')
       }
     ]
   },

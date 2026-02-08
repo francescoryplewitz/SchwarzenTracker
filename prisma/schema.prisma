@@ -20,10 +20,12 @@ model User {
   modifiedAt     DateTime      @updatedAt
   isActive       Boolean       @default(true)
   filterSettings Json          @default("{}")
+  locale         String        @default("en")
 
   // Exercise relations
   createdExercises  Exercise[]
   exerciseFavorites UserExerciseFavorite[]
+  exerciseNotes     ExerciseNote[]
 
   // Plan relations
   createdPlans   TrainingPlan[]
@@ -31,6 +33,9 @@ model User {
 
   // Workout relations
   workouts       Workout[]
+
+  // Progress relations
+  planExerciseProgressSets PlanExerciseProgressSet[]
 }
 
 // ============================================
@@ -56,6 +61,7 @@ model Exercise {
 
   // Varianten
   variants      ExerciseVariant[]
+  translations  ExerciseTranslation[]
 
   // Herkunft
   isSystem      Boolean  @default(false)
@@ -71,7 +77,21 @@ model Exercise {
 
   // Relations
   userFavorites UserExerciseFavorite[]
+  exerciseNotes ExerciseNote[]
   planExercises PlanExercise[]
+}
+
+model ExerciseNote {
+  id         String   @id @default(cuid())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  note       String   @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, exerciseId])
 }
 
 model ExerciseVariant {
@@ -85,8 +105,31 @@ model ExerciseVariant {
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  translations ExerciseVariantTranslation[]
 }
 
+model ExerciseTranslation {
+  exerciseId  String
+  locale      String
+  name        String
+  description String   @db.Text
+
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@id([exerciseId, locale])
+}
+
+model ExerciseVariantTranslation {
+  exerciseVariantId String
+  locale            String
+  title             String
+  description       String?   @db.Text
+
+  exerciseVariant   ExerciseVariant @relation(fields: [exerciseVariantId], references: [id], onDelete: Cascade)
+
+  @@id([exerciseVariantId, locale])
+}
 model ExerciseImage {
   id         String   @id @default(cuid())
   exerciseId String
@@ -158,9 +201,21 @@ model TrainingPlan {
   exercises   PlanExercise[]
   favorites   UserPlanFavorite[]
   workouts    Workout[]
+  translations TrainingPlanTranslation[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model TrainingPlanTranslation {
+  trainingPlanId String
+  locale         String
+  name           String
+  description    String?  @db.Text
+
+  trainingPlan   TrainingPlan @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
+
+  @@id([trainingPlanId, locale])
 }
 
 model PlanExercise {
@@ -169,6 +224,7 @@ model PlanExercise {
   plan         TrainingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
   exerciseId   String
   exercise     Exercise @relation(fields: [exerciseId], references: [id])
+  dayType      PlanDayType @default(BOTH)
 
   sortOrder    Int      @default(0)
   sets         Int      @default(3)
@@ -178,12 +234,47 @@ model PlanExercise {
   restSeconds  Int?
   notes        String?  @db.Text
 
+  planSets     PlanExerciseSet[]
+  progressSets PlanExerciseProgressSet[]
   workoutSets  WorkoutSet[]
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   @@unique([planId, exerciseId])
+}
+
+model PlanExerciseProgressSet {
+  id             String   @id @default(cuid())
+  userId         Int
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planExerciseId String
+  planExercise   PlanExercise @relation(fields: [planExerciseId], references: [id], onDelete: Cascade)
+
+  setNumber      Int
+  weight         Float?
+  reps           Int
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, planExerciseId, setNumber])
+}
+
+model PlanExerciseSet {
+  id             String   @id @default(cuid())
+  planExerciseId String
+  planExercise   PlanExercise @relation(fields: [planExerciseId], references: [id], onDelete: Cascade)
+
+  setNumber      Int
+  targetWeight   Float?
+  targetMinReps  Int
+  targetMaxReps  Int
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([planExerciseId, setNumber])
 }
 
 model UserPlanFavorite {
@@ -209,6 +300,7 @@ model Workout {
   user          User          @relation(fields: [userId], references: [id])
 
   planName      String        // Snapshot des Plannamens
+  dayType       WorkoutDayType?
   status        WorkoutStatus @default(IN_PROGRESS)
   startedAt     DateTime      @default(now())
   completedAt   DateTime?
@@ -253,4 +345,15 @@ enum WorkoutStatus {
   PAUSED
   COMPLETED
   ABANDONED
+}
+
+enum PlanDayType {
+  BOTH
+  A
+  B
+}
+
+enum WorkoutDayType {
+  A
+  B
 }

@@ -2,10 +2,10 @@
   <q-dialog v-model="dialogVisible" position="bottom" data-test="filter-dialog">
     <div class="filter-dialog">
       <div class="dialog-header">
-        <span class="dialog-title">Filter</span>
+        <span class="dialog-title">{{ $t('plans.filter.title') }}</span>
         <button class="close-btn" data-test="close-btn" @click="dialogVisible = false">
           <q-icon name="mdi-close" size="20px" />
-          <q-tooltip>Schließen</q-tooltip>
+          <q-tooltip>{{ $t('common.close') }}</q-tooltip>
         </button>
       </div>
 
@@ -18,7 +18,7 @@
               class="toggle-input"
             >
             <span class="toggle-switch"></span>
-            <span class="toggle-label">Nur Favoriten</span>
+            <span class="toggle-label">{{ $t('plans.filter.onlyFavorites') }}</span>
           </label>
 
           <label class="toggle-option" data-test="own-toggle">
@@ -28,7 +28,7 @@
               class="toggle-input"
             >
             <span class="toggle-switch"></span>
-            <span class="toggle-label">Nur eigene Pläne</span>
+            <span class="toggle-label">{{ $t('plans.filter.onlyOwn') }}</span>
           </label>
 
           <label class="toggle-option" data-test="system-toggle">
@@ -38,17 +38,17 @@
               class="toggle-input"
             >
             <span class="toggle-switch"></span>
-            <span class="toggle-label">Nur System-Pläne</span>
+            <span class="toggle-label">{{ $t('plans.filter.onlySystem') }}</span>
           </label>
         </div>
       </div>
 
       <div class="dialog-actions">
         <button class="action-btn secondary" data-test="reset-btn" @click="resetFilters">
-          Zurücksetzen
+          {{ $t('plans.filter.reset') }}
         </button>
         <button class="action-btn primary" data-test="apply-btn" @click="applyFilters">
-          Anwenden
+          {{ $t('plans.filter.apply') }}
         </button>
       </div>
     </div>

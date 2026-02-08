@@ -1,0 +1,3 @@
+display_name: Commit Message
+short_description: Creates commit messages and commit commands using a fixed format
+default_prompt: Create a commit message using the pattern $category:($title):$description and provide the matching git commit -m command. Refuse commits on master.

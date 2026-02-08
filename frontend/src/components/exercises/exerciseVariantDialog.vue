@@ -2,43 +2,43 @@
   <q-dialog v-model="dialogVisible" persistent data-test="variant-dialog">
     <div class="form-dialog">
       <div class="dialog-header">
-        <span class="dialog-title">Neue Variante</span>
+        <span class="dialog-title">{{ $t('exercises.variantDialog.title') }}</span>
         <button class="close-btn" data-test="close-btn" @click="close">
           <q-icon name="mdi-close" size="20px" />
-          <q-tooltip>Schließen</q-tooltip>
+          <q-tooltip>{{ $t('common.close') }}</q-tooltip>
         </button>
       </div>
 
       <div class="dialog-content">
         <q-form ref="formRef" class="form-fields">
           <div class="field-group">
-            <label class="field-label">Name der Variante *</label>
+            <label class="field-label">{{ $t('exercises.variantDialog.nameLabel') }}</label>
             <input
               v-model="form.title"
               type="text"
               class="text-input"
               :class="{ error: showError && !form.title }"
               data-test="title-input"
-              placeholder="z.B. Enge Griffweite"
+              :placeholder="$t('exercises.variantDialog.namePlaceholder')"
             >
             <span v-if="showError && !form.title" class="error-text" data-test="error-text">
-              Bitte gib einen Namen ein
+              {{ $t('exercises.variantDialog.nameError') }}
             </span>
           </div>
 
           <div class="field-group">
-            <label class="field-label">Beschreibung / Ausführung</label>
+            <label class="field-label">{{ $t('exercises.variantDialog.descriptionLabel') }}</label>
             <textarea
               v-model="form.description"
               class="textarea-input"
               data-test="description-input"
               rows="4"
-              placeholder="Beschreibe die Ausführung dieser Variante..."
+              :placeholder="$t('exercises.variantDialog.descriptionPlaceholder')"
             ></textarea>
           </div>
 
           <div class="field-group">
-            <label class="field-label">Equipment</label>
+            <label class="field-label">{{ $t('exercises.variantDialog.equipmentLabel') }}</label>
             <div class="chip-select">
               <button
                 v-for="eq in equipmentOptions"
@@ -49,7 +49,7 @@
                 :data-test="`equipment-btn-${eq.value}`"
                 @click="form.equipment = form.equipment === eq.value ? null : eq.value"
               >
-                {{ eq.label }}
+                {{ $t(eq.labelKey) }}
               </button>
             </div>
           </div>
@@ -58,10 +58,10 @@
 
       <div class="dialog-actions">
         <button class="action-btn secondary" data-test="cancel-btn" @click="close">
-          Abbrechen
+          {{ $t('common.cancel') }}
         </button>
         <button class="action-btn primary" data-test="create-btn" @click="save">
-          Erstellen
+          {{ $t('common.add') }}
         </button>
       </div>
     </div>
@@ -73,14 +73,14 @@ import { defineComponent, ref, reactive } from 'vue'
 import { api } from 'boot/axios'
 
 const equipmentOptions = [
-  { value: 'BARBELL', label: 'Langhantel' },
-  { value: 'DUMBBELL', label: 'Kurzhantel' },
-  { value: 'MACHINE', label: 'Maschine' },
-  { value: 'CABLE', label: 'Kabelzug' },
-  { value: 'BODYWEIGHT', label: 'Körpergewicht' },
-  { value: 'KETTLEBELL', label: 'Kettlebell' },
-  { value: 'BAND', label: 'Widerstandsband' },
-  { value: 'OTHER', label: 'Sonstiges' }
+  { value: 'BARBELL', labelKey: 'equipment.BARBELL' },
+  { value: 'DUMBBELL', labelKey: 'equipment.DUMBBELL' },
+  { value: 'MACHINE', labelKey: 'equipment.MACHINE' },
+  { value: 'CABLE', labelKey: 'equipment.CABLE' },
+  { value: 'BODYWEIGHT', labelKey: 'equipment.BODYWEIGHT' },
+  { value: 'KETTLEBELL', labelKey: 'equipment.KETTLEBELL' },
+  { value: 'BAND', labelKey: 'equipment.BAND' },
+  { value: 'OTHER', labelKey: 'equipment.OTHER' }
 ]
 
 export default defineComponent({

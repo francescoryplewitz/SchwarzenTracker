@@ -48,7 +48,8 @@
     "test": "export NODE_ENV=test && npm run set:schema && npm run db:start-local && npm run db:migrate && start-server-and-test start http://localhost:5010 test:integration && npm run db:stop ",
     "test:local": "export NODE_ENV=development && npm run set:schema && npm run db:start-local && npm run db:migrate && start-server-and-test start:ui-tests http://localhost:5001 test:ui && npm run db:stop ",
     "test:ci": "export NODE_ENV=test NODE_V8_COVERAGE=coverage/tmp && npm run set:schema && npm run db:start-local && npm run db:migrate && (rm -rf coverage .nyc_output 2>/dev/null || true) && npm run test:all && sleep 1 && FORCE_COLOR=1 c8 report --exclude-after-remap | sed 's|base-expressjs-vue/||g; s| base-expressjs-vue| .|g' && npm run db:stop",
-    "claude": "claude --dangerously-skip-permissions"
+    "claude": "claude --dangerously-skip-permissions",
+    "seed:workouts-year": "npm run set:schema && node ./scripts/seed-workouts-year.js"
   },
   "c8": {
     "all": true,

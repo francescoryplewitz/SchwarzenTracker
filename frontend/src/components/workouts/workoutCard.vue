@@ -7,6 +7,9 @@
         <div class="card-info">
           <div class="workout-header">
             <span class="plan-name" data-test="plan-name">{{ workout.planName }}</span>
+            <span v-if="workout.dayType" class="day-type-badge">
+              {{ $t(`plans.dayType.${workout.dayType.toLowerCase()}`) }}
+            </span>
             <span class="status-badge" :class="statusClass" data-test="status-badge">
               {{ statusLabel }}
             </span>
@@ -23,7 +26,7 @@
             </span>
             <span class="meta-text sets-text" data-test="sets">
               <q-icon name="mdi-checkbox-marked-circle-outline" size="14px" />
-              {{ workout.setsCompleted }}/{{ workout.totalSets }} Sätze
+              {{ workout.setsCompleted }}/{{ workout.totalSets }} {{ $t('units.sets') }}
             </span>
           </div>
         </div>
@@ -38,12 +41,13 @@
 
 <script>
 import { defineComponent, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const STATUS_CONFIG = {
-  COMPLETED: { label: 'Abgeschlossen', class: 'completed' },
-  ABANDONED: { label: 'Abgebrochen', class: 'abandoned' },
-  IN_PROGRESS: { label: 'Aktiv', class: 'active' },
-  PAUSED: { label: 'Pausiert', class: 'active' }
+  COMPLETED: { labelKey: 'workoutStatus.COMPLETED', class: 'completed' },
+  ABANDONED: { labelKey: 'workoutStatus.ABANDONED', class: 'abandoned' },
+  IN_PROGRESS: { labelKey: 'workoutStatus.IN_PROGRESS', class: 'active' },
+  PAUSED: { labelKey: 'workoutStatus.PAUSED', class: 'active' }
 }
 
 export default defineComponent({
@@ -54,8 +58,9 @@ export default defineComponent({
   },
 
   setup(props) {
+    const { locale, t } = useI18n({ useScope: 'global' })
     const statusConfig = computed(() => STATUS_CONFIG[props.workout.status] || STATUS_CONFIG.IN_PROGRESS)
-    const statusLabel = computed(() => statusConfig.value.label)
+    const statusLabel = computed(() => t(statusConfig.value.labelKey))
     const statusClass = computed(() => statusConfig.value.class)
 
     const formatDate = (dateStr) => {
@@ -64,11 +69,11 @@ export default defineComponent({
       const diffMs = now - date
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
-      if (diffDays === 0) return 'Heute'
-      if (diffDays === 1) return 'Gestern'
-      if (diffDays < 7) return `vor ${diffDays} Tagen`
+      if (diffDays === 0) return t('dates.today')
+      if (diffDays === 1) return t('dates.yesterday')
+      if (diffDays < 7) return t('dates.daysAgo', { count: diffDays })
 
-      return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      return new Intl.DateTimeFormat(locale.value, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date)
     }
 
     const formatDuration = (ms) => {
@@ -164,6 +169,17 @@ export default defineComponent({
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.03em;
+}
+
+.day-type-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: rgba(0, 255, 194, 0.12);
+  border: 1px solid rgba(0, 255, 194, 0.28);
+  color: #00ffc2;
 }
 
 .status-badge.completed {

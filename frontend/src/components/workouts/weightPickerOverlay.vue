@@ -5,9 +5,9 @@
         <Transition name="slide-up">
           <div v-if="modelValue" class="picker-sheet">
             <div class="picker-header">
-              <span class="picker-label">Gewicht</span>
+              <span class="picker-label">{{ $t('workouts.pickers.weight') }}</span>
               <button class="done-btn" @click="close">
-                Fertig
+                {{ $t('common.done') }}
               </button>
             </div>
 
@@ -26,7 +26,7 @@
               <template v-else>
                 <span class="display-value">{{ displayValue }}</span>
               </template>
-              <span class="display-unit">kg</span>
+              <span class="display-unit">{{ $t('units.kg') }}</span>
             </div>
 
             <div class="dual-wheel">
@@ -49,7 +49,7 @@
                     {{ val }}
                   </div>
                 </div>
-                <div class="wheel-label">kg</div>
+                <div class="wheel-label">{{ $t('units.kg') }}</div>
               </div>
 
               <div class="wheel-separator">

@@ -518,7 +518,7 @@ describe('Plan endpoints', () => {
       const result = await POST(`/plans/${createdPlanId}/copy`)
       expect(result.status).to.equal(201)
       expect(result.data).to.have.property('id')
-      expect(result.data.name).to.include('(Kopie)')
+      expect(result.data.name).to.include('(Copy)')
       expect(result.data.isSystem).to.equal(false)
       expect(result.data.exercises).to.be.an('array')
     })

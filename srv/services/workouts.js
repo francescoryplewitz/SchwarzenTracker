@@ -1,5 +1,147 @@
 const prisma = require('../data/prisma')
 const LOG = new Logger('WORKOUTS')
+const { getRequestLocale } = require('../common/locale')
+const PLAN_DAY_TYPES = ['BOTH', 'A', 'B']
+const WORKOUT_DAY_TYPES = ['A', 'B']
+
+const applyExerciseTranslations = (exercise) => {
+  const translation = exercise.translations[0]
+  if (exercise.isSystem && translation) {
+    exercise.name = translation.name
+    exercise.description = translation.description
+  }
+  delete exercise.translations
+
+  const note = exercise.exerciseNotes[0]?.note
+  exercise.userNote = note || null
+  delete exercise.exerciseNotes
+}
+
+const applyWorkoutTranslations = (workout) => {
+  for (const set of workout.sets) {
+    applyExerciseTranslations(set.planExercise.exercise)
+  }
+}
+
+const buildPreviousMaxes = (sets) => {
+  const maxes = new Map()
+
+  for (const set of sets) {
+    if (!maxes.has(set.planExerciseId)) {
+      maxes.set(set.planExerciseId, { maxWeight: null, maxReps: null })
+    }
+    const entry = maxes.get(set.planExerciseId)
+    if (set.weight !== null && (entry.maxWeight === null || set.weight > entry.maxWeight)) {
+      entry.maxWeight = set.weight
+    }
+    if (set.reps !== null && (entry.maxReps === null || set.reps > entry.maxReps)) {
+      entry.maxReps = set.reps
+    }
+  }
+
+  return maxes
+}
+
+const buildCurrentMaxes = (sets) => {
+  const maxes = new Map()
+
+  for (const set of sets) {
+    if (!set.completedAt) continue
+    if (!maxes.has(set.planExerciseId)) {
+      maxes.set(set.planExerciseId, {
+        maxWeight: null,
+        maxReps: null,
+        exerciseId: set.planExercise.exercise.id,
+        exerciseName: set.planExercise.exercise.name
+      })
+    }
+    const entry = maxes.get(set.planExerciseId)
+    if (set.weight !== null && (entry.maxWeight === null || set.weight > entry.maxWeight)) {
+      entry.maxWeight = set.weight
+    }
+    if (set.reps !== null && (entry.maxReps === null || set.reps > entry.maxReps)) {
+      entry.maxReps = set.reps
+    }
+  }
+
+  return maxes
+}
+
+const buildPersonalRecords = (currentSets, previousSets) => {
+  const previousMaxes = buildPreviousMaxes(previousSets)
+  const currentMaxes = buildCurrentMaxes(currentSets)
+  const records = []
+
+  for (const [planExerciseId, current] of currentMaxes.entries()) {
+    const previous = previousMaxes.get(planExerciseId)
+    if (!previous) continue
+
+    const weightDelta = current.maxWeight !== null && previous.maxWeight !== null
+      ? current.maxWeight - previous.maxWeight
+      : null
+    const repsDelta = current.maxReps !== null && previous.maxReps !== null
+      ? current.maxReps - previous.maxReps
+      : null
+
+    if (weightDelta > 0) {
+      records.push({
+        planExerciseId,
+        exerciseId: current.exerciseId,
+        exerciseName: current.exerciseName,
+        type: 'WEIGHT',
+        delta: weightDelta,
+        currentValue: current.maxWeight,
+        previousValue: previous.maxWeight
+      })
+      continue
+    }
+
+    if (repsDelta > 0) {
+      records.push({
+        planExerciseId,
+        exerciseId: current.exerciseId,
+        exerciseName: current.exerciseName,
+        type: 'REPS',
+        delta: repsDelta,
+        currentValue: current.maxReps,
+        previousValue: previous.maxReps
+      })
+    }
+  }
+
+  return records
+}
+
+const getPersonalRecords = async (db, workout) => {
+  if (workout.status !== 'COMPLETED') return []
+
+  const previousWorkout = await db.workout.findFirst({
+    where: {
+      userId: workout.userId,
+      planId: workout.planId,
+      status: 'COMPLETED',
+      completedAt: { not: null, lt: workout.completedAt },
+      id: { not: workout.id }
+    },
+    orderBy: { completedAt: 'desc' }
+  })
+
+  if (!previousWorkout) return []
+
+  const previousSets = await db.workoutSet.findMany({
+    where: {
+      workoutId: previousWorkout.id,
+      completedAt: { not: null }
+    },
+    select: {
+      planExerciseId: true,
+      weight: true,
+      reps: true
+    }
+  })
+
+  return buildPersonalRecords(workout.sets, previousSets)
+}
 
 const buildWorkoutWhere = (req) => {
   const { status } = req.query
@@ -45,6 +187,25 @@ const calculateDuration = (workout) => {
   return end - start - paused
 }
 
+const hasDaySpecificExercises = (planExercises) => {
+  for (const exercise of planExercises) {
+    if (exercise.dayType && exercise.dayType !== 'BOTH') {
+      return true
+    }
+  }
+  return false
+}
+
+const getSuggestedDayType = (lastCompletedWorkout) => {
+  if (!lastCompletedWorkout) return 'A'
+  return lastCompletedWorkout.dayType === 'A' ? 'B' : 'A'
+}
+
+const isPlanExerciseEnabledForDay = (planExercise, dayType) => {
+  if (planExercise.dayType === 'BOTH') return true
+  return planExercise.dayType === dayType
+}
+
 const getWorkouts = async (req, res) => {
   const { count } = req.query
 
@@ -63,6 +224,7 @@ const getWorkouts = async (req, res) => {
       id: w.id,
       planId: w.planId,
       planName: w.planName,
+      dayType: w.dayType,
       status: w.status,
       startedAt: w.startedAt,
       completedAt: w.completedAt,
@@ -81,6 +243,7 @@ const getWorkouts = async (req, res) => {
 
 const getActiveWorkout = async (req, res) => {
   const userId = req.session.user.id
+  const locale = getRequestLocale(req)
 
   try {
     const workout = await prisma.workout.findFirst({
@@ -93,7 +256,20 @@ const getActiveWorkout = async (req, res) => {
           orderBy: { sortOrder: 'asc' },
           include: {
             planExercise: {
-              include: { exercise: true }
+              include: {
+                exercise: {
+                  include: {
+                    translations: {
+                      where: { locale },
+                      select: { name: true, description: true }
+                    },
+                    exerciseNotes: {
+                      where: { userId },
+                      select: { note: true }
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -105,6 +281,7 @@ const getActiveWorkout = async (req, res) => {
       return res.status(200).send(null)
     }
 
+    applyWorkoutTranslations(workout)
     LOG.info(`Found active workout ${workout.id}`)
     return res.status(200).send(workout)
   } catch (e) {
@@ -113,9 +290,71 @@ const getActiveWorkout = async (req, res) => {
   }
 }
 
+const getWorkoutStartOptions = async (req, res) => {
+  const userId = req.session.user.id
+  const { planId } = req.query
+
+  try {
+    const plan = await prisma.trainingPlan.findUnique({
+      where: { id: planId },
+      include: {
+        exercises: {
+          select: {
+            id: true,
+            dayType: true
+          }
+        }
+      }
+    })
+
+    if (!plan) {
+      LOG.info(`Plan ${planId} not found for start options`)
+      return res.status(404).send({ error: 'Trainingsplan nicht gefunden' })
+    }
+
+    if (plan.createdById !== userId && !plan.isSystem) {
+      LOG.info(`User ${userId} not authorized to get start options for plan ${planId}`)
+      return res.status(403).send({ error: 'Du kannst nur eigene Pläne oder System-Pläne verwenden' })
+    }
+
+    const splitDaysEnabled = hasDaySpecificExercises(plan.exercises)
+    if (!splitDaysEnabled) {
+      return res.status(200).send({
+        splitDaysEnabled: false,
+        lastCompletedWorkout: null,
+        suggestedDayType: 'A'
+      })
+    }
+
+    const lastCompletedWorkout = await prisma.workout.findFirst({
+      where: {
+        userId,
+        planId,
+        status: 'COMPLETED'
+      },
+      orderBy: { completedAt: 'desc' },
+      select: {
+        id: true,
+        dayType: true,
+        completedAt: true
+      }
+    })
+
+    return res.status(200).send({
+      splitDaysEnabled: true,
+      lastCompletedWorkout,
+      suggestedDayType: getSuggestedDayType(lastCompletedWorkout)
+    })
+  } catch (e) {
+    LOG.error(`Could not get workout start options for plan ${planId}: ${e}`)
+    return res.status(400).send()
+  }
+}
+
 const getWorkout = async (req, res) => {
   const { id } = req.params
   const userId = req.session.user.id
+  const locale = getRequestLocale(req)
 
   try {
     const workout = await prisma.workout.findUnique({
@@ -125,7 +364,20 @@ const getWorkout = async (req, res) => {
           orderBy: { sortOrder: 'asc' },
           include: {
             planExercise: {
-              include: { exercise: true }
+              include: {
+                exercise: {
+                  include: {
+                    translations: {
+                      where: { locale },
+                      select: { name: true, description: true }
+                    },
+                    exerciseNotes: {
+                      where: { userId },
+                      select: { note: true }
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -142,6 +394,8 @@ const getWorkout = async (req, res) => {
       return res.status(403).send({ error: 'Du kannst nur eigene Workouts sehen' })
     }
 
+    applyWorkoutTranslations(workout)
+    workout.personalRecords = await getPersonalRecords(prisma, workout)
     LOG.info(`Fetched workout ${id}`)
     return res.status(200).send(workout)
   } catch (e) {
@@ -152,7 +406,8 @@ const getWorkout = async (req, res) => {
 
 const createWorkout = async (req, res) => {
   const userId = req.session.user.id
-  const { planId } = req.body
+  const { planId, dayType } = req.body
+  const locale = getRequestLocale(req)
 
   try {
     // Check if user has an active workout
@@ -172,9 +427,29 @@ const createWorkout = async (req, res) => {
     const plan = await prisma.trainingPlan.findUnique({
       where: { id: planId },
       include: {
+        translations: {
+          where: { locale },
+          select: { name: true, description: true }
+        },
         exercises: {
           orderBy: { sortOrder: 'asc' },
-          include: { exercise: true }
+          include: {
+            exercise: {
+              include: {
+                translations: {
+                  where: { locale },
+                  select: { name: true, description: true }
+                }
+              }
+            },
+            planSets: {
+              orderBy: { setNumber: 'asc' }
+            },
+            progressSets: {
+              where: { userId },
+              orderBy: { setNumber: 'asc' }
+            }
+          }
         }
       }
     })
@@ -190,18 +465,50 @@ const createWorkout = async (req, res) => {
       return res.status(403).send({ error: 'Du kannst nur eigene Pläne oder System-Pläne verwenden' })
     }
 
+    if (dayType && !WORKOUT_DAY_TYPES.includes(dayType)) {
+      return res.status(400).send({ error: 'Ungültiger Trainingstag' })
+    }
+
+    for (const planExercise of plan.exercises) {
+      if (!PLAN_DAY_TYPES.includes(planExercise.dayType)) {
+        return res.status(400).send({ error: 'Ungültige Trainingstags-Konfiguration im Plan' })
+      }
+    }
+
+    const splitDaysEnabled = hasDaySpecificExercises(plan.exercises)
+    if (splitDaysEnabled && !dayType) {
+      return res.status(400).send({ error: 'Bitte wähle Tag A oder Tag B aus' })
+    }
+
+    const selectedDayType = splitDaysEnabled ? dayType : null
+    const activeExercises = splitDaysEnabled
+      ? plan.exercises.filter(planExercise => isPlanExerciseEnabledForDay(planExercise, selectedDayType))
+      : plan.exercises
+
+    if (activeExercises.length === 0) {
+      return res.status(400).send({ error: 'Für den gewählten Tag sind keine Übungen im Plan vorhanden' })
+    }
+
     // Generate sets from plan exercises
     const setsData = []
     let sortOrder = 0
 
-    for (const planExercise of plan.exercises) {
-      for (let setNumber = 1; setNumber <= planExercise.sets; setNumber++) {
+    for (const planExercise of activeExercises) {
+      const progressMap = {}
+      for (const progressSet of planExercise.progressSets) {
+        progressMap[progressSet.setNumber] = progressSet
+      }
+
+      for (const planSet of planExercise.planSets) {
+        const progressSet = progressMap[planSet.setNumber]
         setsData.push({
           planExerciseId: planExercise.id,
-          setNumber,
-          targetWeight: planExercise.targetWeight,
-          targetMinReps: planExercise.minReps,
-          targetMaxReps: planExercise.maxReps,
+          setNumber: planSet.setNumber,
+          targetWeight: planSet.targetWeight,
+          targetMinReps: planSet.targetMinReps,
+          targetMaxReps: planSet.targetMaxReps,
+          weight: progressSet ? progressSet.weight : null,
+          reps: progressSet ? progressSet.reps : null,
           restSeconds: planExercise.restSeconds || planExercise.exercise.recommendedRestSeconds || 90,
           sortOrder: sortOrder++
         })
@@ -209,11 +516,15 @@ const createWorkout = async (req, res) => {
     }
 
     // Create workout with sets
+    const planTranslation = plan.translations[0]
+    const planName = plan.isSystem && planTranslation ? planTranslation.name : plan.name
+
     const workout = await prisma.workout.create({
       data: {
         planId,
         userId,
-        planName: plan.name,
+        planName,
+        dayType: selectedDayType,
         status: 'IN_PROGRESS',
         sets: {
           create: setsData
@@ -224,13 +535,27 @@ const createWorkout = async (req, res) => {
           orderBy: { sortOrder: 'asc' },
           include: {
             planExercise: {
-              include: { exercise: true }
+              include: {
+                exercise: {
+                  include: {
+                    translations: {
+                      where: { locale },
+                      select: { name: true, description: true }
+                    },
+                    exerciseNotes: {
+                      where: { userId },
+                      select: { note: true }
+                    }
+                  }
+                }
+              }
             }
           }
         }
       }
     })
 
+    applyWorkoutTranslations(workout)
     LOG.info(`Created workout ${workout.id} for user ${userId} from plan ${planId}`)
     return res.status(201).send(workout)
   } catch (e) {
@@ -242,7 +567,8 @@ const createWorkout = async (req, res) => {
 const updateWorkoutStatus = async (req, res) => {
   const { id } = req.params
   const userId = req.session.user.id
-  const { action } = req.body
+  const { action, forceComplete } = req.body
+  const locale = getRequestLocale(req)
 
   try {
     const workout = await prisma.workout.findUnique({ where: { id } })
@@ -287,6 +613,17 @@ const updateWorkoutStatus = async (req, res) => {
         if (!['IN_PROGRESS', 'PAUSED'].includes(workout.status)) {
           return res.status(400).send({ error: 'Workout kann nicht abgeschlossen werden' })
         }
+        if (!forceComplete) {
+          const missingSets = await prisma.workoutSet.count({
+            where: {
+              workoutId: id,
+              completedAt: null
+            }
+          })
+          if (missingSets > 0) {
+            return res.status(409).send({ error: 'Nicht alle Sätze sind abgeschlossen. Möchtest Du trotzdem beenden?' })
+          }
+        }
         let finalPausedMs = workout.totalPausedMs
         if (workout.pausedAt) {
           finalPausedMs += Date.now() - new Date(workout.pausedAt).getTime()
@@ -321,21 +658,126 @@ const updateWorkoutStatus = async (req, res) => {
         return res.status(400).send({ error: 'Ungültige Aktion' })
     }
 
-    const updated = await prisma.workout.update({
-      where: { id },
-      data: updateData,
-      include: {
-        sets: {
-          orderBy: { sortOrder: 'asc' },
+    const updated = action === 'complete'
+      ? await prisma.$transaction(async (tx) => {
+        if (forceComplete) {
+          await tx.workoutSet.updateMany({
+            where: {
+              workoutId: id,
+              completedAt: null
+            },
+            data: {
+              reps: 0
+            }
+          })
+        }
+        const updatedWorkout = await tx.workout.update({
+          where: { id },
+          data: updateData,
           include: {
-            planExercise: {
-              include: { exercise: true }
+            sets: {
+              orderBy: { sortOrder: 'asc' },
+              include: {
+                planExercise: {
+                  include: {
+                    exercise: {
+                      include: {
+                        translations: {
+                          where: { locale },
+                          select: { name: true, description: true }
+                        },
+                        exerciseNotes: {
+                          where: { userId },
+                          select: { note: true }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        })
+
+        const completedSets = await tx.workoutSet.findMany({
+          where: {
+            workoutId: id,
+            completedAt: { not: null },
+            reps: { not: null }
+          },
+          orderBy: [
+            { planExerciseId: 'asc' },
+            { setNumber: 'asc' }
+          ]
+        })
+
+        const planExerciseIds = []
+        const progressSetsData = []
+        let currentPlanExerciseId = null
+        let currentSetNumber = 0
+
+        for (const set of completedSets) {
+          if (set.planExerciseId !== currentPlanExerciseId) {
+            currentPlanExerciseId = set.planExerciseId
+            currentSetNumber = 0
+            planExerciseIds.push(currentPlanExerciseId)
+          }
+
+          currentSetNumber += 1
+          progressSetsData.push({
+            userId,
+            planExerciseId: currentPlanExerciseId,
+            setNumber: currentSetNumber,
+            weight: set.weight,
+            reps: set.reps
+          })
+        }
+
+        if (planExerciseIds.length > 0) {
+          await tx.planExerciseProgressSet.deleteMany({
+            where: {
+              userId,
+              planExerciseId: { in: planExerciseIds }
+            }
+          })
+        }
+
+        if (progressSetsData.length > 0) {
+          await tx.planExerciseProgressSet.createMany({ data: progressSetsData })
+        }
+
+        return updatedWorkout
+      })
+      : await prisma.workout.update({
+        where: { id },
+        data: updateData,
+        include: {
+          sets: {
+            orderBy: { sortOrder: 'asc' },
+            include: {
+              planExercise: {
+                include: {
+                  exercise: {
+                    include: {
+                      translations: {
+                        where: { locale },
+                        select: { name: true, description: true }
+                      },
+                      exerciseNotes: {
+                        where: { userId },
+                        select: { note: true }
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }
-      }
-    })
+      })
 
+    applyWorkoutTranslations(updated)
+    updated.personalRecords = await getPersonalRecords(prisma, updated)
     LOG.info(`Updated workout ${id} status to ${updated.status}`)
     return res.status(200).send(updated)
   } catch (e) {
@@ -348,6 +790,7 @@ const updateSet = async (req, res) => {
   const { id, setId } = req.params
   const userId = req.session.user.id
   const { weight, reps } = req.body
+  const locale = getRequestLocale(req)
 
   try {
     const workout = await prisma.workout.findUnique({ where: { id } })
@@ -376,11 +819,25 @@ const updateSet = async (req, res) => {
       data: { weight, reps },
       include: {
         planExercise: {
-          include: { exercise: true }
+          include: {
+            exercise: {
+              include: {
+                translations: {
+                  where: { locale },
+                  select: { name: true, description: true }
+                },
+                exerciseNotes: {
+                  where: { userId },
+                  select: { note: true }
+                }
+              }
+            }
+          }
         }
       }
     })
 
+    applyExerciseTranslations(updated.planExercise.exercise)
     LOG.info(`Updated set ${setId} in workout ${id}`)
     return res.status(200).send(updated)
   } catch (e) {
@@ -392,6 +849,7 @@ const updateSet = async (req, res) => {
 const completeSet = async (req, res) => {
   const { id, setId } = req.params
   const userId = req.session.user.id
+  const locale = getRequestLocale(req)
 
   try {
     const workout = await prisma.workout.findUnique({
@@ -426,10 +884,25 @@ const completeSet = async (req, res) => {
       data: { completedAt: new Date() },
       include: {
         planExercise: {
-          include: { exercise: true }
+          include: {
+            exercise: {
+              include: {
+                translations: {
+                  where: { locale },
+                  select: { name: true, description: true }
+                },
+                exerciseNotes: {
+                  where: { userId },
+                  select: { note: true }
+                }
+              }
+            }
+          }
         }
       }
     })
+
+    applyExerciseTranslations(updated.planExercise.exercise)
 
     // Find next set
     const nextSet = workout.sets[setIndex + 1] || null
@@ -475,6 +948,7 @@ const deleteWorkout = async (req, res) => {
 module.exports = {
   getWorkouts,
   getActiveWorkout,
+  getWorkoutStartOptions,
   getWorkout,
   createWorkout,
   updateWorkoutStatus,
