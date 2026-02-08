@@ -4,6 +4,7 @@
   "private": true,
   "license": "Brale Energy GmbH",
   "scripts": {
+    "build": "/bin/zsh ./scripts/build-image.sh",
     "docker:build": "docker build . --build-arg NODE_ENV=production -t $version",
     "docker:build:pi": "docker build -t schwarzentacker:pi .",
     "docker:create": "npm run docker:build && npm run docker:tag && npm run docker:push",
