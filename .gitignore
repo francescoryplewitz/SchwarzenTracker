@@ -1,6 +1,5 @@
 node_modules
 node_modules
-prisma/migrations/**
 .local-development/development-documents
 *.env
 .DS_Store
