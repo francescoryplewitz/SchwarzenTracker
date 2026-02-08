@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/env bash
 set -euo pipefail
 
 startBranch=$(git rev-parse --abbrev-ref HEAD)
