@@ -5,7 +5,9 @@
       <q-icon :name="item.icon" size="22px" />
       <span class="nav-label">{{ $t(item.labelKey) }}</span>
     </button>
-    <q-btn class="nav-item nav-user" flat dense stack no-caps icon="mdi-account-circle-outline" :label="$t('nav.user')">
+    <button class="nav-item nav-user">
+      <q-icon name="mdi-account-circle-outline" size="22px" />
+      <span class="nav-label">{{ $t('nav.user') }}</span>
       <q-menu anchor="top middle" self="bottom middle" class="user-menu">
         <q-list class="user-menu-list">
           <q-item clickable v-close-popup @click="changeLocale('en')">
@@ -35,7 +37,7 @@
           </q-item>
         </q-list>
       </q-menu>
-    </q-btn>
+    </button>
   </nav>
 </template>
 
