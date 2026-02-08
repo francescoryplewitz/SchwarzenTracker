@@ -16,7 +16,7 @@
     "set:private-secrets": "node ./scripts/set-private-secrets.js",
     "commit": "npm run lint && git-cz",
     "lint": "npx standard --fix",
-    "release": "standard-version",
+    "release": "/bin/zsh ./scripts/release.sh",
     "audit": "npm audit --omit=dev",
     "start": "node ./srv/server.js",
     "install:all": "npm ci && cd ./frontend && npm ci",
